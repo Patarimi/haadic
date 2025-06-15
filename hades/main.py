@@ -54,11 +54,12 @@ def generate_cli(design_yaml: Path = "./design.yml", stop: str = "full") -> None
 
 
 @app.command(name="run")
-def run_cli(design_py: str = "design", sub_folder: str = ""):
+def run_cli(design_py: str = "design.py", sub_folder: str = ""):
     import hades.steps.step as steps
 
     sys.path.append(os.curdir)
-    design = __import__(str(design_py), fromlist=("layout", "techno", "bench"))
+    des = Path(design_py).with_suffix("")
+    design = __import__(str(des), fromlist=("layout", "techno", "bench", "evaluate"))
 
     starting_dir = os.getcwd()
     run_dir = (
@@ -87,6 +88,9 @@ def run_cli(design_py: str = "design", sub_folder: str = ""):
 
     logging.info("loading simulation results...")
     data = steps.load_result()
+
+    logging.info("evaluate performances")
+    design.evaluate(data)
 
     shutil.copy("../hades.log", design_py + ".log")
 
