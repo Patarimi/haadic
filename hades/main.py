@@ -54,7 +54,18 @@ def generate_cli(design_yaml: Path = "./design.yml", stop: str = "full") -> None
 
 
 @app.command(name="run")
-def run_cli(design_py: str = "design.py", sub_folder: str = ""):
+def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool = True):
+    """
+    Run the full hades flow :
+        - Generate the layout using the specified technology.
+        - Extract equivalent spice schematic.
+        - Run test benches.
+        - Compute circuit performances.
+    :param design_py: a python file with at least the following function : layout, bench, evaluate.
+    :param sub_folder: All files are stored inside this folder.
+    :param timestamp: If true, a new folder named <sub_folder>_<current_time> is created and the flow is run inside it.
+    :return: Nothing.
+    """
     import hades.steps.step as steps
 
     sys.path.append(os.curdir)
@@ -64,10 +75,12 @@ def run_cli(design_py: str = "design.py", sub_folder: str = ""):
     )
 
     starting_dir = os.getcwd()
+    if sub_folder == "":
+        sub_folder = des
     run_dir = (
         sub_folder
-        if sub_folder != ""
-        else design_py + "_" + datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
+        if not timestamp
+        else str(sub_folder) + "_" + datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
     )
     if not Path(run_dir).is_dir():
         os.mkdir(run_dir)
