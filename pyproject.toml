@@ -4,8 +4,10 @@ version = "0.4.1"
 description = "A package for parametric layout design."
 authors = [{name = "Patarimi", email="<38954040+Patarimi@users.noreply.github.com>"}]
 readme = "docs/README.md"
+dynamic = ["dependencies"]
+requires-python = "^3.11,<3.14"
 
-[tool.poetry.scripts]
+[project.scripts]
 hades = "hades.main:app"
 
 [tool.poe.tasks]
@@ -34,7 +36,6 @@ log_file = "./pytest.log"
 
 
 [tool.poetry.dependencies]
-python = "^3.11,<3.14"
 pyyaml = "^6.0"
 scipy = "^1.12.0"
 python-dotenv = "^1.0.0"
