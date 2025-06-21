@@ -80,7 +80,9 @@ def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool 
     run_dir = (
         sub_folder
         if not timestamp
-        else str(sub_folder) + "_" + datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
+        else str(sub_folder)
+        + "_"
+        + datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
     )
     if not Path(run_dir).is_dir():
         os.mkdir(run_dir)
