@@ -40,3 +40,10 @@ def run_bench(bench_name: str = "bench.cir", output_dir: Path = None):
 
 def load_result(data_name: str = "bench.raw") -> pd.DataFrame:
     return parse_out(data_name)
+
+
+def compare_to(perf: dict, target: dict):
+    cost = 0
+    for key in target:
+        cost += (target[key] - perf[key]) ** 2
+    return cost

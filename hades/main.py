@@ -59,7 +59,9 @@ def run_cli(design_py: str = "design.py", sub_folder: str = ""):
 
     sys.path.append(os.curdir)
     des = Path(design_py).with_suffix("")
-    design = __import__(str(des), fromlist=("layout", "techno", "bench", "evaluate"))
+    design = __import__(
+        str(des), fromlist=("layout", "techno", "bench", "evaluate", "target")
+    )
 
     starting_dir = os.getcwd()
     run_dir = (
@@ -90,7 +92,11 @@ def run_cli(design_py: str = "design.py", sub_folder: str = ""):
     data = steps.load_result()
 
     logging.info("evaluate performances")
-    design.evaluate(data)
+    perf = design.evaluate(data)
+
+    logging.info("compare performances to targets")
+    cost = steps.compare_to(perf, design.target)
+    logging.info(f"current cost: {cost}")
 
     shutil.copy("../hades.log", design_py + ".log")
 
