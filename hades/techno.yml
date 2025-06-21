@@ -4,6 +4,7 @@ sky130:
   base_dir: ../pdk/sky130A/libs.tech
   layermap: klayout/tech/sky130A.map
   techlef: ../libs.ref/sky130_fd_sc_hvl/techlef/sky130_fd_sc_hvl__nom.tlef
+  magic_rc: magic/sky130A.magicrc
   process: not_found.proc
   # à generer à partir de libs.ref\sky130_fd_sc_hd\*.tlef
 asap7:
@@ -17,6 +18,7 @@ gf180mcu:
   base_dir: ../pdk/gf180mcuD/libs.tech
   layermap: klayout/tech/gf180mcu.map
   techlef: ../libs.ref/gf180mcu_fd_sc_mcu9t5v0/techlef/gf180mcu_fd_sc_mcu9t5v0__nom.tlef
+  magic_rc: magic/gf180mcuD.magicrc
   process: not_found.proc
   # à generer à partir de libs.ref\gf180mcu_fd_sc_mcu7t5v0\*.tlef
 mock:

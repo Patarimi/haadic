@@ -49,7 +49,7 @@ class NGSpice:
                 if line.startswith("write"):
                     words = line.split(" ")
                     words[1] = str(data_file)
-                    line = " ".join(words)
+                    line = " ".join(words) + "\n"
                     write_edited = True
                 if line.startswith("set filetype"):
                     line = "set filetype = ASCII\n"
