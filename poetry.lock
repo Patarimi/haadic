@@ -637,36 +637,6 @@ files = [
 ]
 
 [[package]]
-name = "intel-cmplr-lib-ur"
-version = "2025.1.1"
-description = "Intel® oneAPI Unified Runtime Libraries package"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "intel_cmplr_lib_ur-2025.1.1-py2.py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:b34ddb46fc70e21209297ac13f800e37be390df1589f4dd22e194b289871f30e"},
-    {file = "intel_cmplr_lib_ur-2025.1.1-py2.py3-none-win_amd64.whl", hash = "sha256:a4d2fd91930ea017e9c8dd757b8159352aa7852344eb609d8f855b9efea11cea"},
-]
-
-[package.dependencies]
-umf = "==0.10.*"
-
-[[package]]
-name = "intel-openmp"
-version = "2025.1.1"
-description = "Intel OpenMP* Runtime Library"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "intel_openmp-2025.1.1-py2.py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:c3d3255f4076b86b6fb7e556492c4722be583bb958f095adc92d7a0e3807ec51"},
-    {file = "intel_openmp-2025.1.1-py2.py3-none-win_amd64.whl", hash = "sha256:4a63f6e0a302f08f8fab1109b91b4678f790e0ef508942ee4b2438ce1a253a60"},
-]
-
-[package.dependencies]
-intel-cmplr-lib-ur = "2025.1.1"
-
-[[package]]
 name = "jinja2"
 version = "3.1.6"
 description = "A very fast and expressive template engine."
@@ -1254,44 +1224,28 @@ mkdocs-autorefs = ">=1.4"
 mkdocstrings = ">=0.28.3"
 
 [[package]]
-name = "mkl"
-version = "2025.1.0"
-description = "Intel® oneAPI Math Kernel Library"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "mkl-2025.1.0-py2.py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:1c201bc314304760d995a2b5cc7df9175afba2d3eb7aa70c4917ebe35c2f48de"},
-    {file = "mkl-2025.1.0-py2.py3-none-win_amd64.whl", hash = "sha256:6f459efc394360675efa78c9e9e6fdfa2883f1c730b0323bca414e8df47d4598"},
-]
-
-[package.dependencies]
-intel-openmp = ">=2024,<2026"
-tbb = "==2022.*"
-
-[[package]]
 name = "netgen-mesher"
-version = "6.2.2503"
+version = "6.2.2504"
 description = "Netgen"
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "netgen_mesher-6.2.2503-cp310-cp310-macosx_10_15_universal2.whl", hash = "sha256:c0ccff4f2544560d3c2bfe2ea64058acc06fec6697ac1fb4d6e6b6b67feb9eb1"},
-    {file = "netgen_mesher-6.2.2503-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c66b8dce91b4bd1b565ee9a2b730a2a4dd6d714865476602bd1a33b3a94fb6f0"},
-    {file = "netgen_mesher-6.2.2503-cp310-cp310-win_amd64.whl", hash = "sha256:7a425601f5a23362b930ef72262945fc25f90f1cf52501d9d9ac05eaee2f0e9e"},
-    {file = "netgen_mesher-6.2.2503-cp311-cp311-macosx_10_15_universal2.whl", hash = "sha256:530fd115078b79c2f6c9d0b58848de605a5147eb7dc492a76e9db1b27a2d03e5"},
-    {file = "netgen_mesher-6.2.2503-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6f2ae313c3c891642689c15fc8438263522faf51bc3572ec171c177a3eec04ea"},
-    {file = "netgen_mesher-6.2.2503-cp311-cp311-win_amd64.whl", hash = "sha256:e1828005e49f234ec2982b8d2a8baf47969a7a5acfea4850beef6a4d9424a643"},
-    {file = "netgen_mesher-6.2.2503-cp312-cp312-macosx_10_15_universal2.whl", hash = "sha256:514383ebf04828ac700e3b01d0548535b2a9203bdb6286505b0f8f0287a0a9c0"},
-    {file = "netgen_mesher-6.2.2503-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1b2cf857125b3d8e5237db10982f935b26e6b77c5e622a214de5deaaae9baaeb"},
-    {file = "netgen_mesher-6.2.2503-cp312-cp312-win_amd64.whl", hash = "sha256:b9fcd037179d4168c123733858258a630a2467809a059999f18eb588d0e91b42"},
-    {file = "netgen_mesher-6.2.2503-cp313-cp313-macosx_10_15_universal2.whl", hash = "sha256:33b12729d664f1d7f31fc2a4b9253cc5e70e4ff1adb3a8011143eb850a20b66c"},
-    {file = "netgen_mesher-6.2.2503-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d19fdfb8f01b5c3791063abba7a3d5ca792e46c0037fd24b64bb5d678718cfd5"},
-    {file = "netgen_mesher-6.2.2503-cp313-cp313-win_amd64.whl", hash = "sha256:33321954978cb26a87da716fdbdd45343fe324e70056c4ce2db5f54695261d8e"},
-    {file = "netgen_mesher-6.2.2503-cp39-cp39-macosx_10_15_universal2.whl", hash = "sha256:ec80080fcf27edcbc821ebf90de20ed4c0f8d0e0483f073483b383d44aa64b61"},
-    {file = "netgen_mesher-6.2.2503-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:645d5e91eca91477d293ed0cd80df35c5e87b9d3f1b95e220050a1246335f0ef"},
-    {file = "netgen_mesher-6.2.2503-cp39-cp39-win_amd64.whl", hash = "sha256:f48be6c7555784e843c303136658ce44d857bf21da0f7a53ec0b408c7b3844a2"},
+    {file = "netgen_mesher-6.2.2504-cp310-cp310-macosx_10_15_universal2.whl", hash = "sha256:36dda18847e114c718c0dcb94d300f618725da0ad191feb1a337db2891a8df11"},
+    {file = "netgen_mesher-6.2.2504-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d545e9cb4420657f0a436ed853f8923323891002f67ad5defcb8094413a38316"},
+    {file = "netgen_mesher-6.2.2504-cp310-cp310-win_amd64.whl", hash = "sha256:ae9510c36ee8aa60846740357abd51048cc7b121f6b9de167dd950d78a4148a3"},
+    {file = "netgen_mesher-6.2.2504-cp311-cp311-macosx_10_15_universal2.whl", hash = "sha256:9ef65a665897a124a5cea2f7a09b504b79cc153287fb29054ec9d53ea2b3a0cf"},
+    {file = "netgen_mesher-6.2.2504-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a5c1a50d39c7571a768b3bd5cac0ce3039ba9e177dfd3f79343007ef96a96206"},
+    {file = "netgen_mesher-6.2.2504-cp311-cp311-win_amd64.whl", hash = "sha256:0b1e0b774755c72d41f38c18aaf74e9bb10d4874c309b9eb199e223360f8b68c"},
+    {file = "netgen_mesher-6.2.2504-cp312-cp312-macosx_10_15_universal2.whl", hash = "sha256:59d25ca0bb160b8666941e468eec89ad0a954940d8caeb29ca2ada1099bfa308"},
+    {file = "netgen_mesher-6.2.2504-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c3ef65c8ddde3e5fe485a20e744920f5d63744ac25ee193e5b19938bb70b1b5e"},
+    {file = "netgen_mesher-6.2.2504-cp312-cp312-win_amd64.whl", hash = "sha256:5ba80c20c73c4f583de6fe92ef69ff7d57bd511b88504eef2cd442f263612f8e"},
+    {file = "netgen_mesher-6.2.2504-cp313-cp313-macosx_10_15_universal2.whl", hash = "sha256:de998bd65144aa1cbdcbc499a7c1ce8b325b3993a5234ee196c113912e9d22c8"},
+    {file = "netgen_mesher-6.2.2504-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ee6b365349f6e331d641e5fb337c6b31e1633086e434041b75cc0b6d30a0e876"},
+    {file = "netgen_mesher-6.2.2504-cp313-cp313-win_amd64.whl", hash = "sha256:7b4b3ab3f6be2690109799354840b38972a68f472b3217f03052a2802e687c9d"},
+    {file = "netgen_mesher-6.2.2504-cp39-cp39-macosx_10_15_universal2.whl", hash = "sha256:134bbeca3d6e5fa38d27cb96f1cfbb8442ff792f93348933355d5b190c5147aa"},
+    {file = "netgen_mesher-6.2.2504-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:137d621d9b903589ee354219962db25a1fef11f5a743f105fc64997ee8b1a7e6"},
+    {file = "netgen_mesher-6.2.2504-cp39-cp39-win_amd64.whl", hash = "sha256:b4026dbdcda6643ff336beb1deffe7e13ad6da0a1e976fd14e81ea045524dd12"},
 ]
 
 [package.dependencies]
@@ -1316,32 +1270,31 @@ test = ["pytest"]
 
 [[package]]
 name = "ngsolve"
-version = "6.2.2503"
+version = "6.2.2504"
 description = "NGSolve"
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "ngsolve-6.2.2503-cp310-cp310-macosx_10_15_universal2.whl", hash = "sha256:540c35d495cdae911f37143c545162f84f60beed6d9625406599d40359e596af"},
-    {file = "ngsolve-6.2.2503-cp310-cp310-manylinux_2_28_x86_64.whl", hash = "sha256:94f4668fdcd1a33a5642d237f343c48fd72fe90ab2bae6495ca119ae7310ff83"},
-    {file = "ngsolve-6.2.2503-cp310-cp310-win_amd64.whl", hash = "sha256:6ea7aa6e5bdd0d2626cd9f261b9c81fcf3650a0cfeb40d4d382c3dbf59ab7d74"},
-    {file = "ngsolve-6.2.2503-cp311-cp311-macosx_10_15_universal2.whl", hash = "sha256:daf8aa9c9b2d9939228a6330bc9d1beb8db3856c8821dde3707a74e9dc6b9361"},
-    {file = "ngsolve-6.2.2503-cp311-cp311-manylinux_2_28_x86_64.whl", hash = "sha256:29bb89dba73777c33932e98a4517cdac6ab0a718fa43b64c90f24107c85aa894"},
-    {file = "ngsolve-6.2.2503-cp311-cp311-win_amd64.whl", hash = "sha256:cf8a4cba892da4790893e2546c0162a2f9129a77a52e1afc026f80eebe04fcf4"},
-    {file = "ngsolve-6.2.2503-cp312-cp312-macosx_10_15_universal2.whl", hash = "sha256:bb9a9673715798dea70c46a737d732e80fdac27ffd4bab268ecd58ab5dc68860"},
-    {file = "ngsolve-6.2.2503-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:81154ac9460d47e45d38af25d03c11934565c13c00a6f8e5b98426ac3ae00ac5"},
-    {file = "ngsolve-6.2.2503-cp312-cp312-win_amd64.whl", hash = "sha256:2b2fe5beeed919a8ea014f5640fe3f45b832d65d9fbc46ce8ec8a54c28afe64d"},
-    {file = "ngsolve-6.2.2503-cp313-cp313-macosx_10_15_universal2.whl", hash = "sha256:49ffd160181dd24d3390025eec0affd72f395adf937a7a6d70f200d906f0b9eb"},
-    {file = "ngsolve-6.2.2503-cp313-cp313-manylinux_2_28_x86_64.whl", hash = "sha256:c6d4f8d9f835df5d6c2087a6de3e921507ea5e96dcf45e56339dd968ae5904a3"},
-    {file = "ngsolve-6.2.2503-cp313-cp313-win_amd64.whl", hash = "sha256:8e8a74917ea2c4a6977a13c4714dae35a4debe7ea3a8f6252fdefc6d9c1ec2f8"},
-    {file = "ngsolve-6.2.2503-cp39-cp39-macosx_10_15_universal2.whl", hash = "sha256:6cbcba2335ed6cfed0077e10cf4a9df33bcd1f020264b1718d7f2ef002040bdb"},
-    {file = "ngsolve-6.2.2503-cp39-cp39-manylinux_2_28_x86_64.whl", hash = "sha256:52f24d091cbf6ea6024e5c6ae0eba6187251c9c3d87a9bef61224398d13732c8"},
-    {file = "ngsolve-6.2.2503-cp39-cp39-win_amd64.whl", hash = "sha256:c90aa80e0aae559654860bf37541e6a8f980c5c01b6e8dd0f4a82805656a79a0"},
+    {file = "ngsolve-6.2.2504-cp310-cp310-macosx_10_15_universal2.whl", hash = "sha256:92f43368b218b3f02a3992d1fb0e6183722f121a297e256083fe8790c2af281b"},
+    {file = "ngsolve-6.2.2504-cp310-cp310-manylinux_2_28_x86_64.whl", hash = "sha256:cb64f6a306848acb7c781707b7434f0afa0ae1ce127db733d1c7d598b9f7dd82"},
+    {file = "ngsolve-6.2.2504-cp310-cp310-win_amd64.whl", hash = "sha256:34947736eee7ba916fb64a9de5259665aaa0ba589b62fdbd2ac5839d55fa3b0a"},
+    {file = "ngsolve-6.2.2504-cp311-cp311-macosx_10_15_universal2.whl", hash = "sha256:4dd6853f88d9ed9bb3bbd204ebad8764e920f2f13399b1d8546ff543b76ada61"},
+    {file = "ngsolve-6.2.2504-cp311-cp311-manylinux_2_28_x86_64.whl", hash = "sha256:f17bc679598cd86e03377c7a348f3f9b71709e34c48863e2f58706ef4adca8c3"},
+    {file = "ngsolve-6.2.2504-cp311-cp311-win_amd64.whl", hash = "sha256:2da471280fd004be22413d705feac89486207516789a81263029fa2b1f7992ad"},
+    {file = "ngsolve-6.2.2504-cp312-cp312-macosx_10_15_universal2.whl", hash = "sha256:5faf4fef2b99f8e1d31de14d915eca62166a5cb7e36f08090a08946770beb847"},
+    {file = "ngsolve-6.2.2504-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:2327af206ce46b4f5ec1239930e54686cc824e21864a56be5d8d6d4bdfe87f63"},
+    {file = "ngsolve-6.2.2504-cp312-cp312-win_amd64.whl", hash = "sha256:70c3f4acdcc13b0b595b84a3f8a13e8250a952102b1c46b3a0d8cbcb51d2f5c2"},
+    {file = "ngsolve-6.2.2504-cp313-cp313-macosx_10_15_universal2.whl", hash = "sha256:308b2a14592d3d1a881696a34c5e081a0afa57cc7a5ab74e63e69fc235ef3c8a"},
+    {file = "ngsolve-6.2.2504-cp313-cp313-manylinux_2_28_x86_64.whl", hash = "sha256:c917aa90750e88d94d7968fa85f836e878bab859a8c49e862abf796581bd3278"},
+    {file = "ngsolve-6.2.2504-cp313-cp313-win_amd64.whl", hash = "sha256:140d03f4495e412785172947e36a19603d03a0d8e32fbc276fefc3c52b6f1915"},
+    {file = "ngsolve-6.2.2504-cp39-cp39-macosx_10_15_universal2.whl", hash = "sha256:99d6507ead42095afe07460b27d4666eaa4f6279e51e0da2d93cf20df9ed986c"},
+    {file = "ngsolve-6.2.2504-cp39-cp39-manylinux_2_28_x86_64.whl", hash = "sha256:58ac73a356d24c05b478239fd303a5ebb69c46e304d3e42933d3041ac86ab026"},
+    {file = "ngsolve-6.2.2504-cp39-cp39-win_amd64.whl", hash = "sha256:6192b74c12c332468eebca5efbbaf934c4501a5be87884c6a3ac4e1e692798e2"},
 ]
 
 [package.dependencies]
-mkl = "*"
-netgen-mesher = "6.2.2503"
+netgen-mesher = "6.2.2504"
 
 [[package]]
 name = "numpy"
@@ -2298,33 +2251,6 @@ files = [
 ]
 
 [[package]]
-name = "tbb"
-version = "2022.1.0"
-description = "Intel® oneAPI Threading Building Blocks (oneTBB)"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "tbb-2022.1.0-py2.py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:4992a3f2268b33f9a7b4c274af9d7001f550e74246436647b267d58e4947628a"},
-    {file = "tbb-2022.1.0-py3-none-win_amd64.whl", hash = "sha256:ae9cc327606f604324441abf3ab984c12ea4f6f1ea2a84230874fc40036d0913"},
-]
-
-[package.dependencies]
-tcmlib = "==1.*"
-
-[[package]]
-name = "tcmlib"
-version = "1.3.0"
-description = "Thread Composability Manager"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "tcmlib-1.3.0-py2.py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:c328ba464c556e46174879c694cafd17ba17c3e7406a79fee47bb3e8c9c6a6c5"},
-    {file = "tcmlib-1.3.0-py2.py3-none-win_amd64.whl", hash = "sha256:878c9ce2ae5705da3964b7d00ff721c0c61b23a0aa93960629b2119c2921a1e2"},
-]
-
-[[package]]
 name = "termcolor"
 version = "3.1.0"
 description = "ANSI color formatting for output in terminal"
@@ -2395,21 +2321,6 @@ files = [
     {file = "tzdata-2025.2-py2.py3-none-any.whl", hash = "sha256:1a403fada01ff9221ca8044d701868fa132215d84beb92242d9acd2147f667a8"},
     {file = "tzdata-2025.2.tar.gz", hash = "sha256:b60a638fcc0daffadf82fe0f57e53d06bdec2f36c4df66280ae79bce6bd6f2b9"},
 ]
-
-[[package]]
-name = "umf"
-version = "0.10.0"
-description = "Unified Memory Framework"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "umf-0.10.0-py2.py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:a27a368c614fd9d0e67e9ef77de391a7080697d7a4d51b9035707f629d81dc7c"},
-    {file = "umf-0.10.0-py2.py3-none-win_amd64.whl", hash = "sha256:7b3ee402f1a5bbe418d661970338f75b25a441cb59bb084dca916040f5c3c303"},
-]
-
-[package.dependencies]
-tcmlib = "==1.3.*"
 
 [[package]]
 name = "urllib3"
@@ -2608,4 +2519,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">3.11,<3.14"
-content-hash = "948b542238e59d960727941d1a65c47452a92e6da06ae64a78982150f22d707e"
+content-hash = "0ca47771e2b1deec4bae443fb0c526109b8d1f1f373c3f512d1a49316fc9bbe9"
