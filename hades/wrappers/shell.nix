@@ -9,5 +9,5 @@ pkgs.mkShellNoCC {
     magic-vlsi
   ];
 
-  PDK_ROOT= builtins.toString ./pdk;
+  PDK_ROOT= builtins.toString ../../pdk;
 }
