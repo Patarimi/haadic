@@ -102,11 +102,3 @@ def extract_spice_magic(
         logging.error(proc.stderr)
         raise e
     return output_path
-
-
-if __name__ == "__main__":
-    extract_spice_magic(
-        Path("workdir/sky130_fd_sc_hd.gds"),
-        Path("pdk/sky130A/libs.tech/magic/sky130A.magicrc"),
-        cell_name="sky130_fd_sc_hd__o221a_1",
-    )
