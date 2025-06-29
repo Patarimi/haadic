@@ -48,8 +48,9 @@ class LayerStack:
     _stack: list[Layer] = field(init=False)
     _pad: Layer = field(init=False)
     _gate: Layer = field(default_factory=default_layer)
+    _nplus: Layer = field(default_factory=default_layer)
+    _pplus: Layer = field(default_factory=default_layer)
     _nwell: Layer = field(default_factory=default_layer)
-    _pwell: Layer = field(default_factory=default_layer)
     grid: float = 1e-9
 
     def __post_init__(self):
@@ -114,9 +115,9 @@ class LayerStack:
                     layer=dt[0], datatype=dt[1], _pin=dt[1], name=layer.name
                 )
             elif layer.type == "PWELL":
-                self._pwell = Layer(layer=dt[0], datatype=dt[1], name=layer.name)
+                self._pplus = Layer(layer=dt[0], datatype=dt[1], name=layer.name)
             elif layer.type == "NWELL":
-                self._nwell = Layer(layer=dt[0], datatype=dt[1], name=layer.name)
+                self._nplus = Layer(layer=dt[0], datatype=dt[1], name=layer.name)
             else:
                 raise ValueError(f"Unknown layer type: {layer.type}")
 

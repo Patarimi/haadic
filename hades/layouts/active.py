@@ -1,4 +1,5 @@
 import logging
+from typing import Literal
 
 import klayout.db as db
 from hades.layouts.tools import LayerStack, Layer
@@ -11,7 +12,7 @@ def mosfet(
     nf: int = 5,
     width=2,
     length=0.13,
-    type: str = "N",
+    doping: Literal["N", "P"] = "N",
     active_layer: Layer = Layer(22, 0, "active", spacing=0.5),
 ):
     """
@@ -22,13 +23,13 @@ def mosfet(
     :param width: width of each finger in µm
     :param length: length of each finger in µm
     :param active_layer: Layer use for active region
-    :param type: mos type (P or N).
+    :param doping: mos type (P or N).
     :return:
     """
     layout = cell.layout()
     poly_layer = layers.get_gate_layer()
     gate_ext = poly_layer.spacing
-    doping_layer = layers._pwell if type == "P" else layers._nwell
+    doping_layer = layers._pplus if doping == "P" else layers._nplus
     doping_ext = doping_layer.spacing
     m1_layer = layers.get_metal_layer(1)
     m1_width = m1_layer.width
@@ -36,7 +37,7 @@ def mosfet(
     via_layer = layers.get_via_layer(0)
     logging.debug(f"via layer : {via_layer}")
 
-    mos = layout.create_cell(f"{type.lower()}mos_{nf}")
+    mos = layout.create_cell(f"{doping.lower()}mos_{nf}")
     gate = layout.create_cell("gate")
     gate.shapes(poly_layer.drawing).insert(db.DBox(0, 0, length, width + 2 * gate_ext))
     pitch = length + diff_space
@@ -73,6 +74,15 @@ def mosfet(
             width + doping_ext,
         )
     )
+    if doping == "P":
+        mos.shape(layers._nwell.drawing).insert(
+            db.DBox(
+                -2 * doping_ext,
+                -2 * doping_ext,
+                diff_space + nf * pitch + 2 * doping_ext,
+                width + 2 * doping_ext,
+            )
+        )
     for i in range(nf):
         mos.shapes(poly_layer.pin).insert(
             db.DText(f"g{i}", i * pitch + diff_space + length / 2, -gate_ext)
