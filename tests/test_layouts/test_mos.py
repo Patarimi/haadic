@@ -7,7 +7,7 @@ from hades.layouts.tools import check_diff, LayerStack, Layer
 REF_PATH = dirname(__file__)
 
 stack = LayerStack("mock")
-stack._nwell = Layer(1, 0, "Nwell")
+stack._nplus = Layer(1, 0, "Nwell")
 stack._gate = Layer(2, 0, spacing=0.5)
 
 
@@ -24,7 +24,7 @@ def test_line(tmp_path):
     lyr = stack.get_metal_layer(2)
     stack._gate = Layer(5, 0, spacing=0.5)
     top = lib.create_cell("top")
-    mosfet(top, stack, nf=5, type="n")
+    mosfet(top, stack, nf=5, doping="n")
     line(top, "vdd", lyr)
     line(top, "gnd", lyr, below=True)
     lib.write(tmp_path / "h_line.gds")
