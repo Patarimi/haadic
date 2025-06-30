@@ -48,7 +48,7 @@ numpy = "^2.0.0"
 klayout = "^0.30.2"
 ngsolve = "6.2.2503"
 pydantic = "^2.8.2"
-cyclopts = "^3.16.0"
+cyclopts = "^3.21.0"
 pandas = "^2.2.3"
 
 [tool.poetry.group.dev]
