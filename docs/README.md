@@ -9,10 +9,10 @@ software-agnostic design flow, from device sizing to layout and implementation.
 
 This application needs nix and python3. For windows, please install NixOS as shown [here](https://nixos.wiki/wiki/WSL).
 
-Installation using [pipx](https://pipx.pypa.io/stable/) is recommended.
+Installation using [uvx](https://docs.astral.sh/uv/getting-started/installation/) is recommended.
 
 ```shell
-pipx install git+https://github.com/Patarimi/hades
+uvx --with="git+https://github.com/Patarimi/hades.git" hades
 ```
 
 ## Design flow
