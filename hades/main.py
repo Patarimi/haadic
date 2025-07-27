@@ -36,7 +36,7 @@ if shutil.which("openEMS"):
 
 
 @app.command(name="generate")
-def generate_cli(design_yaml: Path = "./design.yml", stop: str = "full") -> None:
+def generate_cli(design_yaml: Path = Path("./design.yml"), stop: str = "full") -> None:
     """Main command. Run the flow until convergence using _design.yaml_. The design can be stopped at a specific step using the _stop_ option."""
     with open(design_yaml) as f:
         conf = yaml.load(f, Loader=yaml.Loader)
@@ -101,7 +101,7 @@ def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool 
         raise FileNotFoundError(
             f"bench file {str(design.bench)} not found or is not a file."
         )
-    steps.run_bench(design.bench, os.curdir)
+    steps.run_bench(design.bench, Path(os.curdir))
 
     logging.info("loading simulation results...")
     data = steps.load_result()
