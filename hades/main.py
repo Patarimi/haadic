@@ -108,6 +108,10 @@ def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool 
 
     logging.info("evaluate performances")
     perf = design.evaluate(data)
+    logging.info("name | evaluated | target")
+    for key in perf:
+        tar = design.target.get(key, "N/A")
+        logging.info(f"{key} | {perf[key]} | {tar}")
 
     logging.info("compare performances to targets")
     cost = steps.compare_to(perf, design.target)
