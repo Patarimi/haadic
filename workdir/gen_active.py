@@ -16,12 +16,13 @@ def layout(cell, layerstack: LayerStack):
         layer=66, datatype=20, _pin=16, name="poly", width=0.15, spacing=0.27
     )
     layerstack._nplus = Layer(layer=93, datatype=44, name="nsdm", spacing=0.135)
-    layerstack._pplus = Layer(layer=94, datatype=20, name="psdm")
+    layerstack._pplus = Layer(layer=94, datatype=20, name="psdm", spacing=0.135)
     layerstack._nwell = Layer(layer=64, datatype=20, _pin=16, name="nwell")
+    layerstack._active = Layer(layer=65, datatype=20, name="diff", spacing=0.425)
     with open("tech.json", "w") as f:
         json.dump(layerstack, fp=f, default=lambda dc: dc.__dict__, indent=2)
 
-    mosfet(cell, layerstack, width=0.65, length=0.15, active_layer=Layer(65, 20, "diff", spacing=0.425))
+    mosfet(cell, layerstack, width=0.65, length=0.15)
     line(cell, "gate", layerstack.get_gate_layer())
     line(cell, "drain", layerstack.get_metal_layer(1))
     line(cell, "gnd", layerstack.get_metal_layer(1), below=True)
