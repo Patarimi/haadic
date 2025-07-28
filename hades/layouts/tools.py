@@ -49,7 +49,9 @@ class LayerStack:
     _pad: Layer = field(init=False)
     _gate: Layer = field(default_factory=default_layer)
     _nwell: Layer = field(default_factory=default_layer)
-    _pwell: Layer = field(default_factory=default_layer)
+    _pplus: Layer = field(default_factory=default_layer)
+    _nplus: Layer = field(default_factory=default_layer)
+    _active: Layer = field(default_factory=default_layer)
     grid: float = 1e-9
 
     def __post_init__(self):
