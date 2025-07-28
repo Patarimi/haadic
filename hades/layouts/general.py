@@ -6,7 +6,7 @@ This module contains function to generate general purpose cells.
 import logging
 import math
 import klayout.db as db
-from hades.layouts.tools import LayerStack, ViaLayer
+from hades.layouts.tools import LayerStack, ViaLayer, Layer
 
 
 def via(layout: db.Layout, layer: ViaLayer, size: tuple[float, float]) -> db.Cell:
@@ -153,3 +153,33 @@ def ground_plane(
     )
     gnd.shapes(layer).insert(db.DBox(0, 0, size[0], size[1]))
     return gnd
+
+
+def enclose(
+    cell: db.Cell,
+    layer: Layer,
+    extension: float = 0.0,
+    filter: Layer | None = None,
+) -> db.DBox:
+    """
+    Enclose the cell with a box on the given layer.
+    :param cell: The cell to enclose.
+    :param layer: The layer to use for the enclosure.
+    :param extension: The amount of extension around the cell.
+    :return: The enclosing box as a db.DBox.
+    """
+    if filter is None:
+        bbox = cell.dbbox()
+    else:
+        shapes = cell.shapes(filter.drawing)
+        bbox = db.DBox()
+        for shape in shapes.each():
+            bbox = bbox + shape.dbbox()
+    rec = db.DBox(
+        bbox.left - extension,
+        bbox.bottom - extension,
+        bbox.right + extension,
+        bbox.top + extension,
+    )
+    cell.shapes(layer.drawing).insert(rec)
+    return rec
