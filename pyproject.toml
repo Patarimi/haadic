@@ -38,7 +38,7 @@ log_file = "./pytest.log"
 [tool.poetry.dependencies]
 pyyaml = "^6.0"
 scipy = "^1.16.0"
-python-dotenv = "^1.0.0"
+python-dotenv = "^1.1.1"
 volare = "^0.20.6"
 rich = "^13.0"
 scikit-rf = "^1.0.0"
