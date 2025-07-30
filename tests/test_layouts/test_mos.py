@@ -7,8 +7,9 @@ from hades.layouts.tools import check_diff, LayerStack, Layer
 REF_PATH = dirname(__file__)
 
 stack = LayerStack("mock")
-stack._nwell = Layer(1, 0, "Nwell")
+stack._nplus = Layer(1, 0, "Nwell")
 stack._gate = Layer(2, 0, spacing=0.5)
+stack._active = Layer(22, 0, "active", spacing=0.5)
 
 
 def test_mos(tmp_path):
