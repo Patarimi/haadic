@@ -3,7 +3,7 @@ from typing import Literal
 
 import klayout.db as db
 from hades.layouts.tools import LayerStack, Layer
-from hades.layouts.general import via, get_dtext, get_shape
+from hades.layouts.general import via, get_dtext, get_shape, enclose
 
 
 def mosfet(
@@ -13,7 +13,6 @@ def mosfet(
     width=2,
     length=0.13,
     doping: Literal["N", "P"] = "N",
-    active_layer: Layer = Layer(22, 0, "active", spacing=0.5),
 ):
     """
     Create and insert a mosfet in the given cell
@@ -33,7 +32,7 @@ def mosfet(
     doping_ext = doping_layer.spacing
     m1_layer = layers.get_metal_layer(1)
     m1_width = m1_layer.width
-    diff_space = active_layer.spacing
+    diff_space = layers._active.spacing
     via_layer = layers.get_via_layer(0)
     logging.debug(f"via layer : {via_layer}")
 
@@ -63,26 +62,12 @@ def mosfet(
         1,
     )
     mos.insert(dr_cons)
-    mos.shapes(active_layer.drawing).insert(
+    mos.shapes(layers._active.drawing).insert(
         db.DBox(0, 0, diff_space + nf * pitch, width)
     )
-    mos.shapes(doping_layer.drawing).insert(
-        db.DBox(
-            -doping_ext,
-            -doping_ext,
-            diff_space + nf * pitch + doping_ext,
-            width + doping_ext,
-        )
-    )
+    enclose(mos, doping_layer, doping_ext, filter=layers._active)
     if doping == "P":
-        mos.shape(layers._nwell.drawing).insert(
-            db.DBox(
-                -2 * doping_ext,
-                -2 * doping_ext,
-                diff_space + nf * pitch + 2 * doping_ext,
-                width + 2 * doping_ext,
-            )
-        )
+        enclose(mos, layers._nwell, doping_ext, filter=doping_layer)
     for i in range(nf):
         mos.shapes(poly_layer.pin).insert(
             db.DText(f"g{i}", i * pitch + diff_space + length / 2, -gate_ext)
