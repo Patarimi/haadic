@@ -4,8 +4,29 @@ version = "0.4.1"
 description = "A package for parametric layout design."
 authors = [{name = "Patarimi", email="<38954040+Patarimi@users.noreply.github.com>"}]
 readme = "docs/README.md"
-dynamic = ["dependencies"]
 requires-python = ">3.11,<3.14"
+dependencies = [
+    "cyclopts>=3.22.3",
+    "klayout>=0.30.2",
+    "lark>=1.2.2",
+    "matplotlib>=3.10.3",
+    "ngsolve==6.2.2503",
+    "numpy>=2.3.2",
+    "pandas>=2.3.1",
+    "pydantic>=2.11.7",
+    "python-dotenv>=1.1.1",
+    "pyyaml>=6.0.2",
+    "rich>=13.9.4",
+    "scikit-rf>=1.8.0",
+    "scipy>=1.16.1",
+    "volare>=0.20.6",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.3,<0.9.0"]
+build-backend = "uv_build"
+[tool.uv.build-backend]
+module-root = ""
 
 [project.scripts]
 hades = "hades.main:app"
@@ -34,46 +55,19 @@ log_cli_level = "ERROR"
 log_file_level = "INFO"
 log_file = "./pytest.log"
 
-
-[tool.poetry.dependencies]
-pyyaml = "^6.0"
-scipy = "^1.16.0"
-python-dotenv = "^1.1.1"
-volare = "^0.20.6"
-rich = "^13.0"
-scikit-rf = "^1.0.0"
-matplotlib = "^3.8.2"
-lark = "^1.1.9"
-numpy = "^2.0.0"
-klayout = "^0.30.2"
-ngsolve = "6.2.2503"
-pydantic = "^2.8.2"
-cyclopts = "^3.22.3"
-pandas = "^2.2.3"
-
-[tool.poetry.group.dev]
-optional = true
-
-[tool.poetry.group.dev.dependencies]
-poethepoet = "^0.36.0"
-pytest = "^8.1.1"
-pytest-sugar = "^1.0.0"
-setuptools = "^80.3.1"
-ruff = "^0.12.7"
-
-[tool.poetry.group.doc]
-optional = true
-
-[tool.poetry.group.doc.dependencies]
-mkdocs = "^1.4.3"
-mkdocs-material = "^9.6.16"
-mkdocs-typer = "^0.0.3"
-mkdocs-gen-files = "^0.5.0"
-mkdocs-literate-nav = "^0.6.0"
-mkdocs-section-index = "^0.3.5"
-mkdocstrings = "^0.29.0"
-mkdocstrings-python = "^1.16.5"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[dependency-groups]
+dev = [
+    "poethepoet>=0.36.0",
+    "pytest>=8.4.1",
+    "pytest-sugar>=1.0.0",
+]
+doc = [
+    "mkdocs>=1.6.1",
+    "mkdocs-gen-files>=0.5.0",
+    "mkdocs-literate-nav>=0.6.2",
+    "mkdocs-material>=9.6.16",
+    "mkdocs-section-index>=0.3.10",
+    "mkdocs-typer>=0.0.3",
+    "mkdocstrings>=0.30.0",
+    "mkdocstrings-python>=1.16.12",
+]
