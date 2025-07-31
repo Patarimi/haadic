@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from klayout import db
 from netgen import csg, occ
-import ngsolve as ng
+# import ngsolve as ng
 from hades.layouts.tools import LayerStack
 from math import pi
 from numpy import sign
