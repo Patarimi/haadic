@@ -116,7 +116,7 @@ jobs:
         key: ${{ steps.pdk-restore.outputs.cache-primary-key }}
     - name: Test with Pytest
       run: |
-        poetry run pytest -rxXs --basetemp=tmp
+        uv run pytest -rxXs --basetemp=tmp
     - name: Store reports
       if: failure()
       uses: actions/upload-artifact@v4
