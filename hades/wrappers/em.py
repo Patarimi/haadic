@@ -53,7 +53,7 @@ class Emx:
         :param options:
         :return: Scikit RF data structure.
         """
-        if isinstance(freq, float):
+        if isinstance(freq, float) or isinstance(freq, int):
             f_s = [
                 f"{freq:f}",
             ]

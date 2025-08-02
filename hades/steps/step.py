@@ -1,5 +1,6 @@
 from collections.abc import Callable
 from pathlib import Path
+from typing import Optional
 
 import pandas as pd
 from klayout import db
@@ -29,17 +30,17 @@ def extract_from_layout(techno: str, top_cell_name: str = "top"):
     )
 
 
-def run_bench(bench_name: str = "bench.cir", output_dir: Path = None):
+def run_bench(bench_name: str = "bench.cir", output_dir: Optional[Path] = None):
     sim = NGSpice()
     if output_dir is None:
         data_file = Path(bench_name).with_suffix(".raw")
     else:
         data_file = Path(output_dir) / Path(bench_name).with_suffix(".raw").name
-    sim.compute(bench_name, data_file)
+    sim.compute(Path(bench_name), data_file)
 
 
 def load_result(data_name: str = "bench.raw") -> pd.DataFrame:
-    return parse_out(data_name)
+    return parse_out(Path(data_name))
 
 
 def compare_to(perf: dict, target: dict):

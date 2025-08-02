@@ -17,7 +17,7 @@ def wheeler(
     :return: the characteristic impedance of a micro-strip line using Wheeler equation
     """
     if k <= 1:
-        return np.Inf, 0
+        return np.inf, 0
     w_t = width / thick
     t_h = thick / height
     w_eff = width + thick * (1 + 1 / k) / (2 * pi) * log(

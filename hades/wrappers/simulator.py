@@ -5,9 +5,9 @@ from pathlib import Path
 
 from cyclopts import App
 
-sim_app = App("sim", help="Manage the simulators")
+sim_app = App("sim", help="Manage the simulators")  # ty: ignore[unknown-argument]
 
-CONF_PATH = join(dirname(__file__), "simulator.yml")
+CONF_PATH = Path(join(dirname(__file__), "simulator.yml"))
 
 
 class Simulator(Protocol):

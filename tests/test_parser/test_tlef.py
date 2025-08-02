@@ -1,3 +1,4 @@
+from pathlib import Path
 import pytest
 from hades.parsers.tlef import load_tlef, get_metal, get_via
 from hades.techno import load_pdk
@@ -9,7 +10,7 @@ pytestmark = pytest.mark.skipif(not (isdir("./pdk/mock")), reason="PDK not insta
 
 def test_load_tlef():
     pdk = load_pdk("mock")
-    path = join(dirname(dirname(__file__)), pdk["base_dir"], pdk["techlef"])
+    path = Path(join(dirname(dirname(__file__)), pdk["base_dir"], pdk["techlef"]))
     layers = load_tlef(path)
     logging.debug(layers)
 
@@ -22,7 +23,3 @@ def test_load_tlef():
     assert layers.layers[3].width == 0.3
 
     assert layers.unit == 5e-9
-
-
-if __name__ == "__main__":
-    test_load_tlef("./tmp")

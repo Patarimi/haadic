@@ -4,6 +4,7 @@ import shutil
 from fileinput import FileInput
 from subprocess import run
 from pathlib import Path
+from typing import Optional
 
 
 class NGSpice:
@@ -18,7 +19,10 @@ class NGSpice:
         pass
 
     def compute(
-        self, input_file: Path, data_file: Path = None, log_file: Path = None
+        self,
+        input_file: Path,
+        data_file: Optional[Path] = None,
+        log_file: Optional[Path] = None,
     ) -> None:
         """
         Simulate the spice input file with ngspice.

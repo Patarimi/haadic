@@ -25,7 +25,7 @@ def test_line(tmp_path):
     lyr = stack.get_metal_layer(2)
     stack._gate = Layer(5, 0, spacing=0.5)
     top = lib.create_cell("top")
-    mosfet(top, stack, nf=5, doping="n")
+    mosfet(top, stack, nf=5, doping="N")
     line(top, "vdd", lyr)
     line(top, "gnd", lyr, below=True)
     lib.write(tmp_path / "h_line.gds")

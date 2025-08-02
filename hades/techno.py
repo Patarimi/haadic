@@ -15,7 +15,7 @@ from rich import print
 
 
 console = Console(stderr=True)
-pkd_app = App("pdk", help="Manage the PDKs")
+pkd_app = App("pdk", help="Manage the PDKs")  # ty: ignore[unknown-argument]
 
 
 @pkd_app.command(name="install")

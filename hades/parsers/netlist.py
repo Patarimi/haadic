@@ -1,17 +1,7 @@
 from dataclasses import dataclass, field
+from typing import Literal
 from hades.models.tools import eng
-from enum import Enum, auto
 import skrf as rf
-
-
-class ComponentType(Enum):
-    L = auto()
-    C = auto()
-    V = auto()
-    I = auto()  # noqa
-    R = auto()
-    T = auto()
-    K = auto()
 
 
 Unit = {"L": "H", "C": "F", "V": "V", "I": "A", "R": "Ω", "T": "rad", "K": ""}
@@ -23,7 +13,7 @@ class Component:
     Represents a component.
     """
 
-    type: ComponentType
+    type: Literal["L", "C", "V", "I", "R", "T", "K"]
     name: str
     value: float
     node: tuple[str, str]

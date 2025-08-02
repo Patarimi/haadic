@@ -71,3 +71,7 @@ doc = [
     "mkdocstrings>=0.30.0",
     "mkdocstrings-python>=1.16.12",
 ]
+
+
+[tool.ty.src]
+exclude = ["hades/wrappers/oems.py", "hades/wrappers/ngsolve_w.py"]
