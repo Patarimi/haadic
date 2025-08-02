@@ -26,4 +26,5 @@ def test_spice_extractor_magic(tmp_path):
         output_path=output_path,
     )
     assert output_path.exists()
-    assert check_diff(output_path, join(dirname(__file__), "ref_sky130_fd.cir"))
+    ref_path = Path(join(dirname(__file__), "ref_sky130_fd.cir"))
+    assert check_diff(output_path, ref_path)

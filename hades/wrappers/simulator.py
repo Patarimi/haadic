@@ -7,7 +7,7 @@ from cyclopts import App
 
 sim_app = App("sim", help="Manage the simulators")
 
-CONF_PATH = join(dirname(__file__), "simulator.yml")
+CONF_PATH = Path(join(dirname(__file__), "simulator.yml"))
 
 
 class Simulator(Protocol):
