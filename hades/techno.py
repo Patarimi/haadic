@@ -26,8 +26,6 @@ def install(pdk_name: str):
     base_url = tech["source_url"]
     if base_url == "volare":
         cmd = [
-            "poetry",
-            "run",
             "volare",
             "enable",
             "--pdk",
