@@ -171,7 +171,7 @@ def compute(
 def make_geometry(
     gds_file: Path,
     tech: str = "mock",
-    cell_name: str = None,
+    cell_name: Optional[str] = None,
     *,
     margin: float = 0.2,
 ):
@@ -185,7 +185,7 @@ def make_geometry(
     """
     logging.info(f"Creating geometry from {gds_file}")
     layout = db.Layout()
-    layout.read(gds_file)
+    layout.read(str(gds_file))
     dbu = layout.dbu
     if cell_name is None:
         gdsii = layout.top_cells[0]
