@@ -121,7 +121,7 @@ def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool 
 
 
 @app.command(name="new")
-def template(project_name: Path = "./working_dir"):
+def template(project_name: Path = Path("./working_dir")):
     """Create a template directory called _project_name_."""
     """
     TODO: Re-write with cookiecutter

@@ -18,7 +18,9 @@ def wheeler(
     :return:
     """
     u_0 = 4 * pi * 1e-7
-    if shape == "custom" or k is not None:
+    if shape == "custom":
+        if k is None:
+            raise ValueError("k must be given for custom shape.")
         k1, k2 = k
     else:
         try:
