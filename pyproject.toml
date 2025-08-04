@@ -10,7 +10,7 @@ dependencies = [
     "klayout>=0.30.2",
     "lark>=1.2.2",
     "matplotlib>=3.10.3",
-    "ngsolve==6.2.2503",
+    "ngsolve==6.2.2505",
     "numpy>=2.3.2",
     "pandas>=2.3.1",
     "pydantic>=2.11.7",
