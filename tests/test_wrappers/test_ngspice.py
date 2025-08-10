@@ -3,9 +3,13 @@ from pathlib import Path
 from filecmp import cmp
 import shutil
 
+import pytest
+
 from hades.wrappers.ngspice import NGSpice
+from hades.wrappers.tools import nix_check
 
 
+@pytest.mark.skipif(not nix_check(), reason="Nix not correctly installed")
 def test_ngspice(tmp_path):
     spice = NGSpice()
     spice_file = tmp_path / "schem_test.net"
