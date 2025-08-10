@@ -31,8 +31,8 @@ module-root = ""
 hades = "hades.main:app"
 
 [tool.poe.tasks]
-update_show = "poetry show -T -o --with=dev,doc"
-update_all = "poetry update --with=doc,dev"
+update_show = "uv lock --dry-run"
+update_all = "uv lock"
 test = 'pytest --basetemp=tmp'
 install_all = "poetry install --with=dev,doc"
 publish = "poetry publish --build --username __token__ --password $PYPI_TOKEN"
@@ -43,8 +43,8 @@ smoke_test = ["run magic"]
 [tool.poe.tasks.precommit]
 sequence = [
     {ref = "update_show"},
-    {cmd = "ruff format"},
-    {cmd = "ruff check"},
+    {cmd = "uvx ruff format"},
+    {cmd = "uvx ruff check"},
     {ref = "test"}
 ]
 
