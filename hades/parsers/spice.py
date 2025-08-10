@@ -16,6 +16,7 @@ class SpiceFile:
     A class to represent a Spice netlist.
     It contains the title, controls, circuit, and other components of the Spice netlist.
     """
+
     title: str
     controls: list[str] = field(default_factory=list)
     circuit: list[str] = field(default_factory=list)
