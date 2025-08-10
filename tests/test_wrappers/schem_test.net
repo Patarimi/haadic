@@ -23,7 +23,7 @@ Mp1 out in cc cc pm W=4u L=0.18u
 unset askquit
 set filetype = ASCII
 run                                         ; run the .tran command
-write C:\Users\JoPo\PycharmProjects\hades\tmp\test_ngspice0\out.raw v(out) v(in) i(vcc)
+write {path} v(out) v(in) i(vcc)
 .endc                                       ; end of control section
 
 .end
