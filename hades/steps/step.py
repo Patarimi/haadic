@@ -7,7 +7,7 @@ from klayout import db
 from hades.layouts.tools import LayerStack
 from hades.extractors.spicing import extract_spice_magic
 from hades.parsers.raw import parse_out
-from hades.wrappers.ngspice import NGSpice
+from hades.wrappers.ngspice import compute
 from hades.techno import get_file
 
 
@@ -31,12 +31,11 @@ def extract_from_layout(techno: str, top_cell_name: str = "top"):
 
 
 def run_bench(bench_name: str = "bench.cir", output_dir: Optional[Path] = None):
-    sim = NGSpice()
     if output_dir is None:
         data_file = Path(bench_name).with_suffix(".raw")
     else:
         data_file = Path(output_dir) / Path(bench_name).with_suffix(".raw").name
-    sim.compute(Path(bench_name), data_file)
+    compute(Path(bench_name), data_file)
 
 
 def load_result(data_name: str = "bench.raw") -> pd.DataFrame:

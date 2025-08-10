@@ -55,7 +55,9 @@ def extract_spice_magic(
     """
     if output_path is None:
         output_path = Path(f"{dirname(gds_file)}/{gds_file.stem}.cir")
-    root_path = dirname(output_path) if dirname(output_path) != "/" else "./"
+    root_path = dirname(output_path) if dirname(output_path) != "/" else "."
+    if root_path == "":
+        root_path = "."
     logging.warning(f"working dir :{root_path}")
     if cell_name == "None":
         logging.warning("No cell name specified, using first cell in the layout.")

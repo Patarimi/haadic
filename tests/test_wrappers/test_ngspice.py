@@ -5,17 +5,16 @@ import shutil
 
 import pytest
 
-from hades.wrappers.ngspice import NGSpice
+from hades.wrappers.ngspice import compute
 from hades.wrappers.tools import nix_check
 
 
 @pytest.mark.skipif(not nix_check(), reason="Nix not correctly installed")
 def test_ngspice(tmp_path):
-    spice = NGSpice()
     spice_file = tmp_path / "schem_test.net"
     data_file = tmp_path / "out.raw"
     shutil.copy("./tests/test_wrappers/schem_test.net", spice_file)
-    spice.compute(spice_file, data_file)
+    compute(spice_file, data_file)
     assert Path(data_file).exists()
     assert Path(tmp_path / "out.log").exists()
     # remove the line with the date before comparison

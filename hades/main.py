@@ -68,56 +68,66 @@ def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool 
     """
     import hades.steps.step as steps
 
-    sys.path.append(os.curdir)
-    des = Path(design_py).with_suffix("")
-    design = __import__(
-        str(des), fromlist=("layout", "techno", "bench", "evaluate", "target")
-    )
+    try:
+        starting_dir = os.getcwd()
+        sys.path.append(os.curdir)
+        des = Path(design_py).with_suffix("")
 
-    starting_dir = os.getcwd()
-    if sub_folder == "":
-        sub_folder = des
-    run_dir = (
-        sub_folder
-        if not timestamp
-        else str(sub_folder)
-        + "_"
-        + datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
-    )
-    if not Path(run_dir).is_dir():
-        os.mkdir(run_dir)
-    os.chdir(run_dir)
-
-    logging.info("layout generation...")
-    steps.layout_generation(design.techno, design.layout)
-
-    logging.info("extracting schematic...")
-    steps.extract_from_layout(design.techno)
-
-    logging.info(f"simulation of {design.bench}")
-    if not Path(design.bench).is_absolute():
-        design.bench = Path(starting_dir) / design.bench
-    if not design.bench.is_file():
-        raise FileNotFoundError(
-            f"bench file {str(design.bench)} not found or is not a file."
+        if len(str(des).split("/")) > 1:
+            os.chdir(des.parent)
+            des_name = des.name
+        else:
+            des_name = str(des)
+        design = __import__(
+            des_name, fromlist=("layout", "techno", "bench", "evaluate", "target")
         )
-    steps.run_bench(design.bench, Path(os.curdir))
+        os.chdir(starting_dir)
 
-    logging.info("loading simulation results...")
-    data = steps.load_result()
+        if sub_folder == "":
+            sub_folder = des
+        run_dir = (
+            sub_folder
+            if not timestamp
+            else str(sub_folder)
+            + "_"
+            + datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
+        )
+        if not Path(run_dir).is_dir():
+            os.mkdir(run_dir)
+        os.chdir(run_dir)
 
-    logging.info("evaluate performances")
-    perf = design.evaluate(data)
-    logging.info("name | evaluated | target")
-    for key in perf:
-        tar = design.target.get(key, "N/A")
-        logging.info(f"{key} | {perf[key]} | {tar}")
+        logging.info("layout generation...")
+        steps.layout_generation(design.techno, design.layout)
 
-    logging.info("compare performances to targets")
-    cost = steps.compare_to(perf, design.target)
-    logging.info(f"current cost: {cost}")
+        logging.info("extracting schematic...")
+        steps.extract_from_layout(design.techno)
 
-    shutil.copy("../hades.log", design_py + ".log")
+        if not Path(design.bench).is_absolute():
+            design.bench = Path(starting_dir) / design.bench
+        logging.info(f"simulation of {design.bench}")
+        if not design.bench.is_file():
+            raise FileNotFoundError(
+                f"bench file {str(design.bench)} not found or is not a file."
+            )
+        steps.run_bench(design.bench, Path(os.curdir))
+
+        logging.info("loading simulation results...")
+        data = steps.load_result()
+
+        logging.info("evaluate performances")
+        perf = design.evaluate(data)
+        logging.info("name | evaluated | target")
+        for key in perf:
+            tar = design.target.get(key, "N/A")
+            logging.info(f"{key} | {perf[key]} | {tar}")
+
+        logging.info("compare performances to targets")
+        cost = steps.compare_to(perf, design.target)
+        logging.info(f"current cost: {cost}")
+
+        shutil.copy("../hades.log", design_py + ".log")
+    finally:
+        os.chdir(starting_dir)
 
 
 @app.command(name="new")
