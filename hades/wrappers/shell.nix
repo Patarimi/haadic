@@ -7,6 +7,7 @@ in
 pkgs.mkShellNoCC {
   packages = with pkgs; [
     magic-vlsi
+    ngspice
   ];
 
   PDK_ROOT= builtins.toString ../../pdk;

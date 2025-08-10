@@ -1,10 +1,10 @@
-import logging
 import os
 import shutil
 from fileinput import FileInput
-from subprocess import run
 from pathlib import Path
 from typing import Optional
+
+from hades.wrappers.tools import nix_run, to_wsl
 
 
 class NGSpice:
@@ -69,12 +69,11 @@ class NGSpice:
         cmd = [
             "ngspice" if os.name != "nt" else "ngspice_con",
             "-b",
-            str(input_file),
+            to_wsl(input_file),
             "-o",
-            str(log_file),
+            to_wsl(log_file),
         ]
-        logging.info(" ".join(cmd))
-        proc = run(cmd, capture_output=True)
+        proc = nix_run(cmd)
         if proc.returncode != 0:
             RuntimeWarning(str(cmd))
             with open(data_file) as f:
