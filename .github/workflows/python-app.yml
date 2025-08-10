@@ -63,16 +63,6 @@ jobs:
           pdk/
         key: ${{ runner.os }}-pdk-${{ hashFiles('**/hades/techno.yml') }}
     - uses: actions/checkout@v4
-    - name: Install winget - Windows
-      if: ${{runner.os == 'Windows' }}
-      uses: Cyberboss/install-winget@v1
-    - name: Config Windows - Setup External Tools
-      if: ${{runner.os == 'Windows' }}
-      run: |
-        dir
-        winget settings --enable LocalManifestFiles
-        winget install -m .\manifests\n\NGSpice\NGSpice\42
-        Add-Content $env:GITHUB_PATH "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\NGSpice.NGSpice__DefaultSource\Spice64\bin"
     - name: Install Nix for Ubuntu
       if: ${{runner.os != 'Windows' }}
       uses: cachix/install-nix-action@v31
@@ -81,8 +71,6 @@ jobs:
     - name: Config Ubuntu - Setup External Tools
       if: ${{runner.os != 'Windows' }}
       run: |
-        sudo apt-get update
-        sudo apt-get install -y ngspice
         nix-channel --update
         nix-channel --list
     - name: Install uv
