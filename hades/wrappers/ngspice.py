@@ -1,10 +1,8 @@
-import logging
-import os
-import shutil
 from fileinput import FileInput
-from subprocess import run
 from pathlib import Path
 from typing import Optional
+
+from hades.wrappers.tools import nix_check, nix_run, to_wsl
 
 
 class NGSpice:
@@ -42,8 +40,8 @@ class NGSpice:
         if type(log_file) is str:
             log_file = Path(log_file)
 
-        if shutil.which("ngspice") is None:
-            raise RuntimeError("NGSpice is not installed.")
+        if not nix_check():
+            raise RuntimeError("nix is not installed.")
 
         # find the write statement and change the output file
         write_edited = False
@@ -67,14 +65,13 @@ class NGSpice:
                 print(line, end="")
 
         cmd = [
-            "ngspice" if os.name != "nt" else "ngspice_con",
+            "ngspice",
             "-b",
-            str(input_file),
+            to_wsl(input_file),
             "-o",
-            str(log_file),
+            to_wsl(log_file),
         ]
-        logging.info(" ".join(cmd))
-        proc = run(cmd, capture_output=True)
+        proc = nix_run(cmd)
         if proc.returncode != 0:
             RuntimeWarning(str(cmd))
             with open(data_file) as f:
