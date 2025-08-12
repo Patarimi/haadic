@@ -61,6 +61,12 @@ class Netlist:
     def append(self, other: Component):
         self.circuit.append(other)
 
+    def add_control(self, control: str):
+        self.controls.append(control)
+
+    def add_other(self, other: str):
+        self.others.append(other)
+
     def spice(self):
         spice = f"#{self.name}\n"
         for comp in self.circuit:
