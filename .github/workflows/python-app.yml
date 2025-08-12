@@ -20,7 +20,7 @@ jobs:
   check-format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: astral-sh/ruff-action@v3
         with:
           args: 'check'        
@@ -31,7 +31,7 @@ jobs:
   doc-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install uv
         uses: astral-sh/setup-uv@v6
       - uses: actions/setup-python@v5
@@ -62,7 +62,7 @@ jobs:
         path: |
           pdk/
         key: ${{ runner.os }}-pdk-${{ hashFiles('**/hades/techno.yml') }}
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Install Nix for Ubuntu
       if: ${{runner.os != 'Windows' }}
       uses: cachix/install-nix-action@v31
