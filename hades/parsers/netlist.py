@@ -72,8 +72,8 @@ class Netlist:
         for comp in self.circuit:
             spice += f"{comp}\n"
         if self.others:
-            netlist += "\n" + "\n".join(self.others) + "\n"
+            spice += "\n" + "\n".join(self.others) + "\n"
         if self.controls:
-            netlist += ".control\n"
-            netlist += "\n".join(self.controls) + "\n.endc\n"
+            spice += ".control\n"
+            spice += "\n".join(self.controls) + "\n.endc\n"
         return spice

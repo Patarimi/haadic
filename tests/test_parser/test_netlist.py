@@ -20,8 +20,12 @@ def test_netlist():
     assert net.spice() == "#test\nC5 gnd 5 5.000 pF\n"
     net.add_control("run")
     net.add_other(".lib 'test.lib'")
-    assert net.spice() == (
-        "#test\nC5 gnd 5 5.000 pF\n"
-        ".control\nrun\n.endc\n"
-        ".lib 'test.lib'\n"
-    )
+    expected_spice = """#test
+C5 gnd 5 5.000 pF
+
+.lib 'test.lib'
+.control
+run
+.endc
+"""
+    assert net.spice() == expected_spice
