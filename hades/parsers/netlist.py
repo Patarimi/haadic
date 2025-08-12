@@ -49,12 +49,14 @@ class Component:
 @dataclass
 class Netlist:
     """
-    Represents a Netlist. The connexion graph is stored in circuit.
+    Represents a Netlist. The connexion list is stored in circuit.
     The spice netlist can be generated using the spice function.
     """
 
     name: str
     circuit: list[Component] = field(default_factory=list)
+    controls: list[str] = field(default_factory=list)
+    others: list[str] = field(default_factory=list)
 
     def append(self, other: Component):
         self.circuit.append(other)
@@ -63,4 +65,9 @@ class Netlist:
         spice = f"#{self.name}\n"
         for comp in self.circuit:
             spice += f"{comp}\n"
+        if self.others:
+            netlist += "\n" + "\n".join(self.others) + "\n"
+        if self.controls:
+            netlist += ".control\n"
+            netlist += "\n".join(self.controls) + "\n.endc\n"
         return spice
