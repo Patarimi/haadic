@@ -184,10 +184,10 @@ class Port:
     """
 
     name: str
-    ref: str = None
+    ref: str = ""
 
     def __post_init__(self):
-        if self.ref is None:
+        if self.ref == "":
             self.ref = self.name + "_r"
 
     def __str__(self):
@@ -208,19 +208,19 @@ def check_diff(gds1: str | Path, gds2: str | Path) -> bool:
     cell2 = kdb.Layout()
     cell2.read(str(gds2))
     diff = kdb.LayoutDiff()
-    diff.on_cell_name_differs(
+    diff.on_cell_name_differs(  #  type: ignore[call-non-callable]
         lambda c1, c2: logging.error(f"Cell {c1.name} != {c2.name}")
     )
-    diff.on_cell_in_a_only(
+    diff.on_cell_in_a_only(  #  type: ignore[call-non-callable]
         lambda c1: logging.error(f"Cell {c1.name} only in file {str(gds1)}")
     )
-    diff.on_cell_in_b_only(
+    diff.on_cell_in_b_only(  #  type: ignore[call-non-callable]
         lambda c1: logging.error(f"Cell {c1.name} only in file {str(gds2)}")
     )
-    diff.on_layer_in_a_only(
+    diff.on_layer_in_a_only(  #  type: ignore[call-non-callable]
         lambda c1: logging.error(f"Layer {c1.name} only in {str(gds1)}.")
     )
-    diff.on_layer_in_b_only(
+    diff.on_layer_in_b_only(  #  type: ignore[call-non-callable]
         lambda c1: logging.error(f"Layer {c1.name} only in {str(gds2)}.")
     )
     return diff.compare(cell1, cell2)

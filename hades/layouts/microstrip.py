@@ -205,7 +205,7 @@ def lange_coupler(
     half_lange.shapes(lyr_top).insert(first_met)
     if ext > 0:
         port = db.DPath(
-            [db.DPoint(le, 2 * (w + g)), db.Point(le, 2.5 * w + 2 * g + ext)],
+            [db.DPoint(le, 2 * (w + g)), db.DPoint(le, 2 * w + 2 * g + ext)],
             w,
             bgn_ext=0,
             end_ext=w / 2,

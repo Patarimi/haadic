@@ -8,28 +8,24 @@ from pathlib import Path
 from subprocess import CalledProcessError
 
 from klayout import db as kl
-from hades.layouts.tools import LayerStack
 from hades.wrappers.tools import nix_run, to_wsl
 
 
-def extract_spice(
-    gds_file: Path, techno: str, stack: LayerStack = None, output_path: Path = None
-) -> Path:
+def extract_spice(gds_file: Path, techno: str, output_path: Path = Path()) -> Path:
     """
     Extract the equivalent spice schematic of a gdsii file.
     :param gds_file: Input file to be simulated
     :param techno: name of technology to be used in the simulation.
-    :param stack: Layer Stack use to construct the 3D model
     :return: A spice schematic to be used by ngspice
     """
-    if output_path is None:
+    if output_path is Path():
         output_path = Path(f"{dirname(gds_file)}/{gds_file.name}.spice")
     layout = kl.Layout()
-    layout.read(gds_file)
+    layout.read(str(gds_file))
     RSI = kl.RecursiveShapeIterator(layout, layout.top_cell(), layout.layer_indices())
     spice = kl.LayoutToNetlist(RSI)
     spice.extract_netlist()
-    spice.write(output_path)
+    spice.write(str(output_path))
     return output_path
 
 
@@ -37,7 +33,7 @@ def extract_spice_magic(
     gds_file: Path,
     rc_file: Path,
     cell_name: str = "None",
-    output_path: Path = None,
+    output_path: Path = Path(),
     options: str = "NoPar",
 ) -> Path:
     """
@@ -53,7 +49,7 @@ def extract_spice_magic(
         "RC": Extract both resistances and capacitances.
     :return: A spice schematic to be used by ngspice.
     """
-    if output_path is None:
+    if output_path is Path():
         output_path = Path(f"{dirname(gds_file)}/{gds_file.stem}.cir")
     root_path = dirname(output_path) if dirname(output_path) != "/" else "."
     if root_path == "":
@@ -62,7 +58,7 @@ def extract_spice_magic(
     if cell_name == "None":
         logging.warning("No cell name specified, using first cell in the layout.")
         layout = kl.Layout()
-        layout.read(gds_file)
+        layout.read(str(gds_file))
         cell_name = layout.top_cells()[0].name
         logging.info(f"Using cell name {cell_name}")
         logging.info(

@@ -50,7 +50,7 @@ def generate_cli(design_yaml: Path = Path("./design.yml"), stop: str = "full") -
     else:
         raise RuntimeError("Unknown device, choice are mos, inductor")
     dimensions = design["dimensions"]
-    generate(dut, design["specifications"], dimensions, Step[stop])
+    generate(dut, design["specifications"], dimensions, Step[stop])  #  type: ignore[invalid-argument-type]
 
 
 @app.command(name="run")
@@ -97,32 +97,32 @@ def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool 
         os.chdir(run_dir)
 
         logging.info("layout generation...")
-        steps.layout_generation(design.techno, design.layout)
+        steps.layout_generation(design.techno, design.layout)  #  type: ignore[unresolved-attribute]
 
         logging.info("extracting schematic...")
-        steps.extract_from_layout(design.techno)
+        steps.extract_from_layout(design.techno)  #  type: ignore[unresolved-attribute]
 
-        if not Path(design.bench).is_absolute():
-            design.bench = Path(starting_dir) / design.bench
-        logging.info(f"simulation of {design.bench}")
-        if not design.bench.is_file():
+        if not Path(design.bench).is_absolute():  #  type: ignore[unresolved-attribute]
+            design.bench = Path(starting_dir) / design.bench  #  type: ignore[unresolved-attribute]
+        logging.info(f"simulation of {design.bench}")  #  type: ignore[unresolved-attribute]
+        if not design.bench.is_file():  #  type: ignore[unresolved-attribute]
             raise FileNotFoundError(
-                f"bench file {str(design.bench)} not found or is not a file."
+                f"bench file {str(design.bench)} not found or is not a file."  #  type: ignore[unresolved-attribute]
             )
-        steps.run_bench(design.bench, Path(os.curdir))
+        steps.run_bench(design.bench, Path(os.curdir))  #  type: ignore[unresolved-attribute]
 
         logging.info("loading simulation results...")
         data = steps.load_result()
 
         logging.info("evaluate performances")
-        perf = design.evaluate(data)
+        perf = design.evaluate(data)  # type: ignore[unresolved-attribute]
         logging.info("name | evaluated | target")
         for key in perf:
-            tar = design.target.get(key, "N/A")
+            tar = design.target.get(key, "N/A")  # type: ignore[unresolved-attribute]
             logging.info(f"{key} | {perf[key]} | {tar}")
 
         logging.info("compare performances to targets")
-        cost = steps.compare_to(perf, design.target)
+        cost = steps.compare_to(perf, design.target)  # type: ignore[unresolved-attribute]
         logging.info(f"current cost: {cost}")
 
         shutil.copy("../hades.log", design_py + ".log")
