@@ -14,7 +14,7 @@ def octagonal_inductor(
     gap: float,
     layer_stack: LayerStack,
     layer_nb: int = -1,
-    pin_name: [str, str] = ("P1", "P2"),
+    pin_name: tuple[str, str] = ("P1", "P2"),
     port_ext: float = 15e-6,
     port_gap: float = -1,
     bridge_nb: Optional[int] = None,

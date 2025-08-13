@@ -184,10 +184,10 @@ class Port:
     """
 
     name: str
-    ref: str = None
+    ref: str = ""
 
     def __post_init__(self):
-        if self.ref is None:
+        if self.ref == "":
             self.ref = self.name + "_r"
 
     def __str__(self):

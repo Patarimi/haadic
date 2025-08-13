@@ -13,7 +13,7 @@ from hades.wrappers.tools import nix_run, to_wsl
 
 
 def extract_spice(
-    gds_file: Path, techno: str, stack: LayerStack = None, output_path: Path = None
+    gds_file: Path, techno: str, stack: LayerStack = None, output_path: Path = Path()
 ) -> Path:
     """
     Extract the equivalent spice schematic of a gdsii file.
@@ -22,7 +22,7 @@ def extract_spice(
     :param stack: Layer Stack use to construct the 3D model
     :return: A spice schematic to be used by ngspice
     """
-    if output_path is None:
+    if output_path is Path():
         output_path = Path(f"{dirname(gds_file)}/{gds_file.name}.spice")
     layout = kl.Layout()
     layout.read(gds_file)
@@ -37,7 +37,7 @@ def extract_spice_magic(
     gds_file: Path,
     rc_file: Path,
     cell_name: str = "None",
-    output_path: Path = None,
+    output_path: Path = Path(),
     options: str = "NoPar",
 ) -> Path:
     """
@@ -53,7 +53,7 @@ def extract_spice_magic(
         "RC": Extract both resistances and capacitances.
     :return: A spice schematic to be used by ngspice.
     """
-    if output_path is None:
+    if output_path is Path():
         output_path = Path(f"{dirname(gds_file)}/{gds_file.stem}.cir")
     root_path = dirname(output_path) if dirname(output_path) != "/" else "."
     if root_path == "":
