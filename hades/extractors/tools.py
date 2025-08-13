@@ -14,4 +14,4 @@ def check_diff(file1: Path, file2: Path) -> bool:
     net_reader = kl.NetlistSpiceReader()
     net1 = kl.Netlist().read(str(file1), net_reader)
     net2 = kl.Netlist().read(str(file2), net_reader)
-    return comp.compare(net1, net2)
+    return comp.compare(net1, net2)  # type: ignore[invalid-argument-type]
