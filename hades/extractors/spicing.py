@@ -13,13 +13,12 @@ from hades.wrappers.tools import nix_run, to_wsl
 
 
 def extract_spice(
-    gds_file: Path, techno: str, stack: LayerStack = None, output_path: Path = Path()
+    gds_file: Path, techno: str, output_path: Path = Path()
 ) -> Path:
     """
     Extract the equivalent spice schematic of a gdsii file.
     :param gds_file: Input file to be simulated
     :param techno: name of technology to be used in the simulation.
-    :param stack: Layer Stack use to construct the 3D model
     :return: A spice schematic to be used by ngspice
     """
     if output_path is Path():
