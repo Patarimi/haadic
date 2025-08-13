@@ -27,7 +27,7 @@ def via(layout: db.Layout, layer: ViaLayer, size: tuple[float, float]) -> db.Cel
         via_s = float(
             layer.enclosure
             if isinstance(layer.enclosure, (float | int))
-            else layer.enclosure[1] # type : ignore[non-subscriptable]
+            else layer.enclosure[1]  # type : ignore[non-subscriptable]
         )
 
         def repetition(length: float) -> int:

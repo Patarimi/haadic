@@ -8,13 +8,10 @@ from pathlib import Path
 from subprocess import CalledProcessError
 
 from klayout import db as kl
-from hades.layouts.tools import LayerStack
 from hades.wrappers.tools import nix_run, to_wsl
 
 
-def extract_spice(
-    gds_file: Path, techno: str, output_path: Path = Path()
-) -> Path:
+def extract_spice(gds_file: Path, techno: str, output_path: Path = Path()) -> Path:
     """
     Extract the equivalent spice schematic of a gdsii file.
     :param gds_file: Input file to be simulated
