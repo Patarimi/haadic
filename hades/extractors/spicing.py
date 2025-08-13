@@ -25,11 +25,11 @@ def extract_spice(
     if output_path is Path():
         output_path = Path(f"{dirname(gds_file)}/{gds_file.name}.spice")
     layout = kl.Layout()
-    layout.read(gds_file)
+    layout.read(str(gds_file))
     RSI = kl.RecursiveShapeIterator(layout, layout.top_cell(), layout.layer_indices())
     spice = kl.LayoutToNetlist(RSI)
     spice.extract_netlist()
-    spice.write(output_path)
+    spice.write(str(output_path))
     return output_path
 
 
@@ -62,7 +62,7 @@ def extract_spice_magic(
     if cell_name == "None":
         logging.warning("No cell name specified, using first cell in the layout.")
         layout = kl.Layout()
-        layout.read(gds_file)
+        layout.read(str(gds_file))
         cell_name = layout.top_cells()[0].name
         logging.info(f"Using cell name {cell_name}")
         logging.info(
