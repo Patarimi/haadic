@@ -63,6 +63,14 @@ jobs:
           pdk/
         key: ${{ runner.os }}-pdk-${{ hashFiles('**/hades/techno.yml') }}
     - uses: actions/checkout@v5
+    - uses: Vampire/setup-wsl@v6
+      if: ${{runner.os == 'Windows' }}
+    - name: Install Nix for windows
+      if: ${{runner.os == 'Windows' }}
+      run: |
+        Invoke-WebRequest https://github.com/nix-community/NixOS-WSL/releases/download/2505.7.0/nixos.wsl -OutFile ./nixos.wsl
+        wsl --install --from-file .\nixos.wsl -n
+        wsl --list
     - name: Install Nix for Ubuntu
       if: ${{runner.os != 'Windows' }}
       uses: cachix/install-nix-action@v31

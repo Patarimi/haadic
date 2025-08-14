@@ -1,6 +1,6 @@
 import filecmp
 import pytest
-from os.path import join, dirname
+from os.path import join, dirname, isdir
 
 from hades.extractors.spicing import extract_spice, extract_spice_magic
 from hades.extractors.tools import check_diff
@@ -17,6 +17,7 @@ def test_spice_extractor(tmp_path):
     filecmp.cmp(output_path, join(dirname(__file__), "../test_extractors/ref_ind.cir"))
 
 
+@pytest.mark.skipif(not (isdir("./pdk/sky130A")), reason="PDK not installed.")
 @pytest.mark.skipif(not nix_check(), reason="Nix not correctly installed")
 def test_spice_extractor_magic(tmp_path):
     output_path = tmp_path / "spice.cir"
