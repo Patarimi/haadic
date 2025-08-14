@@ -50,7 +50,7 @@ def compute(
         for line in circuit_file:
             if line.startswith("write"):
                 words = line.split(" ")
-                words[1] = str(data_file)
+                words[1] = to_wsl(data_file)
                 line = " ".join(words)
                 write_edited = True
             if line.startswith("set filetype"):
