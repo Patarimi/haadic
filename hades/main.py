@@ -73,9 +73,11 @@ def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool 
         sys.path.append(os.curdir)
         des = Path(design_py).with_suffix("")
 
-        if len(str(des).split("/")) > 1:
+        if len(str(des).split("/")) > 0:
             os.chdir(des.parent)
             des_name = des.name
+            logging.debug(f"Changing directory to {os.getcwd()}")
+            logging.debug(f"Importing design from {des_name}")
         else:
             des_name = str(des)
         design = __import__(
@@ -102,14 +104,16 @@ def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool 
         logging.info("extracting schematic...")
         steps.extract_from_layout(design.techno)  #  type: ignore[unresolved-attribute]
 
-        if not Path(design.bench).is_absolute():  #  type: ignore[unresolved-attribute]
-            design.bench = Path(starting_dir) / design.bench  #  type: ignore[unresolved-attribute]
+        os.chdir(starting_dir)
+        expected_bench = des.parent / design.bench 
         logging.info(f"simulation of {design.bench}")  #  type: ignore[unresolved-attribute]
-        if not design.bench.is_file():  #  type: ignore[unresolved-attribute]
+        if not expected_bench.is_file():  #  type: ignore[unresolved-attribute]
             raise FileNotFoundError(
-                f"bench file {str(design.bench)} not found or is not a file."  #  type: ignore[unresolved-attribute]
+                f"bench file {str(expected_bench)} not found or is not a file."  #  type: ignore[unresolved-attribute]
             )
-        steps.run_bench(design.bench, Path(os.curdir))  #  type: ignore[unresolved-attribute]
+        shutil.copy(expected_bench, run_dir)
+        os.chdir(run_dir)
+        steps.run_bench(design.bench, run_dir)  #  type: ignore[unresolved-attribute]
 
         logging.info("loading simulation results...")
         data = steps.load_result()
@@ -125,7 +129,6 @@ def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool 
         cost = steps.compare_to(perf, design.target)  # type: ignore[unresolved-attribute]
         logging.info(f"current cost: {cost}")
 
-        shutil.copy("../hades.log", design_py + ".log")
     finally:
         os.chdir(starting_dir)
 
