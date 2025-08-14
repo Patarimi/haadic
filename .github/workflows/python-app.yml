@@ -63,6 +63,8 @@ jobs:
           pdk/
         key: ${{ runner.os }}-pdk-${{ hashFiles('**/hades/techno.yml') }}
     - uses: actions/checkout@v5
+    - uses: Vampire/setup-wsl@v6
+      if: ${{runner.os == 'Windows' }}
     - name: Install Nix for windows
       if: ${{runner.os == 'Windows' }}
       run: |
