@@ -64,6 +64,7 @@ jobs:
         Invoke-WebRequest https://github.com/nix-community/NixOS-WSL/releases/download/2505.7.0/nixos.wsl -OutFile ./nixos.wsl
         wsl --install --from-file .\nixos.wsl -n
         wsl --list
+        Set-ExecutionPolicy -Scope CurrentUser Unrestricted # fix pdk installation error
     - name: Install Nix for Ubuntu
       if: ${{runner.os != 'Windows' }}
       uses: cachix/install-nix-action@v31
