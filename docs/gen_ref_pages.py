@@ -1,7 +1,7 @@
 """Generate the code reference pages."""
 
 from pathlib import Path
-import mkdocs_gen_files
+import mkdocs_gen_files  # type: ignore [unresolved-import]
 
 nav = mkdocs_gen_files.Nav()
 

@@ -1,3 +1,4 @@
+from typing import Sequence
 from .tools import LayerStack, Port
 from .general import via_stack, via
 import klayout.db as db
@@ -8,7 +9,7 @@ def straight_line(
     width: float,
     length: float,
     layerstack: LayerStack,
-    ports: tuple[Port, Port] = (Port("S1"), Port("S2")),
+    ports: Sequence[Port] = (Port("S1"), Port("S2")),
     name: str = "ms",
 ) -> db.Cell:
     """
@@ -60,7 +61,7 @@ def coupled_lines(
     gap: float,
     layerstack: LayerStack,
     width2: float = -1,
-    ports: tuple[Port, Port, Port, Port] = def_port,
+    ports: Sequence[Port] = def_port,
     name: str = "cpl",
 ) -> db.Cell:
     """
@@ -99,7 +100,7 @@ def marchand_balun(
     space: float,
     layerstack: LayerStack,
     widths: float = -1,
-    ports: list[Port] = diff_port,
+    ports: Sequence[Port] = diff_port,
     name: str = "marchand",
 ) -> db.Cell:
     """
@@ -164,7 +165,7 @@ def lange_coupler(
     length: float,
     gap: float,
     layerstack: LayerStack,
-    ports: tuple[Port, Port, Port, Port] = def_port,
+    ports: Sequence[Port] = def_port,
     name: str = "lange",
     ext: float = 5,
 ) -> db.Cell:
