@@ -64,6 +64,7 @@ jobs:
         key: ${{ runner.os }}-pdk-${{ hashFiles('**/hades/techno.yml') }}
     - uses: actions/checkout@v5
     - name: Install Nix for windows
+      if: ${{runner.os == 'Windows' }}
       run: |
         wsl --install --no-distribution
         Invoke-WebRequest https://github.com/nix-community/NixOS-WSL/releases/download/2505.7.0/nixos.wsl -OutFile ./nixos.wsl
