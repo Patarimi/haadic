@@ -55,13 +55,6 @@ jobs:
     needs: [check-format, doc-build]
 
     steps:
-    - name: Restore PDK Directory
-      id: pdk-restore
-      uses: actions/cache/restore@v4
-      with:
-        path: |
-          pdk/
-        key: ${{ runner.os }}-pdk-${{ hashFiles('**/hades/techno.yml') }}
     - uses: actions/checkout@v5
     - uses: Vampire/setup-wsl@v6
       if: ${{runner.os == 'Windows' }}
@@ -95,20 +88,7 @@ jobs:
       run: |
         uv run hades pdk install sky130
         uv run hades pdk install gf180mcu
-    - name: Install PDK - Windows
-      if: ${{runner.os == 'Windows' }}
-      run: |
-        uv run volare enable --pdk sky130 --pdk-root ./pdk 6d4d11780c40b20ee63cc98e645307a9bf2b2ab8
-        uv run volare enable --pdk gf180mcu --pdk-root ./pdk 6d4d11780c40b20ee63cc98e645307a9bf2b2ab8
         uv run volare ls
-    - if: ${{ steps.pdk-restore.outputs.cache-hit != 'true' }}
-      name: Save PDK Directory
-      id: pdk-save
-      uses: actions/cache/save@v4
-      with:
-        path: |
-          pdk/
-        key: ${{ steps.pdk-restore.outputs.cache-primary-key }}
     - name: Test with Pytest
       run: |
         uv run pytest -rxXs --basetemp=tmp
