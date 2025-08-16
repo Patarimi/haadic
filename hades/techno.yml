@@ -4,6 +4,7 @@ sky130:
   base_dir: ../pdk/sky130A/libs.tech
   layermap: klayout/tech/sky130A.map
   techlef: ../libs.ref/sky130_fd_sc_hvl/techlef/sky130_fd_sc_hvl__nom.tlef
+  lib_spice: combined/sky130.lib.spice
   magic_rc: magic/sky130A.magicrc
   process: not_found.proc
   # à generer à partir de libs.ref\sky130_fd_sc_hd\*.tlef

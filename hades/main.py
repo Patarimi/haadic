@@ -1,8 +1,6 @@
-import datetime
 import logging
 import os
 import shutil
-import sys
 
 from cyclopts import App
 from pathlib import Path
@@ -70,32 +68,8 @@ def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool 
 
     try:
         starting_dir = os.getcwd()
-        sys.path.append(os.curdir)
-        des = Path(design_py).with_suffix("")
-
-        if len(str(des).split("/")) > 0:
-            os.chdir(des.parent)
-            des_name = des.name
-            logging.debug(f"Changing directory to {os.getcwd()}")
-            logging.debug(f"Importing design from {des_name}")
-        else:
-            des_name = str(des)
-        design = __import__(
-            des_name, fromlist=("layout", "techno", "bench", "evaluate", "target")
-        )
-        os.chdir(starting_dir)
-
-        if sub_folder == "":
-            sub_folder = des
-        run_dir = (
-            sub_folder
-            if not timestamp
-            else str(sub_folder)
-            + "_"
-            + datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
-        )
-        if not Path(run_dir).is_dir():
-            os.mkdir(run_dir)
+        design, run_dir = steps.setup(design_py, Path(sub_folder), timestamp)
+        logging.info(f"Running design {design_py} in {run_dir}")
         os.chdir(run_dir)
 
         logging.info("layout generation...")
@@ -105,7 +79,7 @@ def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool 
         steps.extract_from_layout(design.techno)  #  type: ignore[unresolved-attribute]
 
         os.chdir(starting_dir)
-        expected_bench = des.parent / design.bench
+        expected_bench = Path(design_py).parent / design.bench
         logging.info(f"simulation of {design.bench}")  #  type: ignore[unresolved-attribute]
         if not expected_bench.is_file():  #  type: ignore[unresolved-attribute]
             raise FileNotFoundError(
@@ -113,7 +87,7 @@ def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool 
             )
         shutil.copy(expected_bench, run_dir)
         os.chdir(run_dir)
-        steps.run_bench(design.bench, run_dir)  #  type: ignore[unresolved-attribute]
+        steps.run_bench(design.bench, design.techno)  #  type: ignore[unresolved-attribute]
 
         logging.info("loading simulation results...")
         data = steps.load_result()
