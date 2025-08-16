@@ -13,6 +13,8 @@ from hades.extractors.spicing import extract_spice_magic
 from hades.parsers.raw import parse_out
 from hades.wrappers.ngspice import compute
 from hades.techno import get_file
+from hades.parsers.netlist import Netlist
+from hades.wrappers.tools import to_wsl
 
 
 def setup(design_py: str, run_folder: Path, timestamp: bool = True):
@@ -63,11 +65,13 @@ def extract_from_layout(techno: str, top_cell_name: str = "top"):
     )
 
 
-def run_bench(bench_name: str = "bench.cir", output_dir: Optional[Path] = None):
-    if output_dir is None:
-        data_file = Path(bench_name).with_suffix(".raw")
-    else:
-        data_file = Path(output_dir) / Path(bench_name).with_suffix(".raw").name
+def run_bench(bench_name: str = "bench.cir", techno: str = "sky130"):
+    data_file = Path(bench_name).with_suffix(".raw")
+
+    spice = Netlist("").load(bench_name)
+    spice.add_other(f".lib {to_wsl(get_file(techno, 'lib_spice'))} tt")
+    spice.write(bench_name)
+
     compute(Path(bench_name), data_file)
 
 
