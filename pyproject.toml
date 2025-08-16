@@ -31,8 +31,8 @@ module-root = ""
 hades = "hades.main:app"
 
 [tool.poe.tasks]
-update_show = "uv lock --dry-run"
-update_all = "uv lock"
+update_show = "uv lock --dry-run --upgrade"
+update_all = "uv lock --upgrade"
 test = 'pytest --basetemp=tmp'
 install_all = "poetry install --with=dev,doc"
 publish = "poetry publish --build --username __token__ --password $PYPI_TOKEN"
