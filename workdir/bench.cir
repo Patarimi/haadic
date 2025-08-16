@@ -1,11 +1,11 @@
 # DC extraction bench
-.include ./gen_active/top.cir
+.include ./top.cir
 
 Vgate gate 0 1.8
 Vdrain drain 0 1.8
 Xdut gate drain 0 top
 
-.lib ../pdk/sky130A/libs.tech/combined/sky130.lib.spice tt
+.lib ../../pdk/sky130A/libs.tech/combined/sky130.lib.spice tt
 .save i(vdrain)
 .save @m.xdut.Xnmos_5_0.x0.msky130_fd_pr__nfet_01v8[gm]
 
@@ -14,5 +14,5 @@ dc Vgate 0 1.8 0.1
 let gm = @m.xdut.Xnmos_5_0.x0.msky130_fd_pr__nfet_01v8[gm]
 let d = -i(vdrain)
 set filetype = ASCII
-write /mnt/c/Users/JoPo/PycharmProjects/hades/workdir/gen_active/bench.raw d gm
+write /mnt/c/Users/JoPo/PycharmProjects/hades/workdir/bench.raw d gm
 .endc
