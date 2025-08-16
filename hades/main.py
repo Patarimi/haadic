@@ -105,7 +105,7 @@ def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool 
         steps.extract_from_layout(design.techno)  #  type: ignore[unresolved-attribute]
 
         os.chdir(starting_dir)
-        expected_bench = des.parent / design.bench 
+        expected_bench = des.parent / design.bench
         logging.info(f"simulation of {design.bench}")  #  type: ignore[unresolved-attribute]
         if not expected_bench.is_file():  #  type: ignore[unresolved-attribute]
             raise FileNotFoundError(
