@@ -4,7 +4,6 @@ import logging
 import os
 from pathlib import Path
 import sys
-from typing import Optional
 
 import pandas as pd
 from klayout import db
@@ -38,13 +37,12 @@ def setup(design_py: str, run_folder: Path, timestamp: bool = True):
     run_dir = (
         run_folder
         if not timestamp
-        else str(run_folder)
-        + "_"
-        + datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
+        else str(run_folder) + "_" + datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
     )
     if not Path(run_dir).is_dir():
         os.mkdir(run_dir)
     return design, run_dir
+
 
 def layout_generation(techno: str, layout: Callable, top_cell_name: str = "top"):
     layerstack = LayerStack(techno)
