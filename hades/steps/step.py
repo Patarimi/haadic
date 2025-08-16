@@ -31,7 +31,7 @@ def setup(design_py: str, run_folder: Path, timestamp: bool = True):
     )
     os.chdir(starting_dir)
 
-    if run_folder == "":
+    if run_folder == Path("."):
         run_folder = des
     run_dir = (
         run_folder
@@ -42,8 +42,7 @@ def setup(design_py: str, run_folder: Path, timestamp: bool = True):
     )
     if not Path(run_dir).is_dir():
         os.mkdir(run_dir)
-    os.chdir(run_dir)
-    return design
+    return design, run_dir
 
 def layout_generation(techno: str, layout: Callable, top_cell_name: str = "top"):
     layerstack = LayerStack(techno)

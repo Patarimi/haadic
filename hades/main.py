@@ -70,8 +70,9 @@ def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool 
 
     try:
         starting_dir = os.getcwd()
-        design = steps.setup(design_py, Path(sub_folder), timestamp)
-        run_dir = os.getcwd()
+        design, run_dir = steps.setup(design_py, Path(sub_folder), timestamp)
+        logging.info(f"Running design {design_py} in {run_dir}")
+        os.chdir(run_dir)
 
         logging.info("layout generation...")
         steps.layout_generation(design.techno, design.layout)  #  type: ignore[unresolved-attribute]
@@ -88,7 +89,7 @@ def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool 
             )
         shutil.copy(expected_bench, run_dir)
         os.chdir(run_dir)
-        steps.run_bench(design.bench, run_dir)  #  type: ignore[unresolved-attribute]
+        steps.run_bench(design.bench, design.techno)  #  type: ignore[unresolved-attribute]
 
         logging.info("loading simulation results...")
         data = steps.load_result()
