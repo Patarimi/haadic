@@ -1,5 +1,9 @@
 from collections.abc import Callable
+from datetime import datetime
+import logging
+import os
 from pathlib import Path
+import sys
 from typing import Optional
 
 import pandas as pd
@@ -10,6 +14,36 @@ from hades.parsers.raw import parse_out
 from hades.wrappers.ngspice import compute
 from hades.techno import get_file
 
+
+def setup(design_py: str, run_folder: Path, timestamp: bool = True):
+    starting_dir = os.getcwd()
+    des = Path(design_py).with_suffix("")
+
+    if len(str(des).split("/")) > 0:
+        os.chdir(des.parent)
+        des_name = des.name
+        logging.debug(f"Importing design from {des_name}")
+    else:
+        des_name = str(des)
+    sys.path.append(os.curdir)
+    design = __import__(
+        des_name, fromlist=("layout", "techno", "bench", "evaluate", "target")
+    )
+    os.chdir(starting_dir)
+
+    if run_folder == "":
+        run_folder = des
+    run_dir = (
+        run_folder
+        if not timestamp
+        else str(run_folder)
+        + "_"
+        + datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
+    )
+    if not Path(run_dir).is_dir():
+        os.mkdir(run_dir)
+    os.chdir(run_dir)
+    return design
 
 def layout_generation(techno: str, layout: Callable, top_cell_name: str = "top"):
     layerstack = LayerStack(techno)
