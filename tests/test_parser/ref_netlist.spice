@@ -1,0 +1,18 @@
+* inverter example circuit for control language tutorial
+
+Vcc cc 0 2
+Vin in 0 dc 0 pulse (0 2 95n 2n 2n 90n 180n)
+Mn1 out in 0 0 nm W=2u L=0.18u
+Mp1 out in cc cc pm W=4u L=0.18u
+.model nm nmos level=14 version=4.8.1
+.model pm pmos level=14 version=4.8.1
+.save v(out) v(in) i(vcc)
+.tran 100p 50n
+.end
+
+.control
+unset askquit
+set filetype = ASCII
+run                                         ; run the .tran command
+write {path} v(out) v(in) i(vcc)
+.endc

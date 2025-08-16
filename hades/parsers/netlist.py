@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import Literal, Self
 from hades.models.tools import eng
 import skrf as rf
 
@@ -53,10 +53,30 @@ class Netlist:
     The spice netlist can be generated using the spice function.
     """
 
-    name: str
+    name: str = ""
     circuit: list[Component] = field(default_factory=list)
     controls: list[str] = field(default_factory=list)
     others: list[str] = field(default_factory=list)
+
+    def load(self, spice_file: str) -> Self:
+        block: Literal["circuit", "control", "other"] = "other"
+        with open(spice_file, "r") as f:
+            lines = f.readlines()
+        self.name = lines.pop(0).strip("*").strip()
+        for line in lines:
+            if line.startswith("*") or line.lstrip() == "":
+                continue
+            if line.startswith(".control"):
+                block = "control"
+                continue
+            if line.startswith(".endc"):
+                block = "other"
+                continue
+            if block == "other":
+                self.others.append(line.rstrip())
+            else:
+                self.controls.append(line.rstrip())
+        return self
 
     def append(self, other: Component):
         self.circuit.append(other)
@@ -68,12 +88,17 @@ class Netlist:
         self.others.append(other)
 
     def spice(self):
-        spice = f"#{self.name}\n"
+        spice = f"* {self.name}\n"
         for comp in self.circuit:
             spice += f"{comp}\n"
         if self.others:
             spice += "\n" + "\n".join(self.others) + "\n"
         if self.controls:
-            spice += ".control\n"
+            spice += "\n.control\n"
             spice += "\n".join(self.controls) + "\n.endc\n"
         return spice
+
+    def write(self, filename: str = "netlist.cir"):
+        with open(filename, "w") as f:
+            f.write(self.spice())
+        return filename
