@@ -1,12 +1,13 @@
+from dataclasses import field
 import enum
 import logging
+from numbers import Number
 from typing import Protocol
 from enum import Enum
 import klayout.db as db
 from pathlib import Path
-import pydantic
 
-ParamSet = pydantic.BaseModel
+ParamSet = dict[str, Number]
 
 
 class Step(Enum):
@@ -35,7 +36,7 @@ class Device(Protocol):
 def generate(
     dut: Device,
     specifications: ParamSet,
-    dimensions: ParamSet = None,
+    dimensions: ParamSet = field(default_factory=ParamSet),
     stop: Step = Step.full,
 ) -> ParamSet:
     if dimensions is None:
