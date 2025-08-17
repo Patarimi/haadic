@@ -7,6 +7,7 @@ from hades.layouts.active import mosfet, line, connect
 from hades.layouts.general import set_as_port
 from hades.layouts.tools import LayerStack, ViaLayer, Layer
 import json
+from tabulate import tabulate
 
 techno = "sky130"
 target: dict[str, float] = {"IC": 5, "id": 0.1e-3, "L": 0.15e-6}
@@ -57,10 +58,13 @@ def evaluate(bench_data: pd.DataFrame):
     ut = 0.0259  # Thermal voltage at room temperature
     id = bench_data["i(d)"]
     vgate = bench_data["v(v-sweep)"]
+
     def ekv(vg, vth, n, ispec):
         return ispec * np.log(1 + np.exp((vg - vth) / (n * 2 * ut))) ** 2
+
     def ekv_log(vg, vth, n, ispec):
         return np.log10(ekv(vg, vth, n, ispec))
+
     start = [0.3, 1.5, id[0]]
     res = curve_fit(
         ekv_log,
@@ -70,11 +74,13 @@ def evaluate(bench_data: pd.DataFrame):
         bounds=(0, [1, 2, 1e-3]),
     )
     x = res[0]
-    logging.info(f"Optimization result: {res[1]}")
-    logging.info("EKV parameters:")
-    logging.info(f"Vth: {x[0]:0.3} V (start: {start[0]})")
-    logging.info(f"n: {x[1]:0.3} (start: {start[1]})")
-    logging.info(f"I_spec: {x[2]:0.3} A (start: {start[2]:0.3})")
+    logging.info(
+        "EKV parameters:\n"
+        + tabulate(
+            zip(("vth (V)", "n", "ispec (A)"), x, start),
+            headers=["value", "start"],
+        )
+    )
     IC = id / x[2]
     plt.semilogy(vgate, id, label="Post Layout Simulation data")
     plt.semilogy(vgate, ekv(vgate, x[0], x[1], x[2]), label="EKV model", ls="--")

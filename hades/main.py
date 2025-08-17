@@ -4,6 +4,8 @@ import shutil
 
 from cyclopts import App
 from pathlib import Path
+
+from tabulate import tabulate
 from hades.devices.mos import Mos
 from hades.devices.inductor import Inductor
 from hades.devices.micro_strip import MicroStrip
@@ -65,6 +67,7 @@ def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool 
     :return: Nothing.
     """
     import hades.steps.step as steps
+
     reload_result = True
     try:
         starting_dir = os.getcwd()
@@ -94,10 +97,10 @@ def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool 
 
         logging.info("evaluate performances")
         perf = design.evaluate(data)  # type: ignore[unresolved-attribute]
-        logging.info("name | evaluated | target")
-        for key in perf:
-            tar = design.target.get(key, "N/A")  # type: ignore[unresolved-attribute]
-            logging.info(f"{key} | {perf[key]} | {tar}")
+        res = [(key, perf[key], design.target.get(key, "N/A")) for key in perf]
+        logging.info(
+            "\n" + tabulate(res, headers=["obtained", "targeted"], tablefmt="grid")
+        )
 
         logging.info("compare performances to targets")
         cost = steps.compare_to(perf, design.target)  # type: ignore[unresolved-attribute]
