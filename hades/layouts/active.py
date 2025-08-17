@@ -10,8 +10,8 @@ def mosfet(
     cell: db.Cell,
     layers: LayerStack,
     nf: int = 5,
-    width=2,
-    length=0.13,
+    width: float = 2,
+    length: float = 0.13,
     doping: Literal["N", "P"] = "N",
 ):
     """

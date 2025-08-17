@@ -1,16 +1,29 @@
+import logging
+from matplotlib import pyplot as plt
 import pandas as pd
-import matplotlib.pyplot as plt
-from numpy import interp
-
+import numpy as np
+from scipy.optimize import curve_fit
 from hades.layouts.active import mosfet, line, connect
 from hades.layouts.general import set_as_port
 from hades.layouts.tools import LayerStack, ViaLayer, Layer
 import json
 
 techno = "sky130"
-target = {"gm_id": 5}
+target: dict[str, float] = {"IC": 5, "id": 0.1e-3, "L": 0.15e-6}
 
-def layout(cell, layerstack: LayerStack):
+
+def local_model(target: dict[str, float]) -> dict[str, float]:
+    i_spec = 130e-9
+    if "W" not in target:
+        return {
+            "W": target["id"] / i_spec / target["IC"] * target["L"] * 1e6,
+            "L": target["L"] * 1e6,
+            "n": 1,
+        }
+    raise ValueError("Not supported for yet.")
+
+
+def layout(cell, layerstack: LayerStack, width: float = 0.65, length: float = 0.15):
     layerstack._stack.insert(0, ViaLayer(66, 44, "licon1", 0.17, 0.17))
     layerstack._gate = Layer(
         layer=66, datatype=20, _pin=16, name="poly", width=0.15, spacing=0.27
@@ -22,7 +35,7 @@ def layout(cell, layerstack: LayerStack):
     with open("tech.json", "w") as f:
         json.dump(layerstack, fp=f, default=lambda dc: dc.__dict__, indent=2)
 
-    mosfet(cell, layerstack, width=0.65, length=0.15)
+    mosfet(cell, layerstack, width=width, length=length)
     line(cell, "gate", layerstack.get_gate_layer())
     line(cell, "drain", layerstack.get_metal_layer(1))
     line(cell, "gnd", layerstack.get_metal_layer(1), below=True)
@@ -38,15 +51,42 @@ def layout(cell, layerstack: LayerStack):
 
 bench = "bench.cir"
 
+
 def evaluate(bench_data: pd.DataFrame):
     bench_data.to_csv("bench_data.csv")
-    IC = bench_data["gm"] / bench_data["i(d)"]
+    ut = 0.0259  # Thermal voltage at room temperature
+    id = bench_data["i(d)"]
     vgate = bench_data["v(v-sweep)"]
-    plt.semilogy(vgate, IC, label="IC")
-    plt.semilogy(vgate, bench_data["gm"], label="gm")
-    plt.semilogy(vgate, bench_data["i(d)"], label="i_d")
+    def ekv(vg, vth, n, ispec):
+        return np.log10(ispec * np.log(1 + np.exp((vg - vth) / (n * 2 * ut))) ** 2)
+    start = [0.3, 1.5, id[0]]
+    res = curve_fit(
+        ekv,
+        vgate,
+        np.log10(id),
+        p0=start,
+        bounds=(0, [1, 2, 1e-3]),
+    )
+    x = res[0]
+    logging.info(f"Optimization result: {res[1]}")
+    logging.info("EKV parameters:")
+    logging.info(f"Vth: {x[0]:0.3} V (start: {start[0]})")
+    logging.info(f"n: {x[1]:0.3} (start: {start[1]})")
+    logging.info(f"I_spec: {x[2]:0.3} A (start: {start[2]:0.3})")
+    IC = id / x[2]
+    plt.semilogy(vgate, id, label="Post Layout Simulation data")
+    plt.semilogy(vgate, ekv(vgate, x[0], x[1], x[2]), label="EKV model", ls="--")
     plt.legend()
+    plt.figure()
+    plt.plot(IC, id, label="Post Layout Simulation data")
     plt.show(block=True)
-    vg_spec = interp(target["gm_id"], vgate, IC)
-    id = interp(vg_spec, vgate, bench_data["i(d)"])
-    return {"vg_spec": vg_spec, "id": id, "gm_id": target["gm_id"]}
+    if np.max(IC) < target["IC"] or np.min(IC) > target["IC"]:
+        logging.warning("IC is out of target range.")
+        it = 0
+    else:
+        it = np.interp(target["IC"], IC, id)
+    return {
+        "IC": target["IC"],
+        "id": it,
+        "L": target["L"],
+    }
