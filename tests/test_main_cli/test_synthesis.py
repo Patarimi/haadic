@@ -28,7 +28,7 @@ def test_generate(tmp_path):
             pytest.skip(f"The pdk {pdk} is not installed. Skipping")
         except KeyError:
             pass
-        generate_cli(design_yaml=design, stop="geometries")
+        generate_cli(design_yaml=Path(design), stop="geometries")
         chdir(cwd)
     assert (tmp_path / "ind.gds").is_file()
     assert (tmp_path / "ms.gds").is_file()
