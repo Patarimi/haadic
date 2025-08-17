@@ -78,6 +78,8 @@ def evaluate(bench_data: pd.DataFrame):
     IC = id / x[2]
     plt.semilogy(vgate, id, label="Post Layout Simulation data")
     plt.semilogy(vgate, ekv(vgate, x[0], x[1], x[2]), label="EKV model", ls="--")
+    plt.xlabel("Gate Voltage (V)")
+    plt.ylabel("Drain Current (A)")
     plt.legend()
     plt.show(block=True)
     if np.max(IC) < target["IC"] or np.min(IC) > target["IC"]:
