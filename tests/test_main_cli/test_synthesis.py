@@ -11,9 +11,9 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-def test_generation():
+def test_generate():
     cwd = getcwd()
-    chdir("./tests/test_generate/")
+    chdir("./tests/test_main_cli/")
     for design in ("./design ind gf.yml", "./design ms sky.yml"):
         with open(design) as f:
             conf = yaml.load(f, Loader=yaml.Loader)
