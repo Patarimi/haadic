@@ -4,7 +4,6 @@
 /hades/techno.yml
 /site/
 /pdk/*
-/tests/test_generate/*.gds
 /dist/hades-*.tar.gz
 /dist/hades-*.whl
 !/pdk/mock/
