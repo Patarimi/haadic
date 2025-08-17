@@ -1,4 +1,6 @@
 import os
+from pathlib import Path
+import shutil
 from hades.main import generate_cli, run_cli
 from hades.parsers.layermap import get_number
 from os import chdir, getcwd
@@ -11,10 +13,12 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-def test_generation():
+def test_generate(tmp_path):
     cwd = getcwd()
-    chdir("./tests/test_generate/")
+    ref_dir = Path("./tests/test_main_cli/")
     for design in ("./design ind gf.yml", "./design ms sky.yml"):
+        shutil.copy(ref_dir / design, tmp_path)
+        chdir(tmp_path)
         with open(design) as f:
             conf = yaml.load(f, Loader=yaml.Loader)
         pdk = conf["techno"]
@@ -24,8 +28,10 @@ def test_generation():
             pytest.skip(f"The pdk {pdk} is not installed. Skipping")
         except KeyError:
             pass
-        generate_cli(design_yaml=design, stop="geometries")
-    chdir(cwd)
+        generate_cli(design_yaml=Path(design), stop="geometries")
+        chdir(cwd)
+    assert (tmp_path / "ind.gds").is_file()
+    assert (tmp_path / "ms.gds").is_file()
 
 
 def test_run(tmp_path):
