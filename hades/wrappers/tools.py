@@ -1,3 +1,4 @@
+import functools
 import logging
 import os
 from os.path import dirname
@@ -5,6 +6,7 @@ from pathlib import Path
 from subprocess import run, CompletedProcess
 
 
+@functools.lru_cache(maxsize=1)
 def nix_check():
     if os.name == "nt":
         proc = run(["wsl", "-l"], capture_output=True, text=True)
@@ -13,7 +15,7 @@ def nix_check():
             logging.error(list_of_wsl)
             return False
     try:
-        proc = nix_run(["--version"])
+        proc = nix_run(["nix --version"])
         logging.info(f"{proc.stdout=}")
         return True
     except Exception as e:
