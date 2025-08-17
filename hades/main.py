@@ -65,29 +65,29 @@ def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool 
     :return: Nothing.
     """
     import hades.steps.step as steps
-
+    reload_result = True
     try:
         starting_dir = os.getcwd()
         design, run_dir = steps.setup(design_py, Path(sub_folder), timestamp)
         logging.info(f"Running design {design_py} in {run_dir}")
         os.chdir(run_dir)
+        if not reload_result:
+            logging.info("layout generation...")
+            steps.layout_generation(design.techno, design.layout)  #  type: ignore[unresolved-attribute]
 
-        logging.info("layout generation...")
-        steps.layout_generation(design.techno, design.layout)  #  type: ignore[unresolved-attribute]
+            logging.info("extracting schematic...")
+            steps.extract_from_layout(design.techno)  #  type: ignore[unresolved-attribute]
 
-        logging.info("extracting schematic...")
-        steps.extract_from_layout(design.techno)  #  type: ignore[unresolved-attribute]
-
-        os.chdir(starting_dir)
-        expected_bench = Path(design_py).parent / design.bench
-        logging.info(f"simulation of {design.bench}")  #  type: ignore[unresolved-attribute]
-        if not expected_bench.is_file():  #  type: ignore[unresolved-attribute]
-            raise FileNotFoundError(
-                f"bench file {str(expected_bench)} not found or is not a file."  #  type: ignore[unresolved-attribute]
-            )
-        shutil.copy(expected_bench, run_dir)
-        os.chdir(run_dir)
-        steps.run_bench(design.bench, design.techno)  #  type: ignore[unresolved-attribute]
+            os.chdir(starting_dir)
+            expected_bench = Path(design_py).parent / design.bench
+            logging.info(f"simulation of {design.bench}")  #  type: ignore[unresolved-attribute]
+            if not expected_bench.is_file():  #  type: ignore[unresolved-attribute]
+                raise FileNotFoundError(
+                    f"bench file {str(expected_bench)} not found or is not a file."  #  type: ignore[unresolved-attribute]
+                )
+            shutil.copy(expected_bench, run_dir)
+            os.chdir(run_dir)
+            steps.run_bench(design.bench, design.techno)  #  type: ignore[unresolved-attribute]
 
         logging.info("loading simulation results...")
         data = steps.load_result()
