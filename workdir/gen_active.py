@@ -79,8 +79,6 @@ def evaluate(bench_data: pd.DataFrame):
     plt.semilogy(vgate, id, label="Post Layout Simulation data")
     plt.semilogy(vgate, ekv(vgate, x[0], x[1], x[2]), label="EKV model", ls="--")
     plt.legend()
-    plt.figure()
-    plt.plot(IC, id, label="Post Layout Simulation data")
     plt.show(block=True)
     if np.max(IC) < target["IC"] or np.min(IC) > target["IC"]:
         logging.warning("IC is out of target range.")
