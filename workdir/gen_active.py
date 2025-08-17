@@ -58,10 +58,12 @@ def evaluate(bench_data: pd.DataFrame):
     id = bench_data["i(d)"]
     vgate = bench_data["v(v-sweep)"]
     def ekv(vg, vth, n, ispec):
-        return np.log10(ispec * np.log(1 + np.exp((vg - vth) / (n * 2 * ut))) ** 2)
+        return ispec * np.log(1 + np.exp((vg - vth) / (n * 2 * ut))) ** 2
+    def ekv_log(vg, vth, n, ispec):
+        return np.log10(ekv(vg, vth, n, ispec))
     start = [0.3, 1.5, id[0]]
     res = curve_fit(
-        ekv,
+        ekv_log,
         vgate,
         np.log10(id),
         p0=start,
