@@ -11,7 +11,7 @@ from tabulate import tabulate
 
 techno = "sky130"
 target: dict[str, float] = {"IC": 5, "id": 0.1e-3, "L": 0.15e-6}
-
+dis_plot = True
 
 def local_model(target: dict[str, float]) -> dict[str, float]:
     i_spec = 130e-9
@@ -82,12 +82,19 @@ def evaluate(bench_data: pd.DataFrame):
         )
     )
     IC = id / x[2]
-    plt.semilogy(vgate, id, label="Post Layout Simulation data")
-    plt.semilogy(vgate, ekv(vgate, x[0], x[1], x[2]), label="EKV model", ls="--")
-    plt.xlabel("Gate Voltage (V)")
-    plt.ylabel("Drain Current (A)")
-    plt.legend()
-    plt.show(block=True)
+    id_mod = ekv(vgate, x[0], x[1], x[2])
+    if dis_plot:
+        fig, ax = plt.subplots()
+        plt.semilogy(vgate, id, label="Post Layout Simulation data")
+        plt.semilogy(vgate, id_mod, label="EKV model", ls="--")
+        plt.xlabel("Gate Voltage (V)")
+        plt.ylabel("Drain Current (A)")
+        plt.legend()
+        plt.grid()
+        secax = ax.twinx()
+        secax.plot(vgate, 100*(id-id_mod) / id, color="red", ls=":")
+        secax.set_ylabel("Relative error (%)", color="red")
+        plt.show(block=True)
     if np.max(IC) < target["IC"] or np.min(IC) > target["IC"]:
         logging.warning("IC is out of target range.")
         it = 0
