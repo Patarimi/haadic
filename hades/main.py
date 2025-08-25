@@ -68,7 +68,7 @@ def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool 
     """
     import hades.steps.step as steps
 
-    reload_result = True
+    reload_result = False
     try:
         starting_dir = os.getcwd()
         design, run_dir = steps.setup(design_py, Path(sub_folder), timestamp)
