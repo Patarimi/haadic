@@ -11,7 +11,7 @@ from tabulate import tabulate
 
 techno = "sky130"
 target: dict[str, float] = {"IC": 5, "id": 0.1e-3, "L": 0.15e-6}
-dis_plot = True
+dis_plot = False
 
 def local_model(target: dict[str, float]) -> dict[str, float]:
     i_spec = 130e-9
