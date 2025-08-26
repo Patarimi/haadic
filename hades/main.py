@@ -10,6 +10,7 @@ from hades.devices.mos import Mos
 from hades.devices.inductor import Inductor
 from hades.devices.micro_strip import MicroStrip
 from hades.devices.device import generate, Step
+from hades.layouts.tools import check_diff
 import yaml
 from os.path import join
 from os import makedirs
@@ -54,7 +55,12 @@ def generate_cli(design_yaml: Path = Path("./design.yml"), stop: str = "full") -
 
 
 @app.command(name="run")
-def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool = True):
+def run_cli(
+    design_py: str = "design.py",
+    sub_folder: str = "",
+    timestamp: bool = True,
+    reload_result: bool = True,
+) -> None:
     """
     Run the full hades flow :
         - Generate the layout using the specified technology.
@@ -68,16 +74,25 @@ def run_cli(design_py: str = "design.py", sub_folder: str = "", timestamp: bool 
     """
     import hades.steps.step as steps
 
-    reload_result = False
     try:
         starting_dir = os.getcwd()
         design, run_dir = steps.setup(design_py, Path(sub_folder), timestamp)
         logging.info(f"Running design {design_py} in {run_dir}")
         os.chdir(run_dir)
+        logging.info("layout generation...")
+        if Path("top.gds").is_file() and reload_result:
+            logging.info("existing layout found, checking for changes...")
+            shutil.move("top.gds", "old_top.gds")
+            steps.layout_generation(design.techno, design.layout)  #  type: ignore[unresolved-attribute]:
+            if not check_diff(Path("old_top.gds"), Path("top.gds")):
+                logging.info("Changes detected in layout, back to full flow.")
+                reload_result = False
+            os.remove("old_top.gds")
+        else:
+            logging.info("Running full flow.")
+            steps.layout_generation(design.techno, design.layout)
+            reload_result = False
         if not reload_result:
-            logging.info("layout generation...")
-            steps.layout_generation(design.techno, design.layout)  #  type: ignore[unresolved-attribute]
-
             logging.info("extracting schematic...")
             steps.extract_from_layout(design.techno)  #  type: ignore[unresolved-attribute]
 
