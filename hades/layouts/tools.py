@@ -2,11 +2,11 @@ import logging
 from dataclasses import dataclass, field
 from os.path import join, dirname, realpath
 from pathlib import Path
-from hades.techno import load_pdk
+from hades.techno import add_reference, load_pdk
 from hades.parsers.tlef import load_tlef
 from hades.parsers.layermap import load_map, get_number
 import klayout.db as kdb
-
+import json
 
 @dataclass
 class Layer:
@@ -25,12 +25,12 @@ class Layer:
         return {"layer": self.layer, "datatype": self.datatype}
 
     @property
-    def drawing(self):
-        return self.layer, self.datatype
+    def drawing(self) -> kdb.LayerInfo:
+        return kdb.LayerInfo(self.layer, self.datatype)
 
     @property
-    def pin(self):
-        return self.layer, self._pin
+    def pin(self) -> kdb.LayerInfo:
+        return kdb.LayerInfo(self.layer, self._pin)
 
 
 @dataclass
@@ -56,81 +56,108 @@ class LayerStack:
 
     def __post_init__(self):
         pdk = load_pdk(self.techno)
-        path = realpath(join(dirname(__file__), "../", pdk["base_dir"], pdk["techlef"]))
-        t_stack = load_tlef(path)
-        self.grid = t_stack.unit
-        layer_map = load_map(self.techno)
-        stack = []
-        for layer in t_stack.layers:
-            if layer.name not in layer_map.keys():
-                logging.error(f"{layer.name} not found in layer map file.")
-                continue
-            for dtype in ("VIA", "drawing", "pin", "net", "lefpin"):
-                try:
-                    dt = get_number(layer_map, layer.name, dtype)
-                    logging.debug(f"Found {dt} for {layer.name}.")
-                    break
-                except KeyError:
-                    continue
-            if "dt" not in locals():
-                raise KeyError(
-                    f"Type not found for layer {layer.name}. Available type are {layer_map[layer.name]}."
-                )
-            if layer.type == "ROUTING":
-                try:
-                    pin = get_number(layer_map, layer.name, "pin")
-                except KeyError:
-                    pin = dt
-                    logging.error(
-                        f"No 'pin' layer found for {layer.name}. Using {dt} instead."
-                    )
-                logging.debug(f"{pin=}")
-                lyr = Layer(
-                    layer=dt[0],
-                    datatype=dt[1],
-                    _pin=pin[1],
-                    name=layer.name,
-                    width=layer.width,
-                    spacing=layer.spacing,
-                )
-                stack.append(lyr)
-            elif layer.type == "CUT":
-                lyr = ViaLayer(
-                    layer=dt[0],
-                    datatype=dt[1],
-                    name=layer.name,
-                    width=layer.width,
-                    spacing=layer.spacing,
-                    enclosure=layer.enclosure,
-                )
-                stack.append(lyr)
-            elif layer.type == "MASTERSLICE":
-                try:
-                    pin = get_number(layer_map, layer.name, "pin")
-                except KeyError:
-                    pin = dt
-                    logging.error(
-                        f"No 'pin' layer found for {layer.name}. Using {dt} instead."
-                    )
-                self._gate = Layer(
-                    layer=dt[0], datatype=dt[1], _pin=dt[1], name=layer.name
-                )
-            elif layer.type == "PWELL":
-                self._pplus = Layer(layer=dt[0], datatype=dt[1], name=layer.name)
-            elif layer.type == "NWELL":
-                self._nplus = Layer(layer=dt[0], datatype=dt[1], name=layer.name)
-            else:
-                raise ValueError(f"Unknown layer type: {layer.type}")
-
-        if stack[-1].name[0].lower() in ("m", "v") or isinstance(stack[-1], ViaLayer):
-            logging.warning("No Pad layer detected")
-            logging.debug("".join("\t" + lyr.name for lyr in stack))
-            self._pad = Layer(0, name="NotFound")
+        try:
+            path_json = realpath(join(dirname(__file__), "../", pdk["base_dir"], pdk["hades"]))
+        except KeyError:
+            path_json = "notfound"
+        if Path(path_json).is_file():
+            with open(path_json, "r") as f:
+                data = json.load(f)
+                self.grid = data.get("grid", 1e-9)
+                self._gate = Layer(**data.get("_gate", {}))
+                self._nplus = Layer(**data.get("_nplus", {}))
+                self._pplus = Layer(**data.get("_pplus", {}))
+                self._nwell = Layer(**data.get("_nwell", {}))
+                self._active = Layer(**data.get("_active", {}))
+                self._pad = Layer(**data.get("pad", default_layer().__dict__))
+                self._stack = []
+                for i, lyr in enumerate(data.get("_stack")):
+                    if i % 2:
+                        self._stack.append(Layer(**lyr))
+                    else:
+                        self._stack.append(ViaLayer(**lyr))
         else:
-            self._pad = stack.pop(-1)
-            logging.debug(f"{self._pad.name} set as Pad layer")
-        logging.info("".join("\t" + lyr.name for lyr in stack))
-        self._stack = stack
+            path = realpath(join(dirname(__file__), "../", pdk["base_dir"], pdk["techlef"]))
+            t_stack = load_tlef(path)
+            self.grid = t_stack.unit
+            layer_map = load_map(self.techno)
+            stack = []
+            for layer in t_stack.layers:
+                if layer.name not in layer_map.keys():
+                    logging.error(f"{layer.name} not found in layer map file.")
+                    continue
+                for dtype in ("VIA", "drawing", "pin", "net", "lefpin"):
+                    try:
+                        dt = get_number(layer_map, layer.name, dtype)
+                        logging.debug(f"Found {dt} for {layer.name}.")
+                        break
+                    except KeyError:
+                        continue
+                if "dt" not in locals():
+                    raise KeyError(
+                        f"Type not found for layer {layer.name}. Available type are {layer_map[layer.name]}."
+                    )
+                if layer.type == "ROUTING":
+                    try:
+                        pin = get_number(layer_map, layer.name, "pin")
+                    except KeyError:
+                        pin = dt
+                        logging.error(
+                            f"No 'pin' layer found for {layer.name}. Using {dt} instead."
+                        )
+                    logging.debug(f"{pin=}")
+                    lyr = Layer(
+                        layer=dt[0],
+                        datatype=dt[1],
+                        _pin=pin[1],
+                        name=layer.name,
+                        width=layer.width,
+                        spacing=layer.spacing,
+                    )
+                    stack.append(lyr)
+                elif layer.type == "CUT":
+                    lyr = ViaLayer(
+                        layer=dt[0],
+                        datatype=dt[1],
+                        name=layer.name,
+                        width=layer.width,
+                        spacing=layer.spacing,
+                        enclosure=layer.enclosure,
+                    )
+                    stack.append(lyr)
+                elif layer.type == "MASTERSLICE":
+                    try:
+                        pin = get_number(layer_map, layer.name, "pin")
+                    except KeyError:
+                        pin = dt
+                        logging.error(
+                            f"No 'pin' layer found for {layer.name}. Using {dt} instead."
+                        )
+                    self._gate = Layer(
+                        layer=dt[0], datatype=dt[1], _pin=dt[1], name=layer.name
+                    )
+                elif layer.type == "PWELL":
+                    self._pplus = Layer(layer=dt[0], datatype=dt[1], name=layer.name)
+                elif layer.type == "NWELL":
+                    self._nplus = Layer(layer=dt[0], datatype=dt[1], name=layer.name)
+                else:
+                    raise ValueError(f"Unknown layer type: {layer.type}")
+
+            if stack[-1].name[0].lower() in ("m", "v") or isinstance(stack[-1], ViaLayer):
+                logging.warning("No Pad layer detected")
+                logging.debug("".join("\t" + lyr.name for lyr in stack))
+                self._pad = Layer(0, name="NotFound")
+            else:
+                self._pad = stack.pop(-1)
+                logging.debug(f"{self._pad.name} set as Pad layer")
+            logging.info("".join("\t" + lyr.name for lyr in stack))
+            self._stack = stack
+            path_json = realpath(join(dirname(__file__), "../", pdk["base_dir"], f"{self.techno}.json"))
+            with open(path_json, "w") as f:
+                json.dump(self, fp=f, default=lambda dc: dc.__dict__, indent=2)
+            add_reference(self.techno, "hades", f"{self.techno}.json")
+            
+            
 
     def __len__(self):
         return len(self._stack)
