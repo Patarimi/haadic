@@ -35,7 +35,6 @@ hades = "hades.main:app"
 update_show = "uv lock --dry-run --upgrade"
 update_all = "uv lock --upgrade"
 test = 'pytest --basetemp=tmp'
-install_all = "poetry install --with=dev,doc"
 publish = "poetry publish --build --username __token__ --password $PYPI_TOKEN"
 doc = "mkdocs gh-deploy"
 run = "wsl -d NixOS nix-shell --run"
