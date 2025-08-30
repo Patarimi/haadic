@@ -125,8 +125,9 @@ def set_as_port(cell: db.Cell, label: str):
     """
     lay = cell.layout()
     for subcell in cell.each_child_cell():
-        res = get_dtext(lay.cell(subcell).layout(), label)
-        if res is None:
+        try:
+            res = get_dtext(lay.cell(subcell).layout(), label)
+        except ValueError:
             continue
         txt, lyr = res
         cell.shapes(lyr).insert(txt)
