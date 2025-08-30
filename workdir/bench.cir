@@ -6,11 +6,11 @@ Vdrain drain 0 1.8
 Xdut gate drain 0 top
 
 .save i(vdrain)
-.save @m.xdut.Xnmos_5_0.x0.msky130_fd_pr__nfet_01v8[gm]
+.save @m.xdut.Xnmos_80_0.x0.msky130_fd_pr__nfet_01v8[gm]
 
 .control
 dc Vgate 0 1.8 0.1
-let gm = @m.xdut.Xnmos_5_0.x0.msky130_fd_pr__nfet_01v8[gm]
+let gm = @m.xdut.Xnmos_80_0.x0.msky130_fd_pr__nfet_01v8[gm]
 let d = -i(vdrain)
 set filetype = ASCII
 write /mnt/c/Users/JoPo/PycharmProjects/hades/workdir/bench.raw d gm

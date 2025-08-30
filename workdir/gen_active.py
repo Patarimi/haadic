@@ -5,8 +5,7 @@ import numpy as np
 from scipy.optimize import curve_fit
 from hades.layouts.active import mosfet, line, connect
 from hades.layouts.general import set_as_port
-from hades.layouts.tools import LayerStack, ViaLayer, Layer
-import json
+from hades.layouts.tools import LayerStack
 from tabulate import tabulate
 
 techno = "sky130"
@@ -24,27 +23,16 @@ def local_model(target: dict[str, float]) -> dict[str, float]:
     raise ValueError("Not supported for yet.")
 
 
-def layout(cell, layerstack: LayerStack, width: float = 0.65, length: float = 0.15):
-    layerstack._stack.insert(0, ViaLayer(66, 44, "licon1", 0.17, 0.17))
-    layerstack._gate = Layer(
-        layer=66, datatype=20, _pin=16, name="poly", width=0.15, spacing=0.27
-    )
-    layerstack._nplus = Layer(layer=93, datatype=44, name="nsdm", spacing=0.135)
-    layerstack._pplus = Layer(layer=94, datatype=20, name="psdm", spacing=0.135)
-    layerstack._nwell = Layer(layer=64, datatype=20, _pin=16, name="nwell")
-    layerstack._active = Layer(layer=65, datatype=20, name="diff", spacing=0.425)
-    with open("tech.json", "w") as f:
-        json.dump(layerstack, fp=f, default=lambda dc: dc.__dict__, indent=2)
-
-    mosfet(cell, layerstack, width=width, length=length)
+def layout(cell, layerstack: LayerStack, width: float = 1, length: float = 2, n_fin: int = 80):
+    mosfet(cell, layerstack, width=width, length=length, nf=n_fin)
     line(cell, "gate", layerstack.get_gate_layer())
     line(cell, "drain", layerstack.get_metal_layer(1))
     line(cell, "gnd", layerstack.get_metal_layer(1), below=True)
-    for i in range(6):
-        if i < 5:
-            connect(cell, layerstack.get_metal_layer(1), "gate", f"g{i}")
+    for i in range(n_fin+1):
+        if i < n_fin:
+            connect(cell, layerstack, "gate", f"g{i}")
         drain = "drain" if i % 2 == 0 else "gnd"
-        connect(cell, layerstack.get_metal_layer(1), drain, f"dr{i}")
+        connect(cell, layerstack, drain, f"dr{i}")
     set_as_port(cell, "gate")
     set_as_port(cell, "drain")
     set_as_port(cell, "gnd")
