@@ -43,7 +43,7 @@ smoke_test = ["run magic"]
 
 [tool.poe.tasks.precommit]
 sequence = [
-    {ref = "update_show"},
+    {ref = "update_all"},
     {cmd = "uvx ruff format"},
     {cmd = "uvx ruff check"},
     {ref = "test"}
