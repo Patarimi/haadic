@@ -13,7 +13,6 @@ from hades.devices.device import generate, Step
 from hades.layouts.tools import check_diff
 import yaml
 from os.path import join
-from os import makedirs
 import hades.techno as techno
 import hades.wrappers.simulator as sim
 
@@ -126,18 +125,9 @@ def run_cli(
 
 
 @app.command(name="new")
-def template(project_name: Path = Path("./working_dir")):
-    """Create a template directory called _project_name_."""
-    """
-    TODO: Re-write with cookiecutter
-    :param project_name: Name of the project.
-    """
-    template_file = """
-        name: #insert name of the design
-        techno: #path to the yaml tech files
-        design:
-            
-    """
-    makedirs(project_name)
-    with open(join(project_name, "design.yml"), "w") as f:
-        yaml.dump(yaml.load(template_file, yaml.Loader), f)
+def template() -> None:
+    """Create a new project using the hades template."""
+    import subprocess
+
+    template_dir = join(os.path.dirname(__file__), "./template")
+    subprocess.run(["uvx", "cookiecutter", template_dir], check=True)
