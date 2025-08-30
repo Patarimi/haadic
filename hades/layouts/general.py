@@ -86,7 +86,7 @@ def via_stack(
     return v
 
 
-def get_dtext(layout: db.Layout, label: str):
+def get_dtext(layout: db.Layout, label: str) -> tuple[db.DText, int]:
     """
     This function  return the dtext with the associated label in the layout.
     :param layout: Layout to be explored.
@@ -100,11 +100,10 @@ def get_dtext(layout: db.Layout, label: str):
                     continue
                 if shape.dtext.string == label:
                     return shape.dtext, lyr
-    logging.error(f"label {label} not found in layout")
-    return None
+    raise ValueError(f"label {label} not found in layout")
 
 
-def get_shape(layout: db.Layout, point: db.DPoint, layer: int):
+def get_shape(layout: db.Layout, point: db.DPoint, layer: int) -> tuple[db.DBox, int]:
     for cell in layout.each_cell():
         for lyr in layout.layer_indexes():
             for shape in cell.shapes(lyr):
@@ -114,7 +113,7 @@ def get_shape(layout: db.Layout, point: db.DPoint, layer: int):
                     continue
                 if shape.is_box() and shape.dbox.contains(point):
                     return shape.dbox, lyr
-    return None
+    raise ValueError(f"no shape found at {point} on layer {layer}")
 
 
 def set_as_port(cell: db.Cell, label: str):
@@ -126,8 +125,9 @@ def set_as_port(cell: db.Cell, label: str):
     """
     lay = cell.layout()
     for subcell in cell.each_child_cell():
-        res = get_dtext(lay.cell(subcell).layout(), label)
-        if res is None:
+        try:
+            res = get_dtext(lay.cell(subcell).layout(), label)
+        except ValueError:
             continue
         txt, lyr = res
         cell.shapes(lyr).insert(txt)

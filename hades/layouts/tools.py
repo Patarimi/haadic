@@ -2,10 +2,11 @@ import logging
 from dataclasses import dataclass, field
 from os.path import join, dirname, realpath
 from pathlib import Path
-from hades.techno import load_pdk
+from hades.techno import add_reference, load_pdk
 from hades.parsers.tlef import load_tlef
 from hades.parsers.layermap import load_map, get_number
 import klayout.db as kdb
+import json
 
 
 @dataclass
@@ -25,12 +26,12 @@ class Layer:
         return {"layer": self.layer, "datatype": self.datatype}
 
     @property
-    def drawing(self):
-        return self.layer, self.datatype
+    def drawing(self) -> kdb.LayerInfo:
+        return kdb.LayerInfo(self.layer, self.datatype)
 
     @property
-    def pin(self):
-        return self.layer, self._pin
+    def pin(self) -> kdb.LayerInfo:
+        return kdb.LayerInfo(self.layer, self._pin)
 
 
 @dataclass
@@ -45,7 +46,7 @@ def default_layer():
 @dataclass
 class LayerStack:
     techno: str
-    _stack: list[Layer] = field(init=False)
+    _stack: list[Layer | ViaLayer] = field(init=False)
     _pad: Layer = field(init=False)
     _gate: Layer = field(default_factory=default_layer)
     _nplus: Layer = field(default_factory=default_layer)
@@ -56,7 +57,80 @@ class LayerStack:
 
     def __post_init__(self):
         pdk = load_pdk(self.techno)
-        path = realpath(join(dirname(__file__), "../", pdk["base_dir"], pdk["techlef"]))
+        root = Path(join(dirname(__file__), "../", pdk["base_dir"]))
+        if "hades" in pdk.keys() and (root / pdk["hades"]).is_file():
+            path_json = root / pdk["hades"]
+            self.load_from_json(path_json)
+            logging.info(f"LayerStack loaded from {path_json}")
+        else:
+            path = root / pdk["techlef"]
+            self.load_from_tlef(path)
+            logging.info(f"LayerStack loaded from {path}")
+            path_json = root / f"{self.techno}.json"
+            with open(path_json, "w") as f:
+                json.dump(self, fp=f, default=lambda dc: dc.__dict__, indent=2)
+            add_reference(self.techno, "hades", f"{self.techno}.json")
+        self.apply_patch()
+
+    def __len__(self):
+        return len(self._stack)
+
+    def get_metal_layer(self, num: int) -> Layer:
+        if num == 0:
+            raise ValueError("nbr cannot be 0")
+        try:
+            pard = 0 if isinstance(self._stack[-1], ViaLayer) else 1
+            paru = 1 if isinstance(self._stack[0], ViaLayer) else 2
+            return self._stack[2 * num - paru if num > 0 else 2 * num + pard]
+        except IndexError:
+            raise IndexError(
+                f"Layer {num} not found. Available layers are {self._stack}"
+            )
+
+    def get_id(self, layer: int, datatype: int = 0):
+        for i, lyr in enumerate(self._stack):
+            if lyr.layer == layer and lyr.datatype == datatype:
+                return i
+        return None
+
+    def get_pad_layer(self) -> Layer:
+        return self._pad
+
+    def get_gate_layer(self) -> Layer:
+        return self._gate
+
+    def get_via_layer(self, num: int) -> ViaLayer:
+        if num == 0 and not isinstance(self._stack[0], ViaLayer):
+            raise ValueError(
+                "Contact layer not found. First layer in stack is a metal Layer"
+            )
+        if num == -1 and not isinstance(self._stack[0], ViaLayer):
+            raise ValueError(
+                "Last Via layer not found. Last layer in stack is a metal Layer\n"
+                + "".join("\t" + lyr.name for lyr in self._stack)
+            )
+        pard = 1 if isinstance(self._stack[-1], ViaLayer) else 2
+        paru = 0 if isinstance(self._stack[0], ViaLayer) else 1
+        return self._stack[2 * num - paru if num >= 0 else 2 * num + pard]
+
+    def load_from_json(self, path_json: Path | str):
+        with open(path_json, "r") as f:
+            data = json.load(f)
+            self.grid = data.get("grid", 1e-9)
+            self._gate = Layer(**data.get("_gate", {}))
+            self._nplus = Layer(**data.get("_nplus", {}))
+            self._pplus = Layer(**data.get("_pplus", {}))
+            self._nwell = Layer(**data.get("_nwell", {}))
+            self._active = Layer(**data.get("_active", {}))
+            self._pad = Layer(**data.get("pad", default_layer().__dict__))
+            self._stack = []
+            for i, lyr in enumerate(data.get("_stack")):
+                if "enclosure" in lyr.keys():
+                    self._stack.append(ViaLayer(**lyr))
+                else:
+                    self._stack.append(Layer(**lyr))
+
+    def load_from_tlef(self, path: Path | str):
         t_stack = load_tlef(path)
         self.grid = t_stack.unit
         layer_map = load_map(self.techno)
@@ -132,46 +206,27 @@ class LayerStack:
         logging.info("".join("\t" + lyr.name for lyr in stack))
         self._stack = stack
 
-    def __len__(self):
-        return len(self._stack)
+    def apply_patch(self):
+        """
+        Apply a patch file to the techno.yml file.
+        The patch file is a json file that contains the modifications to be applied to the techno.yml file.
 
-    def get_metal_layer(self, num: int) -> Layer:
-        if num == 0:
-            raise ValueError("nbr cannot be 0")
-        try:
-            pard = 0 if isinstance(self._stack[-1], ViaLayer) else 1
-            paru = 1 if isinstance(self._stack[0], ViaLayer) else 2
-            return self._stack[2 * num - paru if num > 0 else 2 * num + pard]
-        except IndexError:
-            raise IndexError(
-                f"Layer {num} not found. Available layers are {self._stack}"
+        Args:
+            pdk_name: Name of the PDK to which the patch file is applied.
+            patch_file: Path to the patch file.
+        """
+        patch_file = realpath(
+            join(
+                dirname(__file__),
+                "../../pdk/patches",
+                f"{self.techno}.json",
             )
-
-    def get_id(self, layer: int, datatype: int = 0):
-        for i, lyr in enumerate(self._stack):
-            if lyr.layer == layer and lyr.datatype == datatype:
-                return i
-        return None
-
-    def get_pad_layer(self) -> Layer:
-        return self._pad
-
-    def get_gate_layer(self) -> Layer:
-        return self._gate
-
-    def get_via_layer(self, num: int):
-        if num == 0 and not isinstance(self._stack[0], ViaLayer):
-            raise ValueError(
-                "Contact layer not found. First layer in stack is a metal Layer"
-            )
-        if num == -1 and not isinstance(self._stack[0], ViaLayer):
-            raise ValueError(
-                "Last Via layer not found. Last layer in stack is a metal Layer\n"
-                + "".join("\t" + lyr.name for lyr in self._stack)
-            )
-        pard = 1 if isinstance(self._stack[-1], ViaLayer) else 2
-        paru = 0 if isinstance(self._stack[0], ViaLayer) else 1
-        return self._stack[2 * num - paru if num >= 0 else 2 * num + pard]
+        )
+        if not Path(patch_file).is_file():
+            logging.info(f"No patch file found at {patch_file}.")
+            return
+        self.load_from_json(patch_file)
+        logging.info(f"Patch file {patch_file} applied to LayerStack.")
 
 
 @dataclass
