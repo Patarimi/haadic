@@ -11,7 +11,8 @@ for path in sorted(Path("hades").rglob("*.py")):  #
     full_doc_path = Path("reference", doc_path)  #
 
     parts = tuple(module_path.parts)
-
+    if parts[1] == "template":  # Skip template files
+        continue
     if parts[-1] == "__init__":  #
         parts = parts[:-1]
         doc_path = doc_path.with_name("index.md")
