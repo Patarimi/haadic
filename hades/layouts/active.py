@@ -122,7 +122,9 @@ def line(
     return horz
 
 
-def connect(cell: db.Cell, layers: LayerStack, label_line: str, label_mos: str) -> db.Cell:
+def connect(
+    cell: db.Cell, layers: LayerStack, label_line: str, label_mos: str
+) -> db.Cell:
     """
     Connect a horizontal line to a label using a vertical line.
     :param cell: top cell to be used.

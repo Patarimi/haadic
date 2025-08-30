@@ -8,6 +8,7 @@ from hades.parsers.layermap import load_map, get_number
 import klayout.db as kdb
 import json
 
+
 @dataclass
 class Layer:
     layer: int
@@ -57,7 +58,9 @@ class LayerStack:
     def __post_init__(self):
         pdk = load_pdk(self.techno)
         try:
-            path_json = realpath(join(dirname(__file__), "../", pdk["base_dir"], pdk["hades"]))
+            path_json = realpath(
+                join(dirname(__file__), "../", pdk["base_dir"], pdk["hades"])
+            )
         except KeyError:
             path_json = "notfound"
         if Path(path_json).is_file():
@@ -72,12 +75,14 @@ class LayerStack:
                 self._pad = Layer(**data.get("pad", default_layer().__dict__))
                 self._stack = []
                 for i, lyr in enumerate(data.get("_stack")):
-                    if i % 2:
-                        self._stack.append(Layer(**lyr))
-                    else:
+                    if "enclosure" in lyr.keys():
                         self._stack.append(ViaLayer(**lyr))
+                    else:
+                        self._stack.append(Layer(**lyr))
         else:
-            path = realpath(join(dirname(__file__), "../", pdk["base_dir"], pdk["techlef"]))
+            path = realpath(
+                join(dirname(__file__), "../", pdk["base_dir"], pdk["techlef"])
+            )
             t_stack = load_tlef(path)
             self.grid = t_stack.unit
             layer_map = load_map(self.techno)
@@ -143,7 +148,9 @@ class LayerStack:
                 else:
                     raise ValueError(f"Unknown layer type: {layer.type}")
 
-            if stack[-1].name[0].lower() in ("m", "v") or isinstance(stack[-1], ViaLayer):
+            if stack[-1].name[0].lower() in ("m", "v") or isinstance(
+                stack[-1], ViaLayer
+            ):
                 logging.warning("No Pad layer detected")
                 logging.debug("".join("\t" + lyr.name for lyr in stack))
                 self._pad = Layer(0, name="NotFound")
@@ -152,12 +159,12 @@ class LayerStack:
                 logging.debug(f"{self._pad.name} set as Pad layer")
             logging.info("".join("\t" + lyr.name for lyr in stack))
             self._stack = stack
-            path_json = realpath(join(dirname(__file__), "../", pdk["base_dir"], f"{self.techno}.json"))
+            path_json = realpath(
+                join(dirname(__file__), "../", pdk["base_dir"], f"{self.techno}.json")
+            )
             with open(path_json, "w") as f:
                 json.dump(self, fp=f, default=lambda dc: dc.__dict__, indent=2)
             add_reference(self.techno, "hades", f"{self.techno}.json")
-            
-            
 
     def __len__(self):
         return len(self._stack)

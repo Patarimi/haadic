@@ -85,11 +85,12 @@ def load_pdk(pdk_name: str) -> dict:
         tech = _read_tech(join(os.getcwd(), "design.yml"))[pdk_name]
     return tech
 
+
 def add_reference(pdk_name: str, ref_name: str, path_file: Path | str):
     """
     Add a reference file to the techno.yml file.
     The reference file can be a LEF, a SPICE model or a HADES json file.
-    
+
     Args:
         pdk_name: Name of the PDK to which the reference file is added.
         ref_name: Name of the reference file (e.g., 'techlef', 'hades', 'spice').
@@ -101,6 +102,7 @@ def add_reference(pdk_name: str, ref_name: str, path_file: Path | str):
     process_d[pdk_name][ref_name] = path_file
     with open(join(dirname(__file__), "techno.yml"), "w") as f:
         yaml.dump(process_d, f)
+
 
 def get_file(pdk_name: str, file_type: str) -> Path:
     pdk = load_pdk(pdk_name)
