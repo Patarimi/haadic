@@ -13,7 +13,6 @@ from hades.devices.device import generate, Step
 from hades.layouts.tools import check_diff
 import yaml
 from os.path import join
-from os import makedirs
 import hades.techno as techno
 import hades.wrappers.simulator as sim
 
@@ -131,4 +130,4 @@ def template() -> None:
     import subprocess
 
     template_dir = join(os.path.dirname(__file__), "./template")
-    subprocess.run(["uvx", "cookiecutter", template_dir])
+    subprocess.run(["uvx", "cookiecutter", template_dir], check=True)
