@@ -57,22 +57,16 @@ class LayerStack:
 
     def __post_init__(self):
         pdk = load_pdk(self.techno)
-        if "hades" in pdk.keys():
-            path_json = realpath(
-                join(dirname(__file__), "../", pdk["base_dir"], pdk["hades"])
-            )
-            if Path(path_json).is_file():
-                self.load_from_json(path_json)
-                logging.info(f"LayerStack loaded from {path_json}")
+        root = Path(join(dirname(__file__), "../", pdk["base_dir"]))
+        if "hades" in pdk.keys() and (root / pdk["hades"]).is_file():
+            path_json = root / pdk["hades"]
+            self.load_from_json(path_json)
+            logging.info(f"LayerStack loaded from {path_json}")
         else:
-            path = realpath(
-                join(dirname(__file__), "../", pdk["base_dir"], pdk["techlef"])
-            )
+            path = root / pdk["techlef"]
             self.load_from_tlef(path)
             logging.info(f"LayerStack loaded from {path}")
-            path_json = realpath(
-                join(dirname(__file__), "../", pdk["base_dir"], f"{self.techno}.json")
-            )
+            path_json = root / f"{self.techno}.json"
             with open(path_json, "w") as f:
                 json.dump(self, fp=f, default=lambda dc: dc.__dict__, indent=2)
             add_reference(self.techno, "hades", f"{self.techno}.json")
