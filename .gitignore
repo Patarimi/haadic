@@ -7,6 +7,7 @@
 /dist/hades-*.tar.gz
 /dist/hades-*.whl
 !/pdk/mock/
+!/pdk/patches/
 /tmp/
 *.log
 /workdir/
