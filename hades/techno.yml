@@ -1,29 +1,30 @@
-sky130:
-  source_url: volare
-  version: 0fe599b2afb6708d281543108caf8310912f54af
-  base_dir: ../pdk/sky130A/libs.tech
-  layermap: klayout/tech/sky130A.map
-  techlef: ../libs.ref/sky130_fd_sc_hvl/techlef/sky130_fd_sc_hvl__nom.tlef
-  lib_spice: combined/sky130.lib.spice
-  magic_rc: magic/sky130A.magicrc
-  process: not_found.proc
-  # à generer à partir de libs.ref\sky130_fd_sc_hd\*.tlef
 asap7:
-  source_url: https://github.com/The-OpenROAD-Project/asap7/archive/refs/heads/master.zip
   base_dir: ../pdk/asap7
   layermap: asap7_TechLib_08.layermap
   process: not_found.proc
+  source_url: https://github.com/The-OpenROAD-Project/asap7/archive/refs/heads/master.zip
 gf180mcu:
-  source_url: volare
-  version: 6d4d11780c40b20ee63cc98e645307a9bf2b2ab8
   base_dir: ../pdk/gf180mcuD/libs.tech
+  hades: gf180mcu.json
   layermap: klayout/tech/gf180mcu.map
-  techlef: ../libs.ref/gf180mcu_fd_sc_mcu9t5v0/techlef/gf180mcu_fd_sc_mcu9t5v0__nom.tlef
   magic_rc: magic/gf180mcuD.magicrc
   process: not_found.proc
-  # à generer à partir de libs.ref\gf180mcu_fd_sc_mcu7t5v0\*.tlef
+  source_url: volare
+  techlef: ../libs.ref/gf180mcu_fd_sc_mcu9t5v0/techlef/gf180mcu_fd_sc_mcu9t5v0__nom.tlef
+  version: 6d4d11780c40b20ee63cc98e645307a9bf2b2ab8
 mock:
   base_dir: ../pdk/mock
+  hades: mock.json
   layermap: mock.map
-  techlef: mock.tlef
   process: mock.proc
+  techlef: mock.tlef
+sky130:
+  base_dir: ../pdk/sky130A/libs.tech
+  hades: sky130.json
+  layermap: klayout/tech/sky130A.map
+  lib_spice: combined/sky130.lib.spice
+  magic_rc: magic/sky130A.magicrc
+  process: not_found.proc
+  source_url: volare
+  techlef: ../libs.ref/sky130_fd_sc_hvl/techlef/sky130_fd_sc_hvl__nom.tlef
+  version: 0fe599b2afb6708d281543108caf8310912f54af

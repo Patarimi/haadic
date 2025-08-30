@@ -1,0 +1,131 @@
+{
+  "techno": "mock",
+  "_gate": {
+    "layer": 30,
+    "datatype": 0,
+    "name": "Poly",
+    "width": 0,
+    "spacing": 0,
+    "_pin": 0
+  },
+  "_nplus": {
+    "layer": 0,
+    "datatype": 0,
+    "name": "NotFound",
+    "width": 0,
+    "spacing": 0,
+    "_pin": 0
+  },
+  "_pplus": {
+    "layer": 0,
+    "datatype": 0,
+    "name": "NotFound",
+    "width": 0,
+    "spacing": 0,
+    "_pin": 0
+  },
+  "_nwell": {
+    "layer": 0,
+    "datatype": 0,
+    "name": "NotFound",
+    "width": 0,
+    "spacing": 0,
+    "_pin": 0
+  },
+  "_active": {
+    "layer": 0,
+    "datatype": 0,
+    "name": "NotFound",
+    "width": 0,
+    "spacing": 0,
+    "_pin": 0
+  },
+  "grid": 5e-09,
+  "_pad": {
+    "layer": 1,
+    "datatype": 0,
+    "name": "Pad",
+    "width": 0,
+    "spacing": 0,
+    "_pin": 0
+  },
+  "_stack": [
+    {
+      "layer": 33,
+      "datatype": 0,
+      "name": "CON",
+      "width": 0.3,
+      "spacing": 0.15,
+      "_pin": 0,
+      "enclosure": 0
+    },
+    {
+      "layer": 34,
+      "datatype": 0,
+      "name": "Metal1",
+      "width": 0.4,
+      "spacing": 0,
+      "_pin": 0
+    },
+    {
+      "layer": 35,
+      "datatype": 0,
+      "name": "Via1",
+      "width": 0.4,
+      "spacing": 0.26,
+      "_pin": 0,
+      "enclosure": 0.2
+    },
+    {
+      "layer": 2,
+      "datatype": 0,
+      "name": "Metal2",
+      "width": 0.4,
+      "spacing": 0.2,
+      "_pin": 0
+    },
+    {
+      "layer": 12,
+      "datatype": 0,
+      "name": "Via2",
+      "width": 0.4,
+      "spacing": 0.26,
+      "_pin": 0,
+      "enclosure": 0.2
+    },
+    {
+      "layer": 46,
+      "datatype": 0,
+      "name": "Metal4",
+      "width": 0,
+      "spacing": 0,
+      "_pin": 0
+    },
+    {
+      "layer": 41,
+      "datatype": 0,
+      "name": "Vi_4",
+      "width": 0.8,
+      "spacing": 0.5,
+      "_pin": 0,
+      "enclosure": 0.2
+    },
+    {
+      "layer": 81,
+      "datatype": 0,
+      "name": "Metal5",
+      "width": 0,
+      "spacing": 0,
+      "_pin": 0
+    },
+    {
+      "layer": 35,
+      "datatype": 0,
+      "name": "Opening",
+      "width": 0,
+      "spacing": 0,
+      "_pin": 0,
+      "enclosure": 0
+    }
+  ]
+}
