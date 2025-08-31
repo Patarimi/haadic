@@ -1,8 +1,11 @@
-from os.path import dirname, join, isdir
+from os.path import dirname, isdir
 import os
+from pathlib import Path
 import pytest
 from hades.layouts import tools
 import logging
+
+REF_PATH = Path(dirname(__file__)).parent / "ref_files"
 
 
 def test_tools():
@@ -10,11 +13,10 @@ def test_tools():
     assert str(lay) == "Via1: 100/4"
     lay2 = tools.Layer(141)
     assert str(lay2) == ": 141/0"
-    base_path = dirname(__file__)
-    ref = join(base_path, "ref_ind.gds")
+    ref = REF_PATH / "ref_ind.gds"
     logging.debug(os.name)
     assert tools.check_diff(ref, ref)
-    assert not tools.check_diff(ref, join(base_path, "ref_ms.gds"))
+    assert not tools.check_diff(ref, REF_PATH / "ref_ms.gds")
 
 
 @pytest.mark.skipif(

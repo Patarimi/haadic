@@ -1,11 +1,12 @@
+from pathlib import Path
 import klayout.db as kl
 
 from hades.layouts.general import via, via_stack, ground_plane, get_dtext, get_shape
 from hades.layouts.tools import LayerStack, check_diff
-from os.path import dirname, join
+from os.path import dirname
 
 stack = LayerStack("mock")
-REF_PATH = dirname(__file__)
+REF_PATH = Path(dirname(__file__)).parent / "ref_files"
 
 
 def test_via(tmp_path):
@@ -14,24 +15,24 @@ def test_via(tmp_path):
     lib = kl.Layout()
     via(lib, stack.get_via_layer(2), (3, 4))
     lib.write(tmp_path / "via.gds")
-    check_diff(tmp_path / "via.gds", join(REF_PATH, "ref_via.gds"))
+    check_diff(tmp_path / "via.gds", REF_PATH / "ref_via.gds")
 
 
 def test_via_stack(tmp_path):
     lib = kl.Layout()
     via_stack(lib, stack, 2, 1, (3, 4))
     lib.write(tmp_path / "via_stack.gds")
-    check_diff(tmp_path / "via_stack.gds", join(REF_PATH, "ref_via_stack.gds"))
+    check_diff(tmp_path / "via_stack.gds", REF_PATH / "ref_via_stack.gds")
 
     lib = kl.Layout()
     via_stack(lib, stack, -3, -4, (3, 4))
     lib.write(tmp_path / "via_stack_neg.gds")
-    check_diff(tmp_path / "via_stack_neg.gds", join(REF_PATH, "ref_via_stack.gds"))
+    check_diff(tmp_path / "via_stack_neg.gds", REF_PATH / "ref_via_stack.gds")
 
 
 def test_dtext():
     lib = kl.Layout()
-    lib.read(join(REF_PATH, "ref_line.gds"))
+    lib.read(REF_PATH / "ref_line.gds")
     gnd, lyr = get_dtext(lib, "gnd")
     assert gnd == kl.DText("gnd", 0, -0.9)
     assert lyr == 0
@@ -39,7 +40,7 @@ def test_dtext():
 
 def test_shape():
     lib = kl.Layout()
-    lib.read(join(REF_PATH, "ref_line.gds"))
+    lib.read(REF_PATH / "ref_line.gds")
     box, lyr = get_shape(lib, kl.DPoint(0, -0.9), 0)
     assert box is not None
     assert lyr == 0
@@ -50,4 +51,4 @@ def test_ground_plane(tmp_path):
     lib = kl.Layout()
     ground_plane(lib, stack, (3, 4), 1)
     lib.write(tmp_path / "ground_plane.gds")
-    check_diff(tmp_path / "ground_plane.gds", join(REF_PATH, "ref_ground_plane.gds"))
+    check_diff(tmp_path / "ground_plane.gds", REF_PATH / "ref_ground_plane.gds")
