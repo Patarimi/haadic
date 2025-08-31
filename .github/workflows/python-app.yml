@@ -92,7 +92,8 @@ jobs:
         uv run volare ls
     - name: Test with Pytest
       run: |
-        uv run pytest -rxXs --basetemp=tmp
+        uv run poe test -rxXs
+        uv run poe cover
     - name: Store reports
       if: failure()
       uses: actions/upload-artifact@v4
@@ -101,3 +102,4 @@ jobs:
         path: |
           tmp/
           pytest.log
+          .coverage
