@@ -10,6 +10,7 @@ from hades.layouts.tools import check_diff
 from os.path import join
 import hades.techno as techno
 
+# Skip logging configuration if it is already done (eg during tests)
 if not logging.getLogger().hasHandlers():
     logging.basicConfig(
         level=logging.INFO,
