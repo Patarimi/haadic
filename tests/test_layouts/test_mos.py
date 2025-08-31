@@ -1,10 +1,11 @@
-from os.path import dirname, join
+from os.path import dirname
+from pathlib import Path
 from klayout import db
 
 from hades.layouts.active import mosfet, line, connect
 from hades.layouts.tools import check_diff, LayerStack, Layer
 
-REF_PATH = dirname(__file__)
+REF_PATH = Path(dirname(__file__)).parent / "ref_files"
 
 stack = LayerStack("mock")
 stack._nplus = Layer(1, 0, "Nwell")
@@ -17,7 +18,13 @@ def test_mos(tmp_path):
     test = lib.create_cell("mos")
     mosfet(test, stack, nf=1)
     lib.write(tmp_path / "mos.gds")
-    assert check_diff(tmp_path / "mos.gds", join(REF_PATH, "ref_mos.gds"))
+    assert check_diff(tmp_path / "mos.gds", REF_PATH / "ref_mos.gds")
+
+    lib = db.Layout()
+    test = lib.create_cell("pmos")
+    mosfet(test, stack, nf=3, doping="P")
+    lib.write(tmp_path / "pmos.gds")
+    assert check_diff(tmp_path / "pmos.gds", REF_PATH / "ref_pmos.gds")
 
 
 def test_line(tmp_path):
@@ -29,12 +36,12 @@ def test_line(tmp_path):
     line(top, "vdd", lyr)
     line(top, "gnd", lyr, below=True)
     lib.write(tmp_path / "h_line.gds")
-    assert check_diff(tmp_path / "h_line.gds", join(REF_PATH, "ref_line.gds"))
+    assert check_diff(tmp_path / "h_line.gds", REF_PATH / "ref_line.gds")
 
 
 def test_connect(tmp_path):
     lib = db.Layout()
-    lib.read(join(REF_PATH, "ref_line.gds"))
+    lib.read(str(REF_PATH / "ref_line.gds"))
     top_cell = lib.cell("top")
     line(top_cell, "vout", stack.get_metal_layer(2))
     connect(top_cell, stack, "vdd", "dr0")
