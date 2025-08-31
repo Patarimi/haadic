@@ -10,7 +10,6 @@ from tabulate import tabulate
 
 techno = "sky130"
 target: dict[str, float] = {"IC": 5, "id": 0.1e-3, "L": 0.15e-6}
-dis_plot = False
 
 def local_model(target: dict[str, float]) -> dict[str, float]:
     i_spec = 130e-9
@@ -41,7 +40,7 @@ def layout(cell, layerstack: LayerStack, width: float = 1, length: float = 2, n_
 bench = "bench.cir"
 
 
-def evaluate(bench_data: pd.DataFrame):
+def evaluate(bench_data: pd.DataFrame, dis_plot: bool = False) -> dict[str, float]:
     bench_data.to_csv("bench_data.csv")
     ut = 0.0259  # Thermal voltage at room temperature
     id = bench_data["i(d)"]
