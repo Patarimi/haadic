@@ -1,5 +1,5 @@
 import os
-from hades.main import run_cli
+from hades.main import run_cli, smoke_test_cli
 import pytest
 
 pytestmark = pytest.mark.skipif(
@@ -8,5 +8,13 @@ pytestmark = pytest.mark.skipif(
 )
 
 
+def test_smoke():
+    smoke_test_cli()
+
+
 def test_run(tmp_path):
+    run_cli(design_py="./workdir/gen_active.py", sub_folder=tmp_path, timestamp=False)
+    assert (tmp_path / "top.gds").is_file()
+    assert (tmp_path / "bench_data.csv").is_file()
+    # Rerun to check reload_result
     run_cli(design_py="./workdir/gen_active.py", sub_folder=tmp_path, timestamp=False)
