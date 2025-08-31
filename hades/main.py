@@ -24,6 +24,14 @@ app = App()
 app.command(techno.pkd_app)
 
 
+@app.command(name="smoke_test")
+def smoke_test_cli():
+    from hades.wrappers.tools import nix_check
+
+    assert nix_check()
+    logging.info("hades installed correctly !")
+
+
 @app.command(name="run")
 def run_cli(
     design_py: str = "design.py",

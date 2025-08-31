@@ -34,18 +34,18 @@ hades = "hades.main:app"
 [tool.poe.tasks]
 update_show = "uv lock --dry-run --upgrade"
 update_all = "uv lock --upgrade"
-test = 'pytest --basetemp=tmp'
+test = 'coverage run -m pytest --basetemp=tmp'
+cover = "coverage report -m --skip-covered"
 publish = "poetry publish --build --username __token__ --password $PYPI_TOKEN"
 doc = "mkdocs gh-deploy"
-run = "wsl -d NixOS nix-shell --run"
-smoke_test = ["run magic"]
 
 [tool.poe.tasks.precommit]
 sequence = [
     {ref = "update_all"},
     {cmd = "uvx ruff format"},
     {cmd = "uvx ruff check"},
-    {ref = "test"}
+    {ref = "test"},
+    {ref = "cover"}
 ]
 
 [tool.pytest.ini_options]
@@ -56,6 +56,7 @@ log_file = "./pytest.log"
 
 [dependency-groups]
 dev = [
+    "coverage>=7.10.6",
     "poethepoet>=0.36.0",
     "pytest>=8.4.1",
 ]
