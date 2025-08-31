@@ -21,7 +21,6 @@ def mosfet(
     :param nf: number of finger
     :param width: width of each finger in µm
     :param length: length of each finger in µm
-    :param active_layer: Layer use for active region
     :param doping: mos type (P or N).
     :return:
     """

@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import logging
 from pathlib import Path
 
@@ -13,6 +14,7 @@ import glob
 from typing import Optional
 
 
+@dataclass
 class Emx:
     """
     Base class for emx simulation.
