@@ -1,13 +1,10 @@
-import logging
 from pathlib import Path
 from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
-from scipy.optimize import curve_fit
 from hades.layouts.active import mosfet, line, connect
 from hades.layouts.general import set_as_port
 from hades.layouts.tools import LayerStack
-from tabulate import tabulate
 import json
 
 techno = "sky130"
@@ -51,7 +48,7 @@ def layout(
 bench = "bench.cir"
 
 
-def evaluate(bench_data: pd.DataFrame, dis_plot: bool = True) -> dict[str, float]:
+def evaluate(bench_data: pd.DataFrame, dis_plot: bool = False) -> dict[str, float]:
     bench_data.to_csv("bench_data.csv")
     ut = 0.0259  # Thermal voltage at room temperature
     with open("model.json", "r") as f:
@@ -65,15 +62,16 @@ def evaluate(bench_data: pd.DataFrame, dis_plot: bool = True) -> dict[str, float
         IC = id / i_spec * mos_shape
         lbda_c = np.min(i_spec / mos_shape / (n * gm * ut))
         asymptote = 1 / (n * lbda_c * IC)
-        lbl = "$n\lambda_c IC$"
+        lbl = r"$n\lambda_c IC$"
     else:
         n = np.min(id / (gm * ut))
         i_spec = np.max((gm * n * ut) ** 2 / id * mos_shape)
         IC = id / i_spec * mos_shape
         lbda_c = 0
         asymptote = 1 / np.sqrt(IC)
-        lbl = "$1/\sqrt{i_d}$"
-    params = {"n": n, "i_spec": i_spec, "lbda_c": lbda_c}
+        lbl = r"$1/\sqrt{i_d}$"
+    params = {"n": n, "i_spec": i_spec, "lbda_c": lbda_c, "L": model["length"],
+              "id": np.max(id)*1e3, "IC": np.max(IC)}
     with open("model.json", "r") as f:
         model = json.load(f)
     with open("model.json", "w") as f:
