@@ -28,7 +28,8 @@ def setup(design_py: str, run_folder: Path, timestamp: bool = True):
         des_name = str(des)
     sys.path.append(os.curdir)
     design = __import__(
-        des_name, fromlist=("layout", "techno", "bench", "evaluate", "target", "local_model")
+        des_name,
+        fromlist=("layout", "techno", "bench", "evaluate", "target", "local_model"),
     )
     os.chdir(starting_dir)
 

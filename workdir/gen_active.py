@@ -13,9 +13,10 @@ import json
 techno = "sky130"
 target: dict[str, float] = {"IC": 5, "id": 0.1e-3, "L": 0.15e-6}
 
+
 def local_model(target: dict[str, float]) -> dict[str, float]:
     if Path("model.json").is_file():
-        geo = {"length": target["L"]*1e6, "width": 1, "n_fin": 80}
+        geo = {"length": target["L"] * 1e6, "width": 1, "n_fin": 80}
         with open("model.json", "r") as f:
             model = json.load(f)
         for key in geo:
@@ -24,18 +25,20 @@ def local_model(target: dict[str, float]) -> dict[str, float]:
             json.dump(model, f, indent=2)
         return geo
     else:
-        geo = {"length": 20*target["L"]*1e6, "width": 1, "n_fin": 80}
+        geo = {"length": 20 * target["L"] * 1e6, "width": 1, "n_fin": 80}
         with open("model.json", "w") as f:
             model = json.dump(geo, f, indent=2)
         return geo
 
 
-def layout(cell, layerstack: LayerStack, width: float = 1, length: float = 2, n_fin: int = 80):
+def layout(
+    cell, layerstack: LayerStack, width: float = 1, length: float = 2, n_fin: int = 80
+):
     mosfet(cell, layerstack, width=width, length=length, nf=n_fin)
     line(cell, "gate", layerstack.get_gate_layer())
     line(cell, "drain", layerstack.get_metal_layer(1))
     line(cell, "gnd", layerstack.get_metal_layer(1), below=True)
-    for i in range(n_fin+1):
+    for i in range(n_fin + 1):
         if i < n_fin:
             connect(cell, layerstack, "gate", f"g{i}")
         drain = "drain" if i % 2 == 0 else "gnd"
