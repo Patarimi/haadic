@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
@@ -7,19 +8,26 @@ from hades.layouts.active import mosfet, line, connect
 from hades.layouts.general import set_as_port
 from hades.layouts.tools import LayerStack
 from tabulate import tabulate
+import json
 
 techno = "sky130"
 target: dict[str, float] = {"IC": 5, "id": 0.1e-3, "L": 0.15e-6}
 
 def local_model(target: dict[str, float]) -> dict[str, float]:
-    i_spec = 130e-9
-    if "W" not in target:
-        return {
-            "W": target["id"] / i_spec / target["IC"] * target["L"] * 1e6,
-            "L": target["L"] * 1e6,
-            "n": 1,
-        }
-    raise ValueError("Not supported for yet.")
+    if Path("model.json").is_file():
+        geo = {"length": target["L"]*1e6, "width": 1, "n_fin": 80}
+        with open("model.json", "r") as f:
+            model = json.load(f)
+        for key in geo:
+            model[key] = geo[key]
+        with open("model.json", "w") as f:
+            json.dump(model, f, indent=2)
+        return geo
+    else:
+        geo = {"length": 20*target["L"]*1e6, "width": 1, "n_fin": 80}
+        with open("model.json", "w") as f:
+            model = json.dump(geo, f, indent=2)
+        return geo
 
 
 def layout(cell, layerstack: LayerStack, width: float = 1, length: float = 2, n_fin: int = 80):

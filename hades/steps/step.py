@@ -28,7 +28,7 @@ def setup(design_py: str, run_folder: Path, timestamp: bool = True):
         des_name = str(des)
     sys.path.append(os.curdir)
     design = __import__(
-        des_name, fromlist=("layout", "techno", "bench", "evaluate", "target")
+        des_name, fromlist=("layout", "techno", "bench", "evaluate", "target", "local_model")
     )
     os.chdir(starting_dir)
 
@@ -44,12 +44,13 @@ def setup(design_py: str, run_folder: Path, timestamp: bool = True):
     return design, run_dir
 
 
-def layout_generation(techno: str, layout: Callable, top_cell_name: str = "top"):
+def layout_generation(techno: str, layout: Callable, geo: dict[str, float] = {}):
+    top_cell_name = "top"
     layerstack = LayerStack(techno)
 
     lib = db.Layout()
     lib.dbu = layerstack.grid * 1e6
-    layout(lib.create_cell(top_cell_name), layerstack)
+    layout(lib.create_cell(top_cell_name), layerstack, **geo)
     lib.write(f"{top_cell_name}.gds")
 
 

@@ -58,18 +58,19 @@ def run_cli(
         design, run_dir = steps.setup(design_py, Path(sub_folder), timestamp)
         logging.info(f"Running design {design_py} in {run_dir}")
         os.chdir(run_dir)
-        logging.info("layout generation...")
+        geo = design.local_model(design.target)
+        logging.info("layout generation with geometry: " + str(geo))
         if Path("top.gds").is_file() and reload_result:
             logging.info("existing layout found, checking for changes...")
             shutil.move("top.gds", "old_top.gds")
-            steps.layout_generation(design.techno, design.layout)  #  type: ignore[unresolved-attribute]:
+            steps.layout_generation(design.techno, design.layout, geo)  #  type: ignore[unresolved-attribute]:
             if not check_diff(Path("old_top.gds"), Path("top.gds")):
                 logging.info("Changes detected in layout, back to full flow.")
                 reload_result = False
             os.remove("old_top.gds")
         else:
             logging.info("Running full flow.")
-            steps.layout_generation(design.techno, design.layout)
+            steps.layout_generation(design.techno, design.layout, geo)
             reload_result = False
         if not reload_result:
             logging.info("extracting schematic...")
