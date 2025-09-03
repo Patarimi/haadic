@@ -9,7 +9,7 @@ Xdut gate drain 0 top
 .save @m.xdut.Xnmos_80_0.x0.msky130_fd_pr__nfet_01v8[gm]
 
 .control
-dc Vgate 0 1.8 0.1
+dc Vgate 0 1.8 0.01
 let gm = @m.xdut.Xnmos_80_0.x0.msky130_fd_pr__nfet_01v8[gm]
 let d = -i(vdrain)
 set filetype = ASCII
