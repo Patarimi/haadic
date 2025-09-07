@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 from hades.models.ekv import EKV
 
+
 def test_ekv_model(tmp_path):
     ekv = EKV(length=0.15, width=1, n_finger=15)
     assert ekv.ratio == 0.01
@@ -16,7 +17,7 @@ def test_ekv_model(tmp_path):
 
     # Test extract method with synthetic data
     id = np.logspace(-6, -3, 100)
-    gm = 1e-5*(np.sqrt(1 + 4*id)-1)/(2*id)
+    gm = 1e-5 * (np.sqrt(1 + 4 * id) - 1) / (2 * id)
     ekv.extract(gm, id)
     assert pytest.approx(ekv.n, abs=0.01) == 3.861
     assert ekv.i_spec == 1e-8
