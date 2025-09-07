@@ -15,7 +15,7 @@ class EKV:
     lbda_c: float = 0
 
     def load(self, filename: str):
-        with open("model.json", "r") as f:
+        with open(filename, "r") as f:
             model = json.load(f)
         for key in model:
             setattr(self, key, model[key])
@@ -55,9 +55,6 @@ class EKV:
 
     def gm_IC(self, IC: np.ndarray) -> np.ndarray:
         return _gm(IC, self.lbda_c, self.n)
-
-    def gm_IC_simu(self, id: np.ndarray, gm: np.ndarray) -> np.ndarray:
-        return
 
 
 def _gm(IC: np.ndarray, l_c: float, n: float) -> np.ndarray:
