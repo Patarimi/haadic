@@ -82,5 +82,9 @@ def load_result(data_name: str = "bench.raw") -> pd.DataFrame:
 def compare_to(perf: dict, target: dict):
     cost = 0
     for key in target:
-        cost += (target[key] - perf[key]) ** 2
+        if key in perf:
+            cost += (target[key] - perf[key]) ** 2
+        else:
+            logging.warning(f"Key {key} not found in performance dictionary")
+            cost += target[key] ** 2
     return cost
