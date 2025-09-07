@@ -12,7 +12,7 @@ class EKV:
     n_finger: int = 1
     n: float = 0
     i_spec: float = 0
-    lbda_c: float = -1
+    lbda_c: float = 0
 
     def load(self, filename: str):
         with open("model.json", "r") as f:
