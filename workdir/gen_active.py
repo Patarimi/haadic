@@ -49,7 +49,7 @@ def layout(
 bench = "bench.cir"
 
 
-def evaluate(bench_data: pd.DataFrame, dis_plot: bool = True) -> dict[str, float]:
+def evaluate(bench_data: pd.DataFrame, dis_plot: bool = False) -> dict[str, float]:
     bench_data.to_csv("bench_data.csv")
     ekv.load("model.json")
     gm = ekv.n_finger * bench_data["gm"]
