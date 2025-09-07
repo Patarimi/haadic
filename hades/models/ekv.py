@@ -52,12 +52,13 @@ class EKV:
     @property
     def ut(self) -> float:
         return 0.0259
-    
+
     def gm_IC(self, IC: np.ndarray) -> np.ndarray:
         return _gm(IC, self.lbda_c, self.n)
 
     def gm_IC_simu(self, id: np.ndarray, gm: np.ndarray) -> np.ndarray:
-        return 
+        return
+
 
 def _gm(IC: np.ndarray, l_c: float, n: float) -> np.ndarray:
     return (np.sqrt((l_c * IC + 1) ** 2 + 4 * IC) - 1) / (

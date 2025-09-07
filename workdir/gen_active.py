@@ -2,7 +2,6 @@ from pathlib import Path
 from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
-import scipy
 from hades.layouts.active import mosfet, line, connect
 from hades.layouts.general import set_as_port
 from hades.layouts.tools import LayerStack
@@ -12,6 +11,7 @@ techno = "sky130"
 target: dict[str, float] = {"IC": 5, "id": 0.1e-3, "length": 0.15e-6}
 
 ekv = EKV()
+
 
 def local_model(target: dict[str, float]) -> dict[str, float]:
     ekv.width = 1
@@ -26,7 +26,11 @@ def local_model(target: dict[str, float]) -> dict[str, float]:
 
 
 def layout(
-    cell, layerstack: LayerStack, width: float = 1, length: float = 2, n_finger: int = 80
+    cell,
+    layerstack: LayerStack,
+    width: float = 1,
+    length: float = 2,
+    n_finger: int = 80,
 ):
     mosfet(cell, layerstack, width=width, length=length, nf=n_finger)
     line(cell, "gate", layerstack.get_gate_layer())
@@ -70,7 +74,7 @@ def evaluate(bench_data: pd.DataFrame, dis_plot: bool = True) -> dict[str, float
         ax[0].legend()
         ax[1].plot(
             IC,
-            np.abs(gm_IC_simu -  gm_IC_model)/ gm_IC_simu * 100,
+            np.abs(gm_IC_simu - gm_IC_model) / gm_IC_simu * 100,
             linestyle="dashed",
             color="C2",
             label="Error (%)",
