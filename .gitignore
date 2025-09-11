@@ -10,8 +10,7 @@
 !/pdk/patches/
 /tmp/
 *.log
-/workdir/
-!/workdir/generate.py
+/workdir/gen_active*/
 */__pycache__/*
 *.vhdx
 *.pyc
