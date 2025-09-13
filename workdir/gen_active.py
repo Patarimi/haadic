@@ -57,7 +57,7 @@ def evaluate(bench_data: pd.DataFrame, dis_plot: bool = True) -> dict[str, float
     ekv.extract(gm, id)
     IC = ekv.ic(id)
     gm_IC_simu = gm * ekv.ut / id
-    gm_IC_model = ekv.gm_IC(IC)
+    gm_IC_model = ekv.gm_IC(id)
     if dis_plot:
         _, ax = plt.subplots(2, 1, sharex=True)
         ax[0].loglog(IC, gm_IC_simu, label="$(n g_m U_t)/i_d$")

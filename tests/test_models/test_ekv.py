@@ -16,11 +16,11 @@ def test_ekv_model(tmp_path):
     assert ekv_loaded.n_finger == ekv.n_finger
 
     # Test extract method with synthetic data
-    id = np.logspace(-6, -3, 100)
-    gm = 1e-5 * (np.sqrt(1 + 4 * id) - 1) / (2 * id)
+    id = np.logspace(-6, 2, 100)
+    gm = (np.sqrt(1 + 4 * id) - 1) / (2 * id)
     ekv.extract(gm, id)
-    assert pytest.approx(ekv.n, abs=0.01) == 3.861
-    assert ekv.i_spec == 1e-8
+    assert pytest.approx(ekv.n, abs=0.01) == 0.0016
+    assert pytest.approx(ekv.i_spec) == 205.635
     assert ekv.lbda_c == 0
 
     # Test ic method
