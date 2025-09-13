@@ -63,9 +63,9 @@ def install(pdk_name: str):
 
 
 @pkd_app.command(name="list")
-def list_pdk() -> list:
+def print_pdk() -> list:
     """Display the list of available PDK."""
-    process_d = _read_tech()
+    process_d = list_pdk()
     print("Available PDKs are:")
     table = Table("Name", "State", show_header=False, box=None)
     for k in process_d:
@@ -75,6 +75,10 @@ def list_pdk() -> list:
             k, "[green]installed[/green]" if isdir(base_dir) else "not installed"
         )
     print(table)
+
+
+def list_pdk():
+    process_d = _read_tech()
     return list(process_d.keys())
 
 
