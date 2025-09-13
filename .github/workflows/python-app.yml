@@ -89,7 +89,8 @@ jobs:
       run: |
         uv run hades pdk install sky130
         uv run hades pdk install gf180mcu
-        uv run ciel ls
+        uv run ciel ls --pdk sky130
+        uv run ciel ls --pdk gf180mcu
     - name: Test with Pytest
       run: |
         uv run poe test -rxXs
