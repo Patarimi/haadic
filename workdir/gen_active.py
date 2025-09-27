@@ -10,7 +10,7 @@ from hades.models.ekv import EKV
 techno = "sky130"
 target: dict[str, float] = {"IC": 5, "id": 0.1e-3, "length": 0.15e-6}
 
-ekv = EKV()
+ekv = EKV(techno)
 
 
 def local_model(target: dict[str, float]) -> dict[str, float]:
