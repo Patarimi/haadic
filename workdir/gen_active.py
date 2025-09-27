@@ -10,7 +10,7 @@ from hades.models.ekv import EKV
 techno = "sky130"
 target: dict[str, float] = {"IC": 5, "id": 0.1e-3, "length": 0.15e-6}
 
-ekv = EKV()
+ekv = EKV(techno)
 
 
 def local_model(target: dict[str, float]) -> dict[str, float]:
@@ -54,7 +54,6 @@ def evaluate(bench_data: pd.DataFrame, dis_plot: bool = True) -> dict[str, float
     ekv.load("model.json")
     gm = ekv.n_finger * bench_data["gm"]
     id = bench_data["i(d)"]
-    ekv.extract(gm, id)
     IC = ekv.ic(id)
     gm_IC_simu = gm * ekv.ut / id
     gm_IC_model = ekv.gm_IC(id)

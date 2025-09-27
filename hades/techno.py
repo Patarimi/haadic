@@ -8,7 +8,7 @@ import zipfile
 from os.path import join, dirname, isdir
 import yaml
 from cyclopts import App
-from typing import Optional
+from typing import Literal, Optional
 from rich.console import Console
 from rich.table import Table
 from rich import print
@@ -80,6 +80,9 @@ def print_pdk() -> list:
 def list_pdk():
     process_d = _read_tech()
     return list(process_d.keys())
+
+
+Available_PDK = Literal["sky130", "gf180mcu"]
 
 
 def load_pdk(pdk_name: str) -> dict:

@@ -8,6 +8,8 @@ from tabulate import tabulate
 import hades.steps.step as step
 from hades.layouts.tools import check_diff
 
+default_options = {"flow": {"reload_result": True}, "extract": {}}
+
 
 def flow(
     techno: str,
@@ -15,9 +17,9 @@ def flow(
     layout: Callable,
     bench: Path,
     evaluate: Callable,
-    local_model: Optional[Callable],
-    dimensions: Optional[dict[str, float]],
-    options: dict[str, str],
+    local_model: Optional[Callable] = None,
+    dimensions: Optional[dict[str, float]] = None,
+    options: Optional[dict[str, str]] = default_options,
 ):
     if local_model is not None:
         geo = local_model(target)
@@ -43,14 +45,15 @@ def flow(
         step.run_bench(bench, techno)  #  type: ignore[unresolved-attribute]
 
     logging.info("loading simulation results...")
-    data = step.load_result()
+    data = step.load_result(Path(bench).with_suffix(".raw"))
 
     logging.info("evaluate performances")
     perf = evaluate(data)  # type: ignore[unresolved-attribute]
-    res = [(key, perf[key], target.get(key, "N/A")) for key in perf]
-    logging.info(
-        "\n" + tabulate(res, headers=["obtained", "targeted"], tablefmt="grid")
-    )
+    if perf is not None:
+        res = [(key, perf[key], target.get(key, "N/A")) for key in perf]
+        logging.info(
+            "\n" + tabulate(res, headers=["obtained", "targeted"], tablefmt="grid")
+        )
 
     logging.info("compare performances to targets")
     cost = step.compare_to(perf, target)  # type: ignore[unresolved-attribute]
