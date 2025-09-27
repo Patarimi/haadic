@@ -48,6 +48,9 @@ sequence = [
     {ref = "cover"}
 ]
 
+[tool.ruff]
+extend-include = ["./workdir/*.py"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 log_cli_level = "ERROR"
