@@ -12,7 +12,7 @@ import scipy
 from hades.layouts.active import connect, line, mosfet
 from hades.layouts.general import set_as_port
 from hades.layouts.tools import LayerStack
-from hades.techno import Available_PDK, get_file, load_pdk
+from hades.techno import Available_PDK, get_file
 from hades.steps import flow
 
 
@@ -36,19 +36,25 @@ class EKV:
                 self.extract_big_l(gm, id)
             self.dump(f"{self.techno}.json")
 
-        working_dir = get_file(self.techno, "base_dir") / 'hades'
-        if not working_dir.is_dir():
-            os.makedirs(working_dir)
-        shutil.copy(Path(__file__).parent/"ekv_bench.cir", working_dir/"ekv_bench.cir")
-        os.chdir(working_dir)
-        flow(
-            self.techno,
-            dict(),
-            layout,
-            "ekv_bench.cir",
-            evaluate,
-            dimensions={"width": 1, "length": 0.18, "n_finger": 80},
-        )
+        try:
+            starting_dir = os.getcwd()
+            working_dir = get_file(self.techno, "base_dir") / "hades"
+            if not working_dir.is_dir():
+                os.makedirs(working_dir)
+            shutil.copy(
+                Path(__file__).parent / "ekv_bench.cir", working_dir / "ekv_bench.cir"
+            )
+            os.chdir(working_dir)
+            flow(
+                self.techno,
+                dict(),
+                layout,
+                "ekv_bench.cir",
+                evaluate,
+                dimensions={"width": 1, "length": 0.18, "n_finger": 80},
+            )
+        finally:
+            os.chdir(starting_dir)
 
     def load(self, filename: str):
         with open(filename, "r") as f:
