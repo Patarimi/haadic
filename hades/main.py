@@ -1,12 +1,9 @@
 import logging
 import os
-import shutil
 
 from cyclopts import App
 from pathlib import Path
 
-from tabulate import tabulate
-from hades.layouts.tools import check_diff
 from os.path import join
 import hades.techno as techno
 
@@ -53,55 +50,16 @@ def run_cli(
     :param timestamp: If true, a new folder named <sub_folder>_<current_time> is created and the flow is run inside it.
     :return: Nothing.
     """
-    import hades.steps.step as steps
+    from hades.steps import flow
+    from hades.steps.step import setup
 
     try:
         starting_dir = os.getcwd()
-        design, run_dir = steps.setup(design_py, Path(sub_folder), timestamp)
+        design, run_dir = setup(design_py, Path(sub_folder), timestamp)
         logging.info(f"Running design {design_py} in {run_dir}")
+        design["options"]["flow"] = {"reload_result": reload_result}
         os.chdir(run_dir)
-        geo = design.local_model(design.target)
-        logging.info("layout generation with geometry: " + str(geo))
-        if Path("top.gds").is_file() and reload_result:
-            logging.info("existing layout found, checking for changes...")
-            shutil.move("top.gds", "old_top.gds")
-            steps.layout_generation(design.techno, design.layout, geo)  #  type: ignore[unresolved-attribute]:
-            if not check_diff(Path("old_top.gds"), Path("top.gds")):
-                logging.info("Changes detected in layout, back to full flow.")
-                reload_result = False
-            os.remove("old_top.gds")
-        else:
-            logging.info("Running full flow.")
-            steps.layout_generation(design.techno, design.layout, geo)
-            reload_result = False
-        if not reload_result:
-            logging.info("extracting schematic...")
-            steps.extract_from_layout(design.techno)  #  type: ignore[unresolved-attribute]
-
-            os.chdir(starting_dir)
-            expected_bench = Path(design_py).parent / design.bench
-            logging.info(f"simulation of {design.bench}")  #  type: ignore[unresolved-attribute]
-            if not expected_bench.is_file():  #  type: ignore[unresolved-attribute]
-                raise FileNotFoundError(
-                    f"bench file {str(expected_bench)} not found or is not a file."  #  type: ignore[unresolved-attribute]
-                )
-            shutil.copy(expected_bench, run_dir)
-            os.chdir(run_dir)
-            steps.run_bench(design.bench, design.techno)  #  type: ignore[unresolved-attribute]
-
-        logging.info("loading simulation results...")
-        data = steps.load_result()
-
-        logging.info("evaluate performances")
-        perf = design.evaluate(data)  # type: ignore[unresolved-attribute]
-        res = [(key, perf[key], design.target.get(key, "N/A")) for key in perf]
-        logging.info(
-            "\n" + tabulate(res, headers=["obtained", "targeted"], tablefmt="grid")
-        )
-
-        logging.info("compare performances to targets")
-        cost = steps.compare_to(perf, design.target)  # type: ignore[unresolved-attribute]
-        logging.info(f"current cost: {cost}")
+        flow(*design)
 
     finally:
         os.chdir(starting_dir)
