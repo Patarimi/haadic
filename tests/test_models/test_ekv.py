@@ -18,7 +18,7 @@ def test_ekv_model(tmp_path):
     # Test extract method with synthetic data
     id = np.logspace(-6, 2, 100)
     gm = (np.sqrt(1 + 4 * id) - 1) / (2 * id)
-    ekv.extract(gm, id)
+    ekv.extract_big_l(gm, id)
     assert pytest.approx(ekv.n, abs=0.01) == 0.0016
     assert pytest.approx(ekv.i_spec) == 205.635
     assert ekv.lbda_c == 0

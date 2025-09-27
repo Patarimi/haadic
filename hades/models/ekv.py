@@ -27,6 +27,8 @@ class EKV:
     lbda_c: float = 0
 
     def __post_init__(self):
+        if self.techno not in list(Available_PDK):
+            return
         def evaluate(bench_data: pd.DataFrame, small_l=True):
             gm = self.n_finger * bench_data["gm"]
             id = bench_data["i(d)"]
@@ -72,7 +74,7 @@ class EKV:
         else:
             self.extract_small_l(gm, id)
 
-    def extract_big_l(self, gm, id):
+    def extract_small_l(self, gm, id):
         Gm_IC = gm * self.ut / id
         self.lbda_c = np.min(self.i_spec / self.ratio / (self.n * gm * self.ut))
         crop = np.nonzero(Gm_IC > 0.9 * np.max(Gm_IC))[0][0]
@@ -88,7 +90,7 @@ class EKV:
         )
         self.lbda_c = lmb_opt[0][0]
 
-    def extract_small_l(self, gm, id):
+    def extract_big_l(self, gm, id):
         Gm_IC = gm * self.ut / id
         n_ext = 1 / Gm_IC
         ref = np.min(n_ext)
