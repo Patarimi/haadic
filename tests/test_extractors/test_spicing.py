@@ -29,3 +29,15 @@ def test_spice_extractor_magic(tmp_path):
     assert output_path.exists()
     ref_path = REF_PATH / "ref_sky130_fd.cir"
     assert check_diff(output_path, ref_path)
+
+    nopar_out = output_path.with_suffix(".noRC.cir")
+    extract_spice_magic(
+        REF_PATH / "sky130_fd_sc_hd.gds",
+        Path("pdk/sky130A/libs.tech/magic/sky130A.magicrc"),
+        output_path=nopar_out,
+        options="NoPar",
+    )
+
+    assert nopar_out.exists()
+    ref_path = REF_PATH / "ref_sky130_fd_noRC.cir"
+    assert check_diff(nopar_out, ref_path)

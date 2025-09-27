@@ -6,6 +6,7 @@ import logging
 from os.path import dirname
 from pathlib import Path
 from subprocess import CalledProcessError
+from typing import Literal
 
 from klayout import db as kl
 from hades.wrappers.tools import nix_run, to_wsl
@@ -34,7 +35,7 @@ def extract_spice_magic(
     rc_file: Path,
     cell_name: str = "None",
     output_path: Path = Path(),
-    options: str = "NoPar",
+    options: Literal["NoPar", "Ronly", "COnly", "RC"] = "RC",
 ) -> Path:
     """
     Extract the equivalent spice schematic of a gdsii file using magic-vlsi.
@@ -76,6 +77,12 @@ def extract_spice_magic(
                 line = line.replace("{output_file}", to_wsl(output_path))
             if "{root_path}" in line:
                 line = line.replace("{root_path}", to_wsl(root_path))
+            if "cthresh" in line:
+                thresh = "0.1" if options in ("COnly", "RC") else "infinite"
+                line = f"ext2spice cthresh {thresh}\n"
+            if "extresist" in line:
+                toggle = "on" if options in ("ROnly", "RC") else "off"
+                line = f"ext2spice extresist {toggle}\n"
             buff_out.append(line)
     tcl_file = output_path.with_suffix(".tcl")
     logging.info(tcl_file)
