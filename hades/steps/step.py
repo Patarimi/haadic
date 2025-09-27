@@ -22,7 +22,7 @@ flow_steps = {
     "layout": Callable,
     "techno": str,
     "bench": str,
-    "evaluate": Callable,
+    "evaluate": (Callable, None),
     "target": dict,
     "local_model": (Callable, None),
     "dimensions": (dict, None),
