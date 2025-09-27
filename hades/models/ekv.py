@@ -29,6 +29,7 @@ class EKV:
     def __post_init__(self):
         if self.techno not in list(Available_PDK):
             return
+
         def evaluate(bench_data: pd.DataFrame, small_l=True):
             gm = self.n_finger * bench_data["gm"]
             id = bench_data["i(d)"]
