@@ -8,7 +8,7 @@ from tabulate import tabulate
 import hades.steps.step as step
 from hades.layouts.tools import check_diff
 
-default_options = {"flow": {"reload_result": True}, "extract": {}}
+default_options = {"flow": {"reload_result": True}, "extract": "RC"}
 
 
 def flow(
@@ -25,6 +25,10 @@ def flow(
         geo = local_model(target)
     else:
         geo = dimensions
+    for defa in default_options:
+        if defa not in options:
+            options[defa] = default_options[defa]
+
     logging.info("layout generation with geometry: " + str(geo))
     reload_result = options["flow"]["reload_result"]
     if Path("top.gds").is_file() and reload_result:

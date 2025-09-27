@@ -35,12 +35,12 @@ def import_or_default(source: Path, import_list: dict[str, type | list]):
     for name in import_list:
         required = not isinstance(import_list[name], tuple)
         imp = __import__(source, fromlist=name)
+        exp_type = import_list[name] if required else import_list[name][0]
         if name not in imp.__dict__:
             if required:
-                raise RuntimeError("The {exp_type} {name} is required.")
+                raise RuntimeError(f"The {exp_type} {name} is required.")
             else:
                 imp.__dict__[name] = flow_steps[name][1]
-        exp_type = import_list[name] if required else import_list[name][0]
         logging.debug(
             f"current import: {name}\texp.type: {exp_type}\t real type: {type(imp.__dict__[name])}"
         )
@@ -98,7 +98,7 @@ def layout_generation(techno: str, layout: Callable, geo: dict[str, float] = {})
     lib.write(f"{top_cell_name}.gds")
 
 
-def extract_from_layout(techno: str, top_cell_name: str = "top", options="RC"):
+def extract_from_layout(techno: str, top_cell_name: str = "top", options: str = "RC"):
     extract_spice_magic(
         Path(f"{top_cell_name}.gds"),
         get_file(techno, "magic_rc"),

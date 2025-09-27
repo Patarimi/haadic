@@ -113,6 +113,8 @@ def add_reference(pdk_name: str, ref_name: str, path_file: Path | str):
 
 def get_file(pdk_name: str, file_type: str) -> Path:
     pdk = load_pdk(pdk_name)
+    if file_type == "base_dir":
+        return Path(dirname(__file__)) / Path(pdk["base_dir"])
     return Path(dirname(__file__)) / Path(pdk["base_dir"]) / Path(pdk[file_type])
 
 
