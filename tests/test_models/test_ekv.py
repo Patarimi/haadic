@@ -30,3 +30,6 @@ def test_ekv_model(tmp_path):
     # Test gm_IC method
     gm_ic = ekv.gm_IC(ic)
     assert np.all(gm_ic > 0)
+
+def test_ekv_sky130():
+    ekv = EKV("sky130")

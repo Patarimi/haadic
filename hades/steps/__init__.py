@@ -52,7 +52,7 @@ def flow(
     data = step.load_result(Path(bench).with_suffix(".raw"))
 
     logging.info("evaluate performances")
-    perf = evaluate(data)  # type: ignore[unresolved-attribute]
+    perf = evaluate(data) if "evaluate" not in options else evaluate(data, options["evaluate"])
     if perf is not None:
         res = [(key, perf[key], target.get(key, "N/A")) for key in perf]
         logging.info(

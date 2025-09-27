@@ -112,7 +112,12 @@ def run_bench(bench_name: str = "bench.cir", techno: str = "sky130"):
     data_file = Path(bench_name).with_suffix(".raw")
 
     spice = Netlist("").load(bench_name)
-    spice.add_other(f".lib {to_wsl(get_file(techno, 'lib_spice'))} tt")
+    skip_lib_add = False
+    for oth in spice.others:
+        if oth.startswith(".lib") and str(get_file(techno, 'lib_spice')) in oth:
+            skip_lib_add = True
+    if not skip_lib_add:
+        spice.add_other(f".lib {to_wsl(get_file(techno, 'lib_spice'))} tt")
     spice.write(bench_name)
 
     compute(Path(bench_name), data_file)
