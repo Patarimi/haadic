@@ -56,21 +56,25 @@ class EKV:
                 Path(__file__).parent / "ekv_bench.cir", working_dir / "ekv_bench.cir"
             )
             os.chdir(working_dir)
+            self.n_finger = 80
+            self.width = 1
+            self.length = 3
             flow(
                 self.techno,
                 dict(),
                 layout,
                 "ekv_bench.cir",
                 evaluate,
-                dimensions={"width": 1, "length": 3, "n_finger": 80},
+                dimensions=self.shape,
             )
+            self.length = 0.18
             flow(
                 self.techno,
                 dict(),
                 layout,
                 "ekv_bench.cir",
                 evaluate,
-                dimensions={"width": 1, "length": 0.18, "n_finger": 80},
+                dimensions=self.shape,
                 options={"evaluate": {"small_l": True}}
             )
         finally:
