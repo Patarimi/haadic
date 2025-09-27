@@ -35,12 +35,12 @@ def import_or_default(source: Path, import_list: dict[str, type | list]):
     for name in import_list:
         required = not isinstance(import_list[name], tuple)
         imp = __import__(source, fromlist=name)
+        exp_type = import_list[name] if required else import_list[name][0]
         if name not in imp.__dict__:
             if required:
-                raise RuntimeError("The {exp_type} {name} is required.")
+                raise RuntimeError(f"The {exp_type} {name} is required.")
             else:
                 imp.__dict__[name] = flow_steps[name][1]
-        exp_type = import_list[name] if required else import_list[name][0]
         logging.debug(
             f"current import: {name}\texp.type: {exp_type}\t real type: {type(imp.__dict__[name])}"
         )
@@ -98,7 +98,7 @@ def layout_generation(techno: str, layout: Callable, geo: dict[str, float] = {})
     lib.write(f"{top_cell_name}.gds")
 
 
-def extract_from_layout(techno: str, top_cell_name: str = "top", options="RC"):
+def extract_from_layout(techno: str, top_cell_name: str = "top", options: str = "RC"):
     extract_spice_magic(
         Path(f"{top_cell_name}.gds"),
         get_file(techno, "magic_rc"),
@@ -112,7 +112,12 @@ def run_bench(bench_name: str = "bench.cir", techno: str = "sky130"):
     data_file = Path(bench_name).with_suffix(".raw")
 
     spice = Netlist("").load(bench_name)
-    spice.add_other(f".lib {to_wsl(get_file(techno, 'lib_spice'))} tt")
+    skip_lib_add = False
+    for oth in spice.others:
+        if oth.startswith(".lib") and str(get_file(techno, "lib_spice")) in oth:
+            skip_lib_add = True
+    if not skip_lib_add:
+        spice.add_other(f".lib {to_wsl(get_file(techno, 'lib_spice'))} tt")
     spice.write(bench_name)
 
     compute(Path(bench_name), data_file)

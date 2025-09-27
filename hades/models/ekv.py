@@ -4,6 +4,7 @@ import logging
 import os
 from pathlib import Path
 import shutil
+from typing import get_args
 
 import numpy as np
 import pandas as pd
@@ -27,10 +28,17 @@ class EKV:
     lbda_c: float = 0
 
     def __post_init__(self):
-        if self.techno not in list(Available_PDK):
+        if self.techno not in get_args(Available_PDK):
             return
 
-        def evaluate(bench_data: pd.DataFrame, small_l=True):
+        working_dir = get_file(self.techno, "base_dir") / "hades"
+        model_file = f"{self.techno}.json"
+        if (working_dir / model_file).is_file():
+            self.load(working_dir / model_file)
+            if self.lbda_c != 0:
+                return
+
+        def evaluate(bench_data: pd.DataFrame, small_l=False):
             gm = self.n_finger * bench_data["gm"]
             id = bench_data["i(d)"]
             if small_l:
@@ -41,20 +49,33 @@ class EKV:
 
         try:
             starting_dir = os.getcwd()
-            working_dir = get_file(self.techno, "base_dir") / "hades"
             if not working_dir.is_dir():
+                logging.error(f"Creating dir: {working_dir}")
                 os.makedirs(working_dir)
             shutil.copy(
                 Path(__file__).parent / "ekv_bench.cir", working_dir / "ekv_bench.cir"
             )
             os.chdir(working_dir)
+            self.n_finger = 80
+            self.width = 1
+            self.length = 3
             flow(
                 self.techno,
                 dict(),
                 layout,
                 "ekv_bench.cir",
                 evaluate,
-                dimensions={"width": 1, "length": 0.18, "n_finger": 80},
+                dimensions=self.shape,
+            )
+            self.length = 0.18
+            flow(
+                self.techno,
+                dict(),
+                layout,
+                "ekv_bench.cir",
+                evaluate,
+                dimensions=self.shape,
+                options={"evaluate": {"small_l": True}},
             )
         finally:
             os.chdir(starting_dir)

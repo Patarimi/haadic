@@ -80,7 +80,7 @@ def extract_spice_magic(
             if "cthresh" in line:
                 thresh = "0.1" if options in ("COnly", "RC") else "infinite"
                 line = f"ext2spice cthresh {thresh}\n"
-            if "extresist" in line:
+            if "ext2spice extresist" in line:
                 toggle = "on" if options in ("ROnly", "RC") else "off"
                 line = f"ext2spice extresist {toggle}\n"
             buff_out.append(line)
