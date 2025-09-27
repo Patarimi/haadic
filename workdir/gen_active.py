@@ -54,7 +54,6 @@ def evaluate(bench_data: pd.DataFrame, dis_plot: bool = True) -> dict[str, float
     ekv.load("model.json")
     gm = ekv.n_finger * bench_data["gm"]
     id = bench_data["i(d)"]
-    ekv.extract(gm, id)
     IC = ekv.ic(id)
     gm_IC_simu = gm * ekv.ut / id
     gm_IC_model = ekv.gm_IC(id)
