@@ -11,11 +11,12 @@ from os.path import join
 import hades.techno as techno
 
 # Skip logging configuration if it is already done (eg during tests)
+log_path = os.path.join(os.path.curdir, "hades.log")
 if not logging.getLogger().hasHandlers():
     logging.basicConfig(
         level=logging.INFO,
         handlers=[
-            logging.FileHandler(os.path.join(os.path.curdir, "hades.log")),
+            logging.FileHandler(log_path),
             logging.StreamHandler(),
         ],
         format="|%(levelname)-7s| %(filename)s:%(lineno)d | %(message)s",
@@ -29,7 +30,8 @@ app.command(techno.pkd_app)
 def smoke_test_cli():
     from hades.wrappers.tools import nix_check
 
-    assert nix_check()
+    if not nix_check():
+        raise SystemError(f"Error during nix check. Please check {log_path}.")
     logging.info("hades installed correctly !")
 
 
