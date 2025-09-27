@@ -59,7 +59,7 @@ def run_cli(
         logging.info(f"Running design {design_py} in {run_dir}")
         design["options"]["flow"] = {"reload_result": reload_result}
         os.chdir(run_dir)
-        flow(*design)
+        flow(**design)
 
     finally:
         os.chdir(starting_dir)

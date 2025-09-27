@@ -2,7 +2,7 @@ import logging
 import os
 from pathlib import Path
 import shutil
-from typing import Callable
+from typing import Callable, Optional
 from tabulate import tabulate
 
 import hades.steps.step as step
@@ -15,10 +15,14 @@ def flow(
     layout: Callable,
     bench: Path,
     evaluate: Callable,
-    local_model: Callable,
+    local_model: Optional[Callable],
+    dimensions: Optional[dict[str, float]],
     options: dict[str, str],
 ):
-    geo = local_model(target)
+    if local_model is not None:
+        geo = local_model(target)
+    else:
+        geo = dimensions
     logging.info("layout generation with geometry: " + str(geo))
     reload_result = options["flow"]["reload_result"]
     if Path("top.gds").is_file() and reload_result:

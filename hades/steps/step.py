@@ -24,7 +24,8 @@ flow_steps = {
     "bench": str,
     "evaluate": Callable,
     "target": dict,
-    "local_model": Callable,
+    "local_model": (Callable, None),
+    "dimensions": (dict, None),
     "options": (dict, default_dict),
 }
 
@@ -32,20 +33,24 @@ flow_steps = {
 def import_or_default(source: Path, import_list: dict[str, type | list]):
     imp_d = dict()
     for name in import_list:
+        required = not isinstance(import_list[name], tuple)
         imp = __import__(source, fromlist=name)
-        exp_type = (
-            import_list[name]
-            if not isinstance(import_list[name], tuple)
-            else import_list[name][0]
-        )
+        if name not in imp.__dict__:
+            if required:
+                raise RuntimeError("The {exp_type} {name} is required.")
+            else:
+                imp.__dict__[name] = flow_steps[name][1]
+        exp_type = import_list[name] if required else import_list[name][0]
         logging.debug(
             f"current import: {name}\texp.type: {exp_type}\t real type: {type(imp.__dict__[name])}"
         )
-        if not isinstance(imp.__dict__[name], exp_type):
+        if not isinstance(imp.__dict__[name], exp_type) and required:
             raise TypeError(
                 f"Type of {name} in {source} is {type(name)}. Expected {exp_type}."
             )
         imp_d[name] = imp.__dict__[name]
+    if imp_d["local_model"] is None and imp_d["dimensions"] is None:
+        raise RuntimeError("Please provide a local_model function or a dimensions dict.")
     return imp_d
 
 
