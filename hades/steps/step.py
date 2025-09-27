@@ -50,7 +50,9 @@ def import_or_default(source: Path, import_list: dict[str, type | list]):
             )
         imp_d[name] = imp.__dict__[name]
     if imp_d["local_model"] is None and imp_d["dimensions"] is None:
-        raise RuntimeError("Please provide a local_model function or a dimensions dict.")
+        raise RuntimeError(
+            "Please provide a local_model function or a dimensions dict."
+        )
     return imp_d
 
 
