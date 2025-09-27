@@ -33,8 +33,8 @@ class EKV:
 
         working_dir = get_file(self.techno, "base_dir") / "hades"
         model_file = f"{self.techno}.json"
-        if (working_dir/model_file).is_file():
-            self.load(working_dir/model_file)
+        if (working_dir / model_file).is_file():
+            self.load(working_dir / model_file)
             if self.lbda_c != 0:
                 return
 
@@ -75,7 +75,7 @@ class EKV:
                 "ekv_bench.cir",
                 evaluate,
                 dimensions=self.shape,
-                options={"evaluate": {"small_l": True}}
+                options={"evaluate": {"small_l": True}},
             )
         finally:
             os.chdir(starting_dir)

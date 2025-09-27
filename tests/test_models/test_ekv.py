@@ -31,5 +31,8 @@ def test_ekv_model(tmp_path):
     gm_ic = ekv.gm_IC(ic)
     assert np.all(gm_ic > 0)
 
+
 def test_ekv_sky130():
     ekv = EKV("sky130")
+    assert ekv.length == 0.18
+    assert ekv.n == 1.5178669546156798

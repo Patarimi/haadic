@@ -114,7 +114,7 @@ def run_bench(bench_name: str = "bench.cir", techno: str = "sky130"):
     spice = Netlist("").load(bench_name)
     skip_lib_add = False
     for oth in spice.others:
-        if oth.startswith(".lib") and str(get_file(techno, 'lib_spice')) in oth:
+        if oth.startswith(".lib") and str(get_file(techno, "lib_spice")) in oth:
             skip_lib_add = True
     if not skip_lib_add:
         spice.add_other(f".lib {to_wsl(get_file(techno, 'lib_spice'))} tt")
