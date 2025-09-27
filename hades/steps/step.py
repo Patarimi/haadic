@@ -3,6 +3,7 @@ from datetime import datetime
 import logging
 import os
 from pathlib import Path
+import shutil
 import sys
 
 import pandas as pd
@@ -14,6 +15,38 @@ from hades.wrappers.ngspice import compute
 from hades.techno import get_file
 from hades.parsers.netlist import Netlist
 from hades.wrappers.tools import to_wsl
+
+default_dict = {"extract": None}
+
+flow_steps = {
+    "layout": Callable,
+    "techno": str,
+    "bench": str,
+    "evaluate": Callable,
+    "target": dict,
+    "local_model": Callable,
+    "options": (dict, default_dict),
+}
+
+
+def import_or_default(source: Path, import_list: dict[str, type | list]):
+    imp_d = dict()
+    for name in import_list:
+        imp = __import__(source, fromlist=name)
+        exp_type = (
+            import_list[name]
+            if not isinstance(import_list[name], tuple)
+            else import_list[name][0]
+        )
+        logging.debug(
+            f"current import: {name}\texp.type: {exp_type}\t real type: {type(imp.__dict__[name])}"
+        )
+        if not isinstance(imp.__dict__[name], exp_type):
+            raise TypeError(
+                f"Type of {name} in {source} is {type(name)}. Expected {exp_type}."
+            )
+        imp_d[name] = imp.__dict__[name]
+    return imp_d
 
 
 def setup(design_py: str, run_folder: Path, timestamp: bool = True):
@@ -27,11 +60,13 @@ def setup(design_py: str, run_folder: Path, timestamp: bool = True):
     else:
         des_name = str(des)
     sys.path.append(os.curdir)
-    design = __import__(
-        des_name,
-        fromlist=("layout", "techno", "bench", "evaluate", "target", "local_model"),
-    )
+    design = import_or_default(des_name, flow_steps)
     os.chdir(starting_dir)
+    expected_bench = Path(design_py).parent / design["bench"]
+    if not expected_bench.is_file():  #  type: ignore[unresolved-attribute]
+        raise FileNotFoundError(
+            f"bench file {str(expected_bench)} not found or is not a file."  #  type: ignore[unresolved-attribute]
+        )
 
     if run_folder == Path("."):
         run_folder = des
@@ -42,6 +77,7 @@ def setup(design_py: str, run_folder: Path, timestamp: bool = True):
     )
     if not Path(run_dir).is_dir():
         os.mkdir(run_dir)
+    shutil.copy(expected_bench, run_dir)
     return design, run_dir
 
 
