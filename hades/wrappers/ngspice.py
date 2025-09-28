@@ -5,18 +5,6 @@ from typing import Optional
 from hades.wrappers.tools import nix_check, nix_run, to_wsl
 
 
-class NGSpice:
-    """
-    Base class for NGSpice simulation.
-    """
-
-    def prepare(self):
-        pass
-
-    def parse(self):
-        pass
-
-
 def compute(
     input_file: Path,
     data_file: Optional[Path] = None,
@@ -74,6 +62,6 @@ def compute(
     proc = nix_run(cmd)
     if proc.returncode != 0:
         RuntimeWarning(str(cmd))
-        with open(data_file) as f:
+        with open(log_file) as f:
             strm = f.readlines()
         raise RuntimeError(strm)

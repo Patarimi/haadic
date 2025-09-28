@@ -34,7 +34,11 @@ def import_or_default(source: Path, import_list: dict[str, type | list]):
     imp_d = dict()
     for name in import_list:
         required = not isinstance(import_list[name], tuple)
-        imp = __import__(source, fromlist=name)
+        source = Path(source)
+        if str(source.parent.absolute()) not in sys.path:
+            sys.path.append(str(source.parent.absolute()))
+        src_name = str(source.stem)
+        imp = __import__(src_name, fromlist=name)
         exp_type = import_list[name] if required else import_list[name][0]
         if name not in imp.__dict__:
             if required:
@@ -49,25 +53,18 @@ def import_or_default(source: Path, import_list: dict[str, type | list]):
                 f"Type of {name} in {source} is {type(name)}. Expected {exp_type}."
             )
         imp_d[name] = imp.__dict__[name]
-    if imp_d["local_model"] is None and imp_d["dimensions"] is None:
-        raise RuntimeError(
-            "Please provide a local_model function or a dimensions dict."
-        )
     return imp_d
 
 
 def setup(design_py: str, run_folder: Path, timestamp: bool = True):
     starting_dir = os.getcwd()
-    des = Path(design_py).with_suffix("")
+    des = Path(design_py)
 
-    if len(str(des).split("/")) > 0:
-        os.chdir(des.parent)
-        des_name = des.name
-        logging.debug(f"Importing design from {des_name}")
-    else:
-        des_name = str(des)
-    sys.path.append(os.curdir)
-    design = import_or_default(des_name, flow_steps)
+    design = import_or_default(design_py, flow_steps)
+    if design["local_model"] is None and design["dimensions"] is None:
+        raise RuntimeError(
+            "Please provide a local_model function or a dimensions dict."
+        )
     os.chdir(starting_dir)
     expected_bench = Path(design_py).parent / design["bench"]
     if not expected_bench.is_file():  #  type: ignore[unresolved-attribute]
@@ -111,7 +108,7 @@ def extract_from_layout(techno: str, top_cell_name: str = "top", options: str = 
 def run_bench(bench_name: str = "bench.cir", techno: str = "sky130"):
     data_file = Path(bench_name).with_suffix(".raw")
 
-    spice = Netlist("").load(bench_name)
+    spice = Netlist().load(bench_name)
     skip_lib_add = False
     for oth in spice.others:
         if oth.startswith(".lib") and str(get_file(techno, "lib_spice")) in oth:
