@@ -12,7 +12,9 @@ REF_PATH = Path(dirname(__file__)).parent / "ref_files"
 
 def test_spice_extractor(tmp_path):
     output_path = tmp_path / "spice.cir"
-    extract_spice_klayout(REF_PATH / "ref_ind.gds", techno="sky130", output_path=output_path)
+    extract_spice_klayout(
+        REF_PATH / "ref_ind.gds", techno="sky130", output_path=output_path
+    )
     assert output_path.exists()
     filecmp.cmp(output_path, REF_PATH / "ref_ind.cir")
 

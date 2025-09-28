@@ -111,7 +111,7 @@ def extract_from_layout(techno: str, top_cell_name: str = "top", options: str = 
 def run_bench(bench_name: str = "bench.cir", techno: str = "sky130"):
     data_file = Path(bench_name).with_suffix(".raw")
 
-    spice = Netlist("").load(bench_name)
+    spice = Netlist().load(bench_name)
     skip_lib_add = False
     for oth in spice.others:
         if oth.startswith(".lib") and str(get_file(techno, "lib_spice")) in oth:
