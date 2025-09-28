@@ -2,7 +2,7 @@ import filecmp
 import pytest
 from os.path import dirname, isdir
 
-from hades.extractors.spicing import extract_spice, extract_spice_magic
+from hades.extractors.spicing import extract_spice_klayout, extract_spice_magic
 from hades.extractors.tools import check_diff
 from hades.wrappers.tools import nix_check
 from pathlib import Path
@@ -12,7 +12,7 @@ REF_PATH = Path(dirname(__file__)).parent / "ref_files"
 
 def test_spice_extractor(tmp_path):
     output_path = tmp_path / "spice.cir"
-    extract_spice(REF_PATH / "ref_ind.gds", techno="sky130", output_path=output_path)
+    extract_spice_klayout(REF_PATH / "ref_ind.gds", techno="sky130", output_path=output_path)
     assert output_path.exists()
     filecmp.cmp(output_path, REF_PATH / "ref_ind.cir")
 
