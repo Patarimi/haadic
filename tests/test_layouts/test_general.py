@@ -1,8 +1,8 @@
 from pathlib import Path
 import klayout.db as kl
 
-from hades.layouts.general import via, via_stack, ground_plane, get_dtext, get_shape
-from hades.layouts.tools import LayerStack, check_diff
+from haadic.layouts.general import via, via_stack, ground_plane, get_dtext, get_shape
+from haadic.layouts.tools import LayerStack, check_diff
 from os.path import dirname
 
 stack = LayerStack("mock")

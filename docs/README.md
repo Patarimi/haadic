@@ -1,6 +1,6 @@
-# HADES
+# HAADIC
 
-## High-frequency Analog DESigner
+## High-Automated Analog Designer for Integrated Circuits.
 
 This project is a prototype. Its goal is to create a technological and
 software-agnostic design flow, from device sizing to layout and implementation.
@@ -12,7 +12,7 @@ This application needs nix and python3. For windows, please install NixOS as sho
 Installation using [uvx](https://docs.astral.sh/uv/getting-started/installation/) is recommended.
 
 ```shell
-uvx --with="git+https://github.com/Patarimi/hades.git" hades
+uvx --with="git+https://github.com/Patarimi/hades.git" haadic
 ```
 
 ## Design flow
@@ -22,9 +22,9 @@ Starting from the specifications written in a design.yml or a python file, the f
 ```mermaid
 flowchart TD
     start -- "specifications (.yml)" --> app["Physical Model
-(hades.devices)"]
+(haadic.devices)"]
     app --dimensions --> pl["Parametric Layout
-(klayout + hades.layouts)"]
+(klayout + haadic.layouts)"]
     pl --"geometries (.gdsII)" --> be_sim["RC extraction up to Mx
 (Magic-VLSI)"]
     pl --"geometries (.gdsII)" --> fe_sim["3D simulation from Mx
@@ -35,7 +35,7 @@ flowchart TD
     ext --"Performances (.yml)" --> atSpec{"Perf = Spec ?"}
     atSpec --> |Yes| stop
     atSpec --> |No| cal["Model Calibrator
-(hades.calibrator)"]
+(haadic.calibrator)"]
     cal --"Locally Optimized Parameters" --> app
 ```
 
@@ -46,10 +46,10 @@ When finished, a _.gds_ file is available for further design.
 The simulator can be configured using:
 
 ```shell
-hades config <simulator_name>
+haadic config <simulator_name>
 ```
 
-This command will write a simulator.yml file in the installation directory of hades.
+This command will write a simulator.yml file in the installation directory of haadic.
 The structure is the following:
 
 ```yaml
@@ -60,7 +60,7 @@ simulator_name:
     - list of option to configure the run
 ```
 
-Similarly, a techno.yml file can be created at hades root with the following structure:
+Similarly, a techno.yml file can be created at haadic root with the following structure:
 
 ```yaml
 techno_name:
@@ -77,7 +77,7 @@ A techno.yml file with three open source PDK is already supplied.
 Configuration file design.yml. This file can be generated using:
 
 ```shell
-hades template
+haadic template
 ```
 
 It must contain at least:
@@ -95,14 +95,14 @@ It is also possible to create custom devices using a python file. *To be written
 
 ## Tests configuration
 
-Install hades with optional group dev :
+Install haadic with optional group dev :
 
 ```shell
-poetry install git+https://github.com/Patarimi/hades --with dev
+uv install git+https://github.com/Patarimi/hades --with dev
 ```
 
 Then run pytest in a shell
 
 ```shell
-poetry run pytest
+uvx run poe test
 ```

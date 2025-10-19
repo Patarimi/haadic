@@ -2,7 +2,7 @@ from os.path import dirname, isdir
 import os
 from pathlib import Path
 import pytest
-from hades.layouts import tools
+from haadic.layouts import tools
 import logging
 
 REF_PATH = Path(dirname(__file__)).parent / "ref_files"

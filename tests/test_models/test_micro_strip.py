@@ -1,6 +1,6 @@
 import pytest
 
-import hades.models.micro_strip as ms
+import haadic.models.micro_strip as ms
 
 
 def test_micro_strip_impedance():

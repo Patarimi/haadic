@@ -2,9 +2,9 @@ import filecmp
 import pytest
 from os.path import dirname, isdir
 
-from hades.extractors.spicing import extract_spice_klayout, extract_spice_magic
-from hades.extractors.tools import check_diff
-from hades.wrappers.tools import nix_check
+from haadic.extractors.spicing import extract_spice_klayout, extract_spice_magic
+from haadic.extractors.tools import check_diff
+from haadic.wrappers.tools import nix_check
 from pathlib import Path
 
 REF_PATH = Path(dirname(__file__)).parent / "ref_files"

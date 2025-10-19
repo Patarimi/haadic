@@ -1,5 +1,5 @@
 from pathlib import Path
-from hades.parsers.raw import parse_raw, parse_out
+from haadic.parsers.raw import parse_raw, parse_out
 
 
 def test_parse_raw():

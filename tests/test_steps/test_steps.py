@@ -1,7 +1,7 @@
 from typing import Callable
 
 import pytest
-from hades.steps.step import import_or_default
+from haadic.steps.step import import_or_default
 
 ref_path = "./tests/test_steps/design.py"
 

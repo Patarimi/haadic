@@ -5,7 +5,7 @@ import mkdocs_gen_files  # type: ignore [unresolved-import]
 
 nav = mkdocs_gen_files.Nav()
 
-for path in sorted(Path("hades").rglob("*.py")):  #
+for path in sorted(Path("haadic").rglob("*.py")):  #
     module_path = path.relative_to(".").with_suffix("")  #
     doc_path = path.relative_to(".").with_suffix(".md")  #
     full_doc_path = Path("reference", doc_path)  #

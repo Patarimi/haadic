@@ -2,7 +2,7 @@ from os.path import dirname
 from pathlib import Path
 import pytest
 
-from hades.wrappers.oems import compute
+from haadic.wrappers.oems import compute
 
 
 @pytest.mark.skip(reason="Mess with dependabot")

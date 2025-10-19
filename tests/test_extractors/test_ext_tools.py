@@ -1,6 +1,6 @@
 from pathlib import Path
 from os.path import dirname
-from hades.extractors.tools import check_diff
+from haadic.extractors.tools import check_diff
 
 REF_PATH = Path(dirname(__file__)).parent / "ref_files"
 

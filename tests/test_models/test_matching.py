@@ -1,5 +1,5 @@
 import numpy as np
-import hades.models.matching as mt
+import haadic.models.matching as mt
 import pytest
 
 

@@ -5,8 +5,8 @@ import shutil
 
 import pytest
 
-from hades.wrappers.ngspice import compute
-from hades.wrappers.tools import nix_check
+from haadic.wrappers.ngspice import compute
+from haadic.wrappers.tools import nix_check
 
 
 @pytest.mark.skipif(not nix_check(), reason="Nix not correctly installed")

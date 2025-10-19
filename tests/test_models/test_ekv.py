@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from hades.models.ekv import EKV
+from haadic.models.ekv import EKV
 
 
 def test_ekv_model(tmp_path):

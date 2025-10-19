@@ -87,9 +87,9 @@ jobs:
         uv sync --group dev
     - name: Install PDK
       run: |
-        uv run hades pdk install sky130
-        uv run hades pdk install gf180mcu
-        uv run hades pdk list
+        uv run haadic pdk install sky130
+        uv run haadic pdk install gf180mcu
+        uv run haadic pdk list
     - name: Test with Pytest
       run: |
         uv run poe test -rxXs

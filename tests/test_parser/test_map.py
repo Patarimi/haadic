@@ -2,7 +2,7 @@ import os.path
 
 import pytest
 
-from hades.parsers.layermap import load_map, get_number
+from haadic.parsers.layermap import load_map, get_number
 
 pytestmark = pytest.mark.skipif(
     not (os.path.isdir("./pdk/mock")), reason="PDK not installed."
