@@ -1,7 +1,7 @@
 from pathlib import Path
 import pytest
-from hades.parsers.tlef import load_tlef, get_metal, get_via
-from hades.techno import load_pdk
+from haadic.parsers.tlef import load_tlef, get_metal, get_via
+from haadic.techno import load_pdk
 from os.path import join, dirname, isdir
 import logging
 

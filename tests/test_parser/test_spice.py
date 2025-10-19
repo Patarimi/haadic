@@ -1,7 +1,7 @@
 from os.path import join, dirname
 
-from hades.parsers.spice import SpiceTransformer
-from hades.parsers.tools import parse
+from haadic.parsers.spice import SpiceTransformer
+from haadic.parsers.tools import parse
 
 
 def test_spice_parser():

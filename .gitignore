@@ -1,11 +1,10 @@
 .idea/
-/hades/simulators/simulator.yml
+/haadic/simulators/simulator.yml
 *.env
-/hades/techno.yml
 /site/
 /pdk/*
-/dist/hades-*.tar.gz
-/dist/hades-*.whl
+/dist/haadic-*.tar.gz
+/dist/haadic-*.whl
 !/pdk/mock/
 !/pdk/patches/
 /tmp/

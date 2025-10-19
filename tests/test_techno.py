@@ -1,4 +1,4 @@
-from hades.techno import list_pdk, load_pdk, get_file
+from haadic.techno import list_pdk, load_pdk, get_file
 
 pdk_exp = ["sky130", "asap7", "gf180mcu"]
 

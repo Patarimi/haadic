@@ -2,8 +2,8 @@ from os.path import dirname
 from pathlib import Path
 from klayout import db
 
-from hades.layouts.active import mosfet, line, connect
-from hades.layouts.tools import check_diff, LayerStack, Layer
+from haadic.layouts.active import mosfet, line, connect
+from haadic.layouts.tools import check_diff, LayerStack, Layer
 
 REF_PATH = Path(dirname(__file__)).parent / "ref_files"
 

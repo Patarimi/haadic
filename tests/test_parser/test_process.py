@@ -1,6 +1,6 @@
 from pathlib import Path
 
-import hades.parsers.process as process
+import haadic.parsers.process as process
 
 
 def test_process():

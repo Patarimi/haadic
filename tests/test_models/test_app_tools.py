@@ -1,6 +1,6 @@
 from math import sqrt
 
-from hades.models import tools
+from haadic.models import tools
 from pytest import approx
 
 

@@ -2,10 +2,10 @@ from pathlib import Path
 from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
-from hades.layouts.active import mosfet, line, connect
-from hades.layouts.general import set_as_port
-from hades.layouts.tools import LayerStack
-from hades.models.ekv import EKV
+from haadic.layouts.active import mosfet, line, connect
+from haadic.layouts.general import set_as_port
+from haadic.layouts.tools import LayerStack
+from haadic.models.ekv import EKV
 
 techno = "sky130"
 target: dict[str, float] = {"IC": 5, "id": 0.1e-3, "length": 0.15e-6}

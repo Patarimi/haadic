@@ -1,5 +1,5 @@
 [project]
-name = "hades"
+name = "haadic"
 version = "0.5.1"
 description = "A package for parametric layout design."
 authors = [{name = "Patarimi", email="<38954040+Patarimi@users.noreply.github.com>"}]
@@ -29,7 +29,7 @@ build-backend = "uv_build"
 module-root = ""
 
 [project.scripts]
-hades = "hades.main:app"
+haadic = "haadic.main:app"
 
 [tool.poe.tasks]
 update_show = "uv lock --dry-run --upgrade"
@@ -75,4 +75,4 @@ doc = [
 
 
 [tool.ty.src]
-exclude = ["hades/wrappers/oems.py", "hades/wrappers/ngsolve_w.py"]
+exclude = ["haadic/wrappers/oems.py", "haadic/wrappers/ngsolve_w.py"]

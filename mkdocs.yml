@@ -1,7 +1,7 @@
-site_name: HADes
-site_url: https://patarimi.github.io/hades
+site_name: HAADIC
+site_url: https://patarimi.github.io/haadic
 watch:
-  - hades
+  - haadic
 
 nav:
   - Home: README.md

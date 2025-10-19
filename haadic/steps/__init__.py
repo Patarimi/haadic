@@ -1,0 +1,68 @@
+import logging
+import os
+from pathlib import Path
+import shutil
+from typing import Callable, Optional
+from tabulate import tabulate
+
+import haadic.steps.step as step
+from haadic.layouts.tools import check_diff
+
+default_options = {"flow": {"reload_result": True}, "extract": "RC"}
+
+
+def flow(
+    techno: str,
+    target: dict[str, str],
+    layout: Callable,
+    bench: Path,
+    evaluate: Callable,
+    local_model: Optional[Callable] = None,
+    dimensions: Optional[dict[str, float]] = None,
+    options: dict[str, str] = default_options,
+):
+    if local_model is not None:
+        geo = local_model(target)
+    else:
+        geo = dimensions
+    for defa in default_options:
+        if defa not in options.keys():
+            options[defa] = default_options[defa]
+
+    logging.info("layout generation with geometry: " + str(geo))
+    reload_result = options["flow"]["reload_result"]
+    if Path("top.gds").is_file() and reload_result:
+        logging.info("existing layout found, checking for changes...")
+        shutil.move("top.gds", "old_top.gds")
+        step.layout_generation(techno, layout, geo)  #  type: ignore[unresolved-attribute]:
+        if not check_diff(Path("old_top.gds"), Path("top.gds")):
+            logging.info("Changes detected in layout, back to full flow.")
+            reload_result = False
+        os.remove("old_top.gds")
+    else:
+        logging.info("Running full flow.")
+        step.layout_generation(techno, layout, geo)
+        reload_result = False
+    if not reload_result:
+        logging.info("extracting schematic...")
+        step.extract_from_layout(techno, options=options["extract"])  #  type: ignore[unresolved-attribute]
+        step.run_bench(bench, techno)  #  type: ignore[unresolved-attribute]
+
+    logging.info("loading simulation results...")
+    data = step.load_result(Path(bench).with_suffix(".raw"))
+
+    logging.info("evaluate performances")
+    perf = (
+        evaluate(data)
+        if "evaluate" not in options
+        else evaluate(data, options["evaluate"])
+    )
+    if perf is not None:
+        res = [(key, perf[key], target.get(key, "N/A")) for key in perf]
+        logging.info(
+            "\n" + tabulate(res, headers=["obtained", "targeted"], tablefmt="grid")
+        )
+
+    logging.info("compare performances to targets")
+    cost = step.compare_to(perf, target)  # type: ignore[unresolved-attribute]
+    logging.info(f"current cost: {cost}")

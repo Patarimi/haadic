@@ -1,8 +1,8 @@
 from os.path import dirname, isdir
 from pathlib import Path
 import pytest
-from hades.layouts.inductor import octagonal_inductor
-from hades.layouts.tools import LayerStack, check_diff
+from haadic.layouts.inductor import octagonal_inductor
+from haadic.layouts.tools import LayerStack, check_diff
 import klayout.db as db
 
 REF_PATH = Path(dirname(__file__)).parent / "ref_files"

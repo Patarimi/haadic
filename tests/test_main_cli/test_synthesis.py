@@ -1,5 +1,5 @@
 import os
-from hades.main import run_cli, smoke_test_cli
+from haadic.main import run_cli, smoke_test_cli
 import pytest
 
 pytestmark = pytest.mark.skipif(

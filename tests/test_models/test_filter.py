@@ -1,4 +1,4 @@
-import hades.models.filter as flr
+import haadic.models.filter as flr
 from pytest import approx
 from numpy import array
 

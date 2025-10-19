@@ -2,13 +2,13 @@ from os.path import dirname
 from pathlib import Path
 from klayout import db
 
-from hades.layouts.microstrip import (
+from haadic.layouts.microstrip import (
     straight_line,
     coupled_lines,
     lange_coupler,
     marchand_balun,
 )
-from hades.layouts.tools import LayerStack, check_diff
+from haadic.layouts.tools import LayerStack, check_diff
 
 layerstack = LayerStack("mock")
 REF_PATH = Path(dirname(__file__)).parent / "ref_files"
