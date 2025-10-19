@@ -12,7 +12,7 @@ This application needs nix and python3. For windows, please install NixOS as sho
 Installation using [uvx](https://docs.astral.sh/uv/getting-started/installation/) is recommended.
 
 ```shell
-uvx --with="git+https://github.com/Patarimi/hades.git" haadic
+uvx --with="git+https://github.com/Patarimi/haadic.git" haadic
 ```
 
 ## Design flow
@@ -98,7 +98,7 @@ It is also possible to create custom devices using a python file. *To be written
 Install haadic with optional group dev :
 
 ```shell
-uv install git+https://github.com/Patarimi/hades --with dev
+uv install git+https://github.com/Patarimi/haadic --with dev
 ```
 
 Then run pytest in a shell
