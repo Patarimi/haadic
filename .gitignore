@@ -1,7 +1,6 @@
 .idea/
 /haadic/simulators/simulator.yml
 *.env
-/haadic/techno.yml
 /site/
 /pdk/*
 /dist/haadic-*.tar.gz
