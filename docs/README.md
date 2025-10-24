@@ -1,6 +1,6 @@
 # HAADIC
 
-**High-Automated Analog Designer for Integrated Circuits**
+**Highly-Automated Analog Designer for Integrated Circuits**
 
 This project is a prototype. Its goal is to create a technological and
 software-agnostic design flow, from device sizing to layout and implementation.
