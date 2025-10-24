@@ -24,7 +24,7 @@ def install(pdk_name: str):
     base_install = join(dirname(__file__), "../pdk/")
     tech = load_pdk(pdk_name)
     base_url = tech["source_url"]
-    if base_url == "volare":
+    if base_url == "ciel":
         cmd = [
             "ciel",
             "enable",

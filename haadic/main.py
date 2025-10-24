@@ -25,6 +25,7 @@ app.command(techno.pkd_app)
 
 @app.command(name="smoke-test")
 def smoke_test_cli():
+    """Run a 'smoke test' to check if haadic is installed correctly."""
     from haadic.wrappers.tools import nix_check
 
     if not nix_check():
