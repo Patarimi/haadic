@@ -1,6 +1,6 @@
 # HAADIC
 
-## High-Automated Analog Designer for Integrated Circuits.
+**High-Automated Analog Designer for Integrated Circuits**
 
 This project is a prototype. Its goal is to create a technological and
 software-agnostic design flow, from device sizing to layout and implementation.
@@ -11,17 +11,19 @@ This application needs nix and python3. For windows, please install NixOS as sho
 
 Installation using [uvx](https://docs.astral.sh/uv/getting-started/installation/) is recommended.
 
+The following command check if everything is correctly setup :
+
 ```shell
-uvx --with="git+https://github.com/Patarimi/haadic.git" haadic
+uvx --with="git+https://github.com/Patarimi/haadic.git" haadic smoke-test
 ```
 
 ## Design flow
 
-Starting from the specifications written in a design.yml or a python file, the following flow is run [see](#working-directory).
+Starting from the specifications written in a python file, the following flow is run [see](#working-directory).
 
 ```mermaid
 flowchart TD
-    start -- "specifications (.yml)" --> app["Physical Model
+    start -- "specifications (.py)" --> app["Physical Model
 (haadic.devices)"]
     app --dimensions --> pl["Parametric Layout
 (klayout + haadic.layouts)"]
@@ -41,57 +43,29 @@ flowchart TD
 
 When finished, a _.gds_ file is available for further design.
 
-## Simulators and PDKs configuration
+## PDKs configuration
 
-The simulator can be configured using:
-
-```shell
-haadic config <simulator_name>
-```
-
-This command will write a simulator.yml file in the installation directory of haadic.
-The structure is the following:
-
-```yaml
-simulator_name:
-  base_dir: path to root directory
-  name: name of the binary file
-  option:
-    - list of option to configure the run
-```
-
-Similarly, a techno.yml file can be created at haadic root with the following structure:
+A techno.yml file can be created in the working dir or the haadic root with the following structure:
 
 ```yaml
 techno_name:
   base_dir: path to the pdk directory root
   layer_map: path to the layermap (relative to the base_dir)
-  process: path to the process file (-proc option in emx)
   techlef: path to the tlef file
+  magic_rc: path to the configuration file of magic
+  source_url: url to be use for download (set to "ciel" for ciel installation)
+  version: version id (only required if source_url is set to "ciel")
 ```
 
-A techno.yml file with three open source PDK is already supplied.
+A techno.yml file with three open source PDK and a mock PDK are already supplied.
 
-## Working directory
+## Setup a new Project :
 
-Configuration file design.yml. This file can be generated using:
+A directory with required files can be generated using :
 
 ```shell
-haadic template
+haadic new
 ```
-
-It must contain at least:
-
-```yaml
-name: name of the output file
-design:
-  name: name of the component in the library
-  specifications:
-    key: pair of specification
-techno:
-```
-
-It is also possible to create custom devices using a python file. *To be written*.
 
 ## Tests configuration
 
