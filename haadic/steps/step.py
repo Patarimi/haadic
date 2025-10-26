@@ -5,9 +5,11 @@ import os
 from pathlib import Path
 import shutil
 import sys
+from typing import Optional
 
 import pandas as pd
 from klayout import db
+import pydantic
 from haadic.layouts.tools import LayerStack
 from haadic.extractors.spicing import extract_spice_magic
 from haadic.parsers.raw import parse_out
@@ -18,41 +20,27 @@ from haadic.wrappers.tools import to_wsl
 
 default_dict = {"extract": None}
 
-flow_steps = {
-    "layout": Callable,
-    "techno": str,
-    "bench": str,
-    "evaluate": (Callable, None),
-    "target": dict,
-    "local_model": (Callable, None),
-    "dimensions": (dict, None),
-    "options": (dict, default_dict),
-}
+
+@pydantic.dataclasses.dataclass
+class FlowStep:
+    layout: Callable
+    techno: str
+    benches: list[str] | str
+    evaluate: Optional[Callable] = None
+    target: dict = pydantic.Field(default_factory=dict)
+    local_model: Optional[Callable] = None
+    dimensions: Optional[dict] = None
+    options: dict = pydantic.Field(default_factory=lambda: default_dict)
 
 
-def import_or_default(source: Path, import_list: dict[str, type | list]):
-    imp_d = dict()
-    for name in import_list:
-        required = not isinstance(import_list[name], tuple)
+def import_or_default(source: Path):
+    for name in FlowStep.__dataclass_fields__.keys():
         source = Path(source)
         if str(source.parent.absolute()) not in sys.path:
             sys.path.append(str(source.parent.absolute()))
         src_name = str(source.stem)
-        imp = __import__(src_name, fromlist=name)
-        exp_type = import_list[name] if required else import_list[name][0]
-        if name not in imp.__dict__:
-            if required:
-                raise RuntimeError(f"The {exp_type} {name} is required.")
-            else:
-                imp.__dict__[name] = flow_steps[name][1]
-        logging.debug(
-            f"current import: {name}\texp.type: {exp_type}\t real type: {type(imp.__dict__[name])}"
-        )
-        if not isinstance(imp.__dict__[name], exp_type) and required:
-            raise TypeError(
-                f"Type of {name} in {source} is {type(name)}. Expected {exp_type}."
-            )
-        imp_d[name] = imp.__dict__[name]
+        imp = __import__(src_name, fromlist=name).__dict__
+        imp_d = FlowStep(**imp).__dict__
     return imp_d
 
 
@@ -60,7 +48,7 @@ def setup(design_py: str, run_folder: Path, timestamp: bool = True):
     starting_dir = os.getcwd()
     des = Path(design_py)
 
-    design = import_or_default(design_py, flow_steps)
+    design = import_or_default(design_py)
     if design["local_model"] is None and design["dimensions"] is None:
         raise RuntimeError(
             "Please provide a local_model function or a dimensions dict."
@@ -73,7 +61,7 @@ def setup(design_py: str, run_folder: Path, timestamp: bool = True):
         )
 
     if run_folder == Path("."):
-        run_folder = des
+        run_folder = des.parent / des.stem
     run_dir = (
         run_folder
         if not timestamp
