@@ -15,7 +15,7 @@ def flow(
     techno: str,
     target: dict[str, str],
     layout: Callable,
-    bench: Path,
+    benches: Path,
     evaluate: Callable,
     local_model: Optional[Callable] = None,
     dimensions: Optional[dict[str, float]] = None,
@@ -34,7 +34,7 @@ def flow(
     if Path("top.gds").is_file() and reload_result:
         logging.info("existing layout found, checking for changes...")
         shutil.move("top.gds", "old_top.gds")
-        step.layout_generation(techno, layout, geo)  #  type: ignore[unresolved-attribute]:
+        step.layout_generation(techno, layout, geo)
         if not check_diff(Path("old_top.gds"), Path("top.gds")):
             logging.info("Changes detected in layout, back to full flow.")
             reload_result = False
@@ -45,11 +45,14 @@ def flow(
         reload_result = False
     if not reload_result:
         logging.info("extracting schematic...")
-        step.extract_from_layout(techno, options=options["extract"])  #  type: ignore[unresolved-attribute]
-        step.run_bench(bench, techno)  #  type: ignore[unresolved-attribute]
+        step.extract_from_layout(techno, options=options["extract"])
+        for bench in benches:
+            step.run_bench(bench, techno)
 
     logging.info("loading simulation results...")
-    data = step.load_result(Path(bench).with_suffix(".raw"))
+    data = list()
+    for bench in benches:
+        data.append(step.load_result(Path(bench).with_suffix(".raw")))
 
     logging.info("evaluate performances")
     perf = (

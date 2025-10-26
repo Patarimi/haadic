@@ -54,11 +54,13 @@ def setup(design_py: str, run_folder: Path, timestamp: bool = True):
             "Please provide a local_model function or a dimensions dict."
         )
     os.chdir(starting_dir)
-    expected_bench = Path(design_py).parent / design["bench"]
-    if not expected_bench.is_file():  #  type: ignore[unresolved-attribute]
-        raise FileNotFoundError(
-            f"bench file {str(expected_bench)} not found or is not a file."  #  type: ignore[unresolved-attribute]
-        )
+    expected_benches = list()
+    for bench in design["benches"]:
+        expected_benches.append(Path(design_py).parent / bench)
+        if not expected_benches[-1].is_file():
+            raise FileNotFoundError(
+                f"bench file {str(expected_benches)} not found or is not a file."
+            )
 
     if run_folder == Path("."):
         run_folder = des.parent / des.stem
@@ -69,7 +71,8 @@ def setup(design_py: str, run_folder: Path, timestamp: bool = True):
     )
     if not Path(run_dir).is_dir():
         os.mkdir(run_dir)
-    shutil.copy(expected_bench, run_dir)
+    for expected_bench in expected_benches:
+        shutil.copy(expected_bench, run_dir)
     return design, run_dir
 
 
