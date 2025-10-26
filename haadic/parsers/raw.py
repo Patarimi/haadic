@@ -38,6 +38,7 @@ def parse_out(results: Path) -> pd.DataFrame:
     data = dict()
     keys = list()
     current_bloc = "Header"
+    is_complex = False
     with open(results, "r") as f:
         for num, line in enumerate(f.readlines()):
             words = line.split()
@@ -49,10 +50,20 @@ def parse_out(results: Path) -> pd.DataFrame:
                 keys.append(words[1])
             if current_bloc == "Values" and len(words) == 2:
                 index = 0
-                data[keys[index]].append(words[1])
+                if "," in words[1]:
+                    cmplx = words[1].split(",")
+                    data[keys[index]].append(float(cmplx[0]) + 1j * float(cmplx[1]))
+                    is_complex = True
+                else:
+                    data[keys[index]].append(words[1])
             if current_bloc == "Values" and len(words) == 1:
                 index += 1
-                data[keys[index]].append(words[0])
-    df = pd.DataFrame(data=data, dtype=float)
+                if "," in words[0]:
+                    cmplx = words[0].split(",")
+                    data[keys[index]].append(float(cmplx[0]) + 1j * float(cmplx[1]))
+                    is_complex = True
+                else:
+                    data[keys[index]].append(words[0])
+    df = pd.DataFrame(data=data, dtype=float if not is_complex else complex)
     logging.debug(df.info)
     return df
