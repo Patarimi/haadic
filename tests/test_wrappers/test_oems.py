@@ -1,11 +1,14 @@
 from os.path import dirname
 from pathlib import Path
-import pytest
 
-from haadic.wrappers.oems import compute
+try:
+    from haadic.wrappers.oems import compute
+except ImportError:
+    import pytest
+
+    pytest.skip("OpenEMS or CSXCAD not found", allow_module_level=True)
 
 
-@pytest.mark.skip(reason="Mess with dependabot")
 def test_compute(tmp_path):
     compute(
         Path(dirname(__file__)) / "../test_layouts/ref_ind2.gds",
