@@ -25,12 +25,19 @@ default_dict = {"extract": None}
 class FlowStep:
     layout: Callable
     techno: str
-    benches: list[str] | str
+    benches: list[Path] | Path
     evaluate: Optional[Callable] = None
     target: dict = pydantic.Field(default_factory=dict)
     local_model: Optional[Callable] = None
     dimensions: Optional[dict] = None
     options: dict = pydantic.Field(default_factory=lambda: default_dict)
+
+    @pydantic.model_validator(mode="after")
+    def check_model_or_dimensions(self):
+        if self.local_model is None and self.dimensions is None:
+            raise RuntimeError(
+                "Please provide a local_model function or a dimensions dict."
+            )
 
 
 def import_or_default(source: Path):
@@ -45,21 +52,18 @@ def import_or_default(source: Path):
 
 
 def setup(design_py: str, run_folder: Path, timestamp: bool = True):
-    starting_dir = os.getcwd()
     des = Path(design_py)
 
     design = import_or_default(design_py)
-    if design["local_model"] is None and design["dimensions"] is None:
-        raise RuntimeError(
-            "Please provide a local_model function or a dimensions dict."
-        )
-    os.chdir(starting_dir)
     expected_benches = list()
     for bench in design["benches"]:
-        expected_benches.append(Path(design_py).parent / bench)
+        if bench.is_absolute():
+            expected_benches.append(bench)
+        else:
+            expected_benches.append(Path(design_py).parent / bench)
         if not expected_benches[-1].is_file():
             raise FileNotFoundError(
-                f"bench file {str(expected_benches)} not found or is not a file."
+                f"Bench file {str(expected_benches)} not found or is not a file."
             )
 
     if run_folder == Path("."):
