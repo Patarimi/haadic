@@ -63,7 +63,7 @@ def install(pdk_name: str):
 
 
 @pkd_app.command(name="list")
-def print_pdk() -> list:
+def print_pdk() -> None:
     """Display the list of available PDK."""
     process_d = list_pdk()
     print("Available PDKs are:")
@@ -85,15 +85,17 @@ def list_pdk():
 Available_PDK = Literal["sky130", "gf180mcu"]
 
 
-def load_pdk(pdk_name: str) -> dict:
+def load_pdk(pdk_name: str, path: Optional[str] = None) -> dict:
     try:
-        tech = _read_tech()[pdk_name]
+        tech = _read_tech(path)[pdk_name]
     except KeyError:
         tech = _read_tech(join(os.getcwd(), "design.yml"))[pdk_name]
     return tech
 
 
-def add_reference(pdk_name: str, ref_name: str, path_file: Path | str):
+def add_reference(
+    pdk_name: str, ref_name: str, path_file: Path | str, path_tech: Optional[str] = None
+) -> None:
     """
     Add a reference file to the techno.yml file.
     The reference file can be a LEF, a SPICE model or a HAADIC json file.
@@ -103,11 +105,13 @@ def add_reference(pdk_name: str, ref_name: str, path_file: Path | str):
         ref_name: Name of the reference file (e.g., 'techlef', 'haadic', 'spice').
         path_file: Path to the reference file.
     """
-    process_d = _read_tech()
+    if path_tech is None:
+        path_tech = join(dirname(__file__), "techno.yml")
+    process_d = _read_tech(path_tech)
     if pdk_name not in process_d:
         raise KeyError(f"{pdk_name} not found in techno.yml")
     process_d[pdk_name][ref_name] = path_file
-    with open(join(dirname(__file__), "techno.yml"), "w") as f:
+    with open(path_tech, "w") as f:
         yaml.dump(process_d, f)
 
 
