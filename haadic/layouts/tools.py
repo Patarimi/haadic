@@ -242,7 +242,7 @@ class Port:
     ref: str = ""
 
     def __post_init__(self):
-        if self.ref == "":
+        if self.ref == "" and self.name != "":
             self.ref = self.name + "_r"
 
     def __str__(self):
