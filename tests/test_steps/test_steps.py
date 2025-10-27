@@ -1,5 +1,4 @@
-from typing import Callable
-
+from pydantic import ValidationError
 import pytest
 from haadic.steps.step import import_or_default
 
@@ -7,10 +6,7 @@ ref_path = "./tests/test_steps/design.py"
 
 
 def test_import():
-    right = {"layout": Callable}
-    des = import_or_default(ref_path, right)
+    des = import_or_default(ref_path)
     assert "layout" in des
-    wrong = right.copy()
-    wrong["notfound"] = str
-    with pytest.raises(RuntimeError):
-        import_or_default(ref_path, wrong)
+    with pytest.raises(ValidationError):
+        import_or_default(ref_path.replace("design.py", "design wrong.py"))

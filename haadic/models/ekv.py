@@ -13,6 +13,7 @@ import scipy
 from haadic.layouts.active import connect, line, mosfet
 from haadic.layouts.general import set_as_port
 from haadic.layouts.tools import LayerStack
+from haadic.steps.step import FlowStep
 from haadic.techno import Available_PDK, get_file
 from haadic.steps import flow
 
@@ -28,8 +29,13 @@ class EKV:
     lbda_c: float = 0
 
     def __post_init__(self):
-        if self.techno not in get_args(Available_PDK):
+        if self.techno == "mock":
+            logging.warning(
+                "Using EKV model with mock techno for testing purposes only."
+            )
             return
+        if self.techno not in get_args(Available_PDK):
+            raise ValueError(f"Techno {self.techno} not supported in EKV model.")
 
         working_dir = get_file(self.techno, "base_dir") / "haadic"
         model_file = f"{self.techno}.json"
@@ -39,8 +45,8 @@ class EKV:
                 return
 
         def evaluate(bench_data: pd.DataFrame, small_l=False):
-            gm = self.n_finger * bench_data["gm"]
-            id = bench_data["i(d)"]
+            gm = self.n_finger * bench_data[0]["gm"]
+            id = bench_data[0]["i(d)"]
             if small_l:
                 self.extract_small_l(gm, id)
             else:
@@ -59,24 +65,18 @@ class EKV:
             self.n_finger = 80
             self.width = 1
             self.length = 3
-            flow(
-                self.techno,
-                dict(),
-                layout,
-                "ekv_bench.cir",
-                evaluate,
+            flowprep = FlowStep(
+                layout=layout,
+                techno=self.techno,
+                benches=("ekv_bench.cir",),
+                evaluate=evaluate,
                 dimensions=self.shape,
             )
+            flow(**flowprep.__dict__)
             self.length = 0.18
-            flow(
-                self.techno,
-                dict(),
-                layout,
-                "ekv_bench.cir",
-                evaluate,
-                dimensions=self.shape,
-                options={"evaluate": {"small_l": True}},
-            )
+            flowprep.dimensions = self.shape
+            flowprep.options = {"evaluate": {"small_l": True}}
+            flow(**flowprep.__dict__)
         finally:
             os.chdir(starting_dir)
 

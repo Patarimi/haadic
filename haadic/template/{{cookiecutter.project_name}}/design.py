@@ -5,6 +5,8 @@ from haadic.layouts.tools import LayerStack
 techno = "{{ cookiecutter.techno_name }}"
 target: dict[str, float] = {}
 
+benches = ("bench.cir",)
+
 
 def local_model(target: dict[str, float]) -> dict[str, float]:
     return {}

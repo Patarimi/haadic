@@ -1,0 +1,6 @@
+# Circuit name
+
+
+.control
+write {bench} all
+.endc

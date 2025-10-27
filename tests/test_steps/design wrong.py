@@ -7,6 +7,4 @@ def layout():
     pass
 
 
-benches = []
-
-techno = "nangate45"
+bench = ""

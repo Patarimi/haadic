@@ -46,14 +46,14 @@ def layout(
     set_as_port(cell, "gnd")
 
 
-bench = "bench.cir"
+benches = ("bench.cir", "bench_ac.cir")
 
 
 def evaluate(bench_data: pd.DataFrame, dis_plot: bool = True) -> dict[str, float]:
-    bench_data.to_csv("bench_data.csv")
+    bench_data[0].to_csv("bench_data.csv")
     ekv.load("model.json")
-    gm = ekv.n_finger * bench_data["gm"]
-    id = bench_data["i(d)"]
+    gm = ekv.n_finger * bench_data[0]["gm"]
+    id = bench_data[0]["i(d)"]
     IC = ekv.ic(id)
     gm_IC_simu = gm * ekv.ut / id
     gm_IC_model = ekv.gm_IC(id)
