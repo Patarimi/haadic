@@ -15,7 +15,7 @@ def flow(
     techno: str,
     target: dict[str, str],
     layout: Callable,
-    benches: Path,
+    benches: list[Path] | tuple[Path],
     evaluate: Callable,
     local_model: Optional[Callable] = None,
     dimensions: Optional[dict[str, float]] = None,
