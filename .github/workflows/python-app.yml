@@ -96,7 +96,7 @@ jobs:
         uv run poe cover
     - name: Store reports
       if: failure()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: reports-${{ matrix.os }}
         path: |
