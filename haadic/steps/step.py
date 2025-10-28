@@ -11,7 +11,7 @@ import pandas as pd
 from klayout import db
 import pydantic
 from haadic.layouts.tools import LayerStack
-from haadic.extractors.spicing import extract_spice_magic
+from haadic.extractors.spicing import ExtractOptions, extract_spice_magic
 from haadic.parsers.raw import parse_out
 from haadic.wrappers.ngspice import compute
 from haadic.techno import get_file
@@ -40,7 +40,7 @@ class FlowStep:
             )
 
 
-def import_or_default(source: Path):
+def import_or_default(source: Path | str) -> dict:
     for name in FlowStep.__dataclass_fields__.keys():
         source = Path(source)
         if str(source.parent.absolute()) not in sys.path:
@@ -90,7 +90,9 @@ def layout_generation(techno: str, layout: Callable, geo: dict[str, float] = {})
     lib.write(f"{top_cell_name}.gds")
 
 
-def extract_from_layout(techno: str, top_cell_name: str = "top", options: str = "RC"):
+def extract_from_layout(
+    techno: str, top_cell_name: str = "top", options: ExtractOptions = "RC"
+):
     extract_spice_magic(
         Path(f"{top_cell_name}.gds"),
         get_file(techno, "magic_rc"),
@@ -100,7 +102,7 @@ def extract_from_layout(techno: str, top_cell_name: str = "top", options: str = 
     )
 
 
-def run_bench(bench_name: str = "bench.cir", techno: str = "sky130"):
+def run_bench(bench_name: Path | str = "bench.cir", techno: str = "sky130"):
     data_file = Path(bench_name).with_suffix(".raw")
 
     spice = Netlist().load(bench_name)
@@ -115,7 +117,7 @@ def run_bench(bench_name: str = "bench.cir", techno: str = "sky130"):
     compute(Path(bench_name), data_file)
 
 
-def load_result(data_name: str = "bench.raw") -> pd.DataFrame:
+def load_result(data_name: Path | str = "bench.raw") -> pd.DataFrame:
     return parse_out(Path(data_name))
 
 

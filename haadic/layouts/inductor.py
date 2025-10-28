@@ -31,7 +31,7 @@ def octagonal_inductor(
     :param port_gap: gap between the two ports (default value : gap).
     :param port_ext: port extension outward the inductor (default value :µm)
     :param layer_nb: layer index for inductor core drawing.
-    :param bridge_nb: layer index o the bridge (for multi-turn inductor).
+    :param bridge_nb: layer index of the bridge (for multi-turn inductor).
     :return: pya.Cell of the inductor
     """
     m_top = layer_stack.get_metal_layer(layer_nb)

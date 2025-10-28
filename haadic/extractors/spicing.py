@@ -11,6 +11,8 @@ from typing import Literal
 from klayout import db as kl
 from haadic.wrappers.tools import nix_run, to_wsl
 
+ExtractOptions = Literal["NoPar", "Ronly", "COnly", "RC"]
+
 
 def extract_spice_klayout(
     gds_file: Path, techno: str, output_path: Path = Path()
@@ -37,7 +39,7 @@ def extract_spice_magic(
     rc_file: Path,
     cell_name: str = "None",
     output_path: Path = Path(),
-    options: Literal["NoPar", "Ronly", "COnly", "RC"] = "RC",
+    options: ExtractOptions = "RC",
 ) -> Path:
     """
     Extract the equivalent spice schematic of a gdsii file using magic-vlsi.

@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 import logging
 from pathlib import Path
+import shutil
 
 import numpy as np
 import skrf as rf
-from .simulator import load_conf
 from ..layouts.tools import Port
 from subprocess import run
 from os.path import join
@@ -61,11 +61,9 @@ class Emx:
             ]
         else:
             f_s = [str(f) for f in freq]
-        conf = load_conf(key="emx")
-        try:
-            emx_base = join(conf["base_dir"], conf["name"])
-        except KeyError:
-            raise KeyError(f"key not found in {conf.keys()}")
+        emx_base = shutil.which("emx")
+        if emx_base is None:
+            raise KeyError("EMX not found in PATH environment variable.")
         # %d enable automatic numbering matching the port number
         path_file = "res.s%dp"
         cmd = (
@@ -99,9 +97,9 @@ class Emx:
         for c in cmd:
             exp += f"{c} "
         logging.debug(exp)
-        proc = run(cmd + conf["options"], capture_output=True, encoding="latin")
+        proc = run(cmd, capture_output=True, encoding="latin")
         if proc.returncode != 0:
-            RuntimeWarning(str(cmd + conf["options"]))
+            RuntimeWarning(str(cmd))
             raise RuntimeError(proc.stderr)
         # get back the real name.
         nw = str(len(ports)) if ports is not None else "[0-9]"

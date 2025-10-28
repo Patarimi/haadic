@@ -242,7 +242,7 @@ class Port:
     ref: str = ""
 
     def __post_init__(self):
-        if self.ref == "":
+        if self.ref == "" and self.name != "":
             self.ref = self.name + "_r"
 
     def __str__(self):
@@ -277,5 +277,17 @@ def check_diff(gds1: str | Path, gds2: str | Path) -> bool:
     )
     diff.on_layer_in_b_only(  #  type: ignore[call-non-callable]
         lambda c1: logging.error(f"Layer {c1.name} only in {str(gds2)}.")
+    )
+    diff.on_text_in_a_only(  #  type: ignore[call-non-callable]
+        lambda c1: logging.error(f"Text {c1.text} only in {str(gds1)}.")
+    )
+    diff.on_text_in_b_only(  #  type: ignore[call-non-callable]
+        lambda c1: logging.error(f"Text {c1.text} only in {str(gds2)}.")
+    )
+    diff.on_polygon_in_a_only(  #  type: ignore[call-non-callable]
+        lambda c1: logging.error(f"Polygon only in {str(gds1)}.")
+    )
+    diff.on_polygon_in_b_only(  #  type: ignore[call-non-callable]
+        lambda c1: logging.error(f"Polygon only in {str(gds2)}.")
     )
     return diff.compare(cell1, cell2)

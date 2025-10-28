@@ -8,7 +8,7 @@ from haadic.layouts.microstrip import (
     lange_coupler,
     marchand_balun,
 )
-from haadic.layouts.tools import LayerStack, check_diff
+from haadic.layouts.tools import LayerStack, Port, check_diff
 
 layerstack = LayerStack("mock")
 REF_PATH = Path(dirname(__file__)).parent / "ref_files"
@@ -17,7 +17,7 @@ REF_PATH = Path(dirname(__file__)).parent / "ref_files"
 def test_straight_line(tmp_path):
     lib = db.Layout()
     lib.dbu = layerstack.grid * 1e6
-    straight_line(lib, 10e-6, 50e-6, layerstack)
+    straight_line(lib, 10e-6, 50e-6, layerstack, (Port("S1"), Port("")))
     lib.write(tmp_path / "ms.gds")
     assert check_diff(tmp_path / "ms.gds", REF_PATH / "ref_ms.gds")
 
