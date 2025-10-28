@@ -17,7 +17,7 @@ def test_load_pdk():
         techno.get_file(pdk, "process")
 
 
-def test_install_pdk(tmp_path):
+def test_install_pdk():
     for pdk in pdk_exp:
         techno.install(pdk)
 
