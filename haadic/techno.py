@@ -17,6 +17,10 @@ from rich import print
 console = Console(stderr=True)
 pkd_app = App("pdk", help="Manage the PDKs")  # ty: ignore[unknown-argument]
 
+# define search paths for techno.yml and design.yml
+PATHS = [Path((dirname(__file__))) / "techno.yml", Path(os.getcwd()) / "design.yml"]
+Available_PDK = Literal["sky130", "gf180mcu"]
+
 
 @pkd_app.command(name="install")
 def install(pdk_name: str):
@@ -78,19 +82,25 @@ def print_pdk() -> None:
 
 
 def list_pdk():
-    process_d = _read_tech()
-    return list(process_d.keys())
-
-
-Available_PDK = Literal["sky130", "gf180mcu"]
+    process_l = list()
+    for path in PATHS:
+        if os.path.isfile(path):
+            process_d = _read_tech(path)
+            process_l += list(process_d.keys())
+    return process_l
 
 
 def load_pdk(pdk_name: str, path: Optional[str] = None) -> dict:
-    try:
-        tech = _read_tech(path)[pdk_name]
-    except KeyError:
-        tech = _read_tech(join(os.getcwd(), "design.yml"))[pdk_name]
-    return tech
+    if path is not None:
+        PATHS.insert(0, path)
+        logging.info(f"Paths list updated: {PATHS}")
+    for file in PATHS:
+        if not os.path.isfile(file):
+            continue
+        tech = _read_tech(file)
+        if pdk_name in tech:
+            return tech[pdk_name]
+    raise KeyError(f"{pdk_name} not found in {path} or local design.yml")
 
 
 def add_reference(
@@ -122,11 +132,7 @@ def get_file(pdk_name: str, file_type: str) -> Path:
     return Path(dirname(__file__)) / Path(pdk["base_dir"]) / Path(pdk[file_type])
 
 
-def _read_tech(tech_file: Optional[str] = None) -> dict:
-    if tech_file is None:
-        tech_yml = join(dirname(__file__), "techno.yml")
-    else:
-        tech_yml = tech_file
-    with open(tech_yml, "r") as f:
+def _read_tech(tech_file: str | Path) -> dict:
+    with open(tech_file, "r") as f:
         process_d = yaml.load(f, Loader=yaml.Loader)
     return process_d
