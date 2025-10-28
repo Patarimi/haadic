@@ -45,8 +45,8 @@ class EKV:
                 return
 
         def evaluate(bench_data: pd.DataFrame, small_l=False):
-            gm = self.n_finger * bench_data[0]["gm"]
             id = bench_data[0]["i(d)"]
+            gm = np.gradient(id, bench_data[0]["v(g)"])
             if small_l:
                 self.extract_small_l(gm, id)
             else:

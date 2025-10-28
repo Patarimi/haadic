@@ -52,8 +52,8 @@ benches = ("bench.cir", "bench_ac.cir")
 def evaluate(bench_data: pd.DataFrame, dis_plot: bool = True) -> dict[str, float]:
     bench_data[0].to_csv("bench_data.csv")
     ekv.load("model.json")
-    gm = ekv.n_finger * bench_data[0]["gm"]
     id = bench_data[0]["i(d)"]
+    gm = np.gradient(id, bench_data[0]["v(g)"])
     IC = ekv.ic(id)
     gm_IC_simu = gm * ekv.ut / id
     gm_IC_model = ekv.gm_IC(id)
