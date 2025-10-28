@@ -25,7 +25,7 @@ Available_PDK = Literal["sky130", "gf180mcu"]
 @pkd_app.command(name="install")
 def install(pdk_name: str):
     """Install the _pdk_name_ technology in its default location."""
-    base_install = join(dirname(__file__), "../pdk/")
+    base_install = Path(dirname(__file__)) / "../pdk/"
     tech = load_pdk(pdk_name)
     base_url = tech["source_url"]
     if base_url == "ciel":
@@ -35,15 +35,15 @@ def install(pdk_name: str):
             "--pdk",
             pdk_name,
             "--pdk-root",
-            base_install,
+            str(base_install),
             tech["version"],
         ]
         ret = run(cmd, capture_output=True, text=True)
         print(ret.stdout)
         console.print(ret.stderr)
         return
-    if not (isdir(base_install + pdk_name)):
-        os.makedirs(base_install + pdk_name)
+    if not (isdir(base_install / pdk_name)):
+        os.makedirs(base_install / pdk_name)
     opener = urllib.request.build_opener()
     opener.addheaders = [
         (
@@ -54,15 +54,15 @@ def install(pdk_name: str):
     urllib.request.install_opener(opener)
     logging.info("downloading files, might take some times...")
     ext = ".zip" if ".zip" in base_url else ".tar.bz2"
-    file_name = base_install + pdk_name + ext
+    file_name = (base_install / pdk_name).with_suffix(ext)
     urllib.request.urlretrieve(base_url, file_name)
     logging.info("extracting, please wait...")
     if ext == ".tar.bz2":
         with tarfile.open(file_name, mode="r") as bz:
-            bz.extractall(base_install + pdk_name)
+            bz.extractall(base_install / pdk_name)
     else:
         with zipfile.ZipFile(file_name, mode="r") as zp:
-            zp.extractall(base_install + pdk_name)
+            zp.extractall(base_install / pdk_name)
     os.remove(file_name)
 
 

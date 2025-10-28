@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Literal, Self
 from haadic.models.tools import eng
 import skrf as rf
@@ -58,7 +59,7 @@ class Netlist:
     controls: list[str] = field(default_factory=list)
     others: list[str] = field(default_factory=list)
 
-    def load(self, spice_file: str) -> Self:
+    def load(self, spice_file: Path | str) -> Self:
         block: Literal["circuit", "control", "other"] = "other"
         with open(spice_file, "r") as f:
             lines = f.readlines()
@@ -98,7 +99,7 @@ class Netlist:
             spice += "\n".join(self.controls) + "\n.endc\n"
         return spice
 
-    def write(self, filename: str = "netlist.cir"):
+    def write(self, filename: Path | str = "netlist.cir"):
         with open(filename, "w") as f:
             f.write(self.spice())
         return filename

@@ -6,7 +6,7 @@ from haadic.wrappers.tools import nix_check, nix_run, to_wsl
 
 
 def compute(
-    input_file: Path,
+    input_file: Path | str,
     data_file: Optional[Path] = None,
     log_file: Optional[Path] = None,
 ) -> None:
@@ -20,7 +20,7 @@ def compute(
     if type(input_file) is str:
         input_file = Path(input_file)
     if data_file is None:
-        data_file = input_file.with_suffix(".raw")
+        data_file = Path(input_file).with_suffix(".raw")
     if type(data_file) is str:
         data_file = Path(data_file)
     if log_file is None:
