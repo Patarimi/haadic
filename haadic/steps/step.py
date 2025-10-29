@@ -79,6 +79,18 @@ def setup(design_py: str, run_folder: Path, timestamp: bool = True):
         shutil.copy(expected_bench, run_dir)
     return design, run_dir
 
+def cleanup():
+    suffix_to_remove = [".gds", ".cir", ".raw", ".log", ".nodes", ".sim", ".tcl"]
+    for suffix in suffix_to_remove:
+        file = Path("top").with_suffix(suffix)
+        if file.is_file():
+            os.remove(file)
+    directories_to_remove = ["extfile", ]
+    for directory in directories_to_remove:
+        dir_path = Path(directory)
+        if dir_path.is_dir():
+            shutil.rmtree(dir_path)
+
 
 def layout_generation(techno: str, layout: Callable, geo: dict[str, float] = {}):
     top_cell_name = "top"
