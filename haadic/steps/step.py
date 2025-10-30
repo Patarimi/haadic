@@ -79,13 +79,16 @@ def setup(design_py: str, run_folder: Path, timestamp: bool = True):
         shutil.copy(expected_bench, run_dir)
     return design, run_dir
 
+
 def cleanup():
     suffix_to_remove = [".gds", ".cir", ".raw", ".log", ".nodes", ".sim", ".tcl"]
     for suffix in suffix_to_remove:
         file = Path("top").with_suffix(suffix)
         if file.is_file():
             os.remove(file)
-    directories_to_remove = ["extfile", ]
+    directories_to_remove = [
+        "extfile",
+    ]
     for directory in directories_to_remove:
         dir_path = Path(directory)
         if dir_path.is_dir():
@@ -123,7 +126,9 @@ def run_bench(bench_name: Path | str = "bench.cir", techno: str = "sky130"):
         if oth.startswith(".lib") and to_wsl(get_file(techno, "lib_spice")) in oth:
             skip_lib_add = True
     if not skip_lib_add:
-        section = "tt" if "section" not in load_pdk(techno) else load_pdk(techno)["section"]
+        section = (
+            "tt" if "section" not in load_pdk(techno) else load_pdk(techno)["section"]
+        )
         spice.add_other(f".lib {to_wsl(get_file(techno, 'lib_spice'))} {section}")
     spice.write(bench_name)
 
