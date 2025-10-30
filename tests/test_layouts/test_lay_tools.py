@@ -26,7 +26,7 @@ def test_layer_stack_gf():
     layer_stack = tools.LayerStack("gf180mcu")
     logging.debug(layer_stack)
     assert layer_stack.get_metal_layer(1) == tools.Layer(
-        34, 0, name="Metal1", width=0.23, spacing=0.3
+        34, 0, name="Metal1", width=0.23, spacing=0.3, _pin=10
     )
     assert layer_stack.get_metal_layer(2) == tools.Layer(
         36, 0, name="Metal2", width=0.28, spacing=0.3
