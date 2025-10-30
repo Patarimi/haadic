@@ -1,0 +1,138 @@
+{
+  "techno": "gf180mcu",
+  "_gate": {
+    "layer": 30,
+    "datatype": 0,
+    "name": "Poly2",
+    "width": 0.18,
+    "spacing": 0.27,
+    "_pin": 10
+  },
+  "_nplus": {
+    "layer": 32,
+    "datatype": 0,
+    "name": "Nplus",
+    "width": 0,
+    "spacing": 0.135,
+    "_pin": 0
+  },
+  "_pplus": {
+    "layer": 31,
+    "datatype": 0,
+    "name": "Pplus",
+    "width": 0,
+    "spacing": 0.135,
+    "_pin": 0
+  },
+  "_nwell": {
+    "layer": 2,
+    "datatype": 0,
+    "name": "NWell",
+    "width": 0,
+    "spacing": 0,
+    "_pin": 0
+  },
+  "_active": {
+    "layer": 22,
+    "datatype": 0,
+    "name": "COMP",
+    "width": 0,
+    "spacing": 0.33,
+    "_pin": 0
+  },
+  "grid": 5e-09,
+  "_pad": {
+    "layer": 0,
+    "datatype": 0,
+    "name": "NotFound",
+    "width": 0,
+    "spacing": 0,
+    "_pin": 0
+  },
+  "_stack": [
+    {
+      "layer": 33,
+      "datatype": 0,
+      "name": "Contact",
+      "width": 0.21,
+      "spacing": 0.21,
+      "enclosure": 0.01
+    },
+    {
+      "layer": 34,
+      "datatype": 0,
+      "name": "Metal1",
+      "width": 0.23,
+      "spacing": 0.3,
+      "_pin": 10
+    },
+    {
+      "layer": 35,
+      "datatype": 0,
+      "name": "Via1",
+      "width": 0.26,
+      "spacing": 0.26,
+      "_pin": 0,
+      "enclosure": 0.01
+    },
+    {
+      "layer": 36,
+      "datatype": 0,
+      "name": "Metal2",
+      "width": 0.28,
+      "spacing": 0.3,
+      "_pin": 0
+    },
+    {
+      "layer": 38,
+      "datatype": 0,
+      "name": "Via2",
+      "width": 0.26,
+      "spacing": 0.26,
+      "_pin": 0,
+      "enclosure": 0.01
+    },
+    {
+      "layer": 42,
+      "datatype": 0,
+      "name": "Metal3",
+      "width": 0.28,
+      "spacing": 0.3,
+      "_pin": 0
+    },
+    {
+      "layer": 40,
+      "datatype": 0,
+      "name": "Via3",
+      "width": 0.26,
+      "spacing": 0.26,
+      "_pin": 0,
+      "enclosure": 0.01
+    },
+    {
+      "layer": 46,
+      "datatype": 0,
+      "name": "Metal4",
+      "width": 0.28,
+      "spacing": 0.3,
+      "_pin": 0
+    },
+    {
+      "layer": 41,
+      "datatype": 0,
+      "name": "Via4",
+      "width": 0.26,
+      "spacing": 0.26,
+      "_pin": 0,
+      "enclosure": 0.01
+    },
+    {
+      "layer": 81,
+      "datatype": 0,
+      "name": "Metal5",
+      "width": 0.44,
+      "spacing": 0.6,
+      "_pin": 0
+    }
+  ]
+}
