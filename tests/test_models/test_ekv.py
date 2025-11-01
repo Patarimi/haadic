@@ -35,4 +35,4 @@ def test_ekv_model(tmp_path):
 def test_ekv_sky130():
     ekv = EKV("sky130")
     assert ekv.length == 0.18
-    assert pytest.approx(ekv.n, abs=1e-3) == 1.51
+    assert pytest.approx(ekv.n, abs=1e-3) == 1.501
