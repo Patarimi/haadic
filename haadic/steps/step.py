@@ -14,7 +14,7 @@ from haadic.layouts.tools import LayerStack
 from haadic.extractors.spicing import ExtractOptions, extract_spice_magic
 from haadic.parsers.raw import parse_out
 from haadic.wrappers.ngspice import compute
-from haadic.techno import get_file
+from haadic.techno import get_file, load_pdk
 from haadic.parsers.netlist import Netlist
 from haadic.wrappers.tools import to_wsl
 
@@ -80,6 +80,21 @@ def setup(design_py: str, run_folder: Path, timestamp: bool = True):
     return design, run_dir
 
 
+def cleanup():
+    suffix_to_remove = [".gds", ".cir", ".raw", ".log", ".nodes", ".sim", ".tcl"]
+    for suffix in suffix_to_remove:
+        file = Path("top").with_suffix(suffix)
+        if file.is_file():
+            os.remove(file)
+    directories_to_remove = [
+        "extfile",
+    ]
+    for directory in directories_to_remove:
+        dir_path = Path(directory)
+        if dir_path.is_dir():
+            shutil.rmtree(dir_path)
+
+
 def layout_generation(techno: str, layout: Callable, geo: dict[str, float] = {}):
     top_cell_name = "top"
     layerstack = LayerStack(techno)
@@ -111,7 +126,10 @@ def run_bench(bench_name: Path | str = "bench.cir", techno: str = "sky130"):
         if oth.startswith(".lib") and to_wsl(get_file(techno, "lib_spice")) in oth:
             skip_lib_add = True
     if not skip_lib_add:
-        spice.add_other(f".lib {to_wsl(get_file(techno, 'lib_spice'))} tt")
+        section = (
+            "tt" if "section" not in load_pdk(techno) else load_pdk(techno)["section"]
+        )
+        spice.add_other(f".lib {to_wsl(get_file(techno, 'lib_spice'))} {section}")
     spice.write(bench_name)
 
     compute(Path(bench_name), data_file)

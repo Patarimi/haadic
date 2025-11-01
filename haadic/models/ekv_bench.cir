@@ -5,13 +5,12 @@ Vgate gate 0 1.8
 Vdrain drain 0 1.8
 Xdut gate drain 0 top
 
-.save i(vdrain)
-.save @m.xdut.Xnmos_80_0.x0.msky130_fd_pr__nfet_01v8[gm]
+.save i(vdrain) v(gate)
 
 .control
 dc Vgate 0 1.8 0.01
-let gm = @m.xdut.Xnmos_80_0.x0.msky130_fd_pr__nfet_01v8[gm]
 let d = -i(vdrain)
+let g = v(gate)
 set filetype = ASCII
-write {bench_path} d gm
+write {bench_path} d g
 .endc

@@ -41,6 +41,8 @@ def flow(
         os.remove("old_top.gds")
     else:
         logging.info("Running full flow.")
+        if Path("top.gds").is_file():
+            step.cleanup()
         step.layout_generation(techno, layout, geo)
         reload_result = False
     if not reload_result:
