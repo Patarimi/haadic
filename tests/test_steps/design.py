@@ -2,7 +2,7 @@
 File for steps testing.
 """
 
-from posixpath import dirname
+from os.path import dirname
 from pathlib import Path
 
 
