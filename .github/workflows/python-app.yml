@@ -87,8 +87,8 @@ jobs:
         uv sync --group dev
     - name: Install PDK
       run: |
-        uv run haadic pdk install sky130
-        uv run haadic pdk install gf180mcu
+        sudo uv run haadic pdk install sky130
+        sudo uv run haadic pdk install gf180mcu
         uv run haadic pdk list
     - name: Test with Pytest
       run: |
