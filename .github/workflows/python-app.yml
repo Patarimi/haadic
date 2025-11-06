@@ -88,6 +88,7 @@ jobs:
     - name: Install PDK
       run: |
         uv run haadic pdk install sky130
+        uv run haadic pdk install sky130
         uv run haadic pdk install gf180mcu
         uv run haadic pdk install gf180mcu
         uv run haadic pdk list
