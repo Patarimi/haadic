@@ -8,9 +8,9 @@ gf180mcu:
   haadic: gf180mcu.json
   layermap: klayout/tech/gf180mcu.map
   lib_spice: ngspice/sm141064.ngspice
-  section: typical
   magic_rc: magic/gf180mcuD.magicrc
   process: not_found.proc
+  section: typical
   source_url: ciel
   techlef: ../libs.ref/gf180mcu_fd_sc_mcu9t5v0/techlef/gf180mcu_fd_sc_mcu9t5v0__nom.tlef
   version: 8f2d1529c86235d726979eb9ecb7e9628108590b
