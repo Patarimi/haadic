@@ -28,6 +28,7 @@ def install(pdk_name: str):
     base_install = Path(dirname(__file__)) / "../pdk/"
     tech = load_pdk(pdk_name)
     base_url = tech["source_url"]
+    cmd = []
     if os.name == "nt":
         proc = run(
             "powershell [Security.Principal.WindowsIdentity]::GetCurrent().Groups -contains 'S-1-5-32-544'",
@@ -36,12 +37,10 @@ def install(pdk_name: str):
             text=True,
         )
         if "True" not in proc.stdout:
-            raise PermissionError(
-                "PDK installation requires admin privilege on Windows.\nRerun the command with 'sudo' or as Administrator."
-            )
+            cmd += ["sudo"]
 
     if base_url == "ciel":
-        cmd = [
+        cmd += [
             "ciel",
             "enable",
             "--pdk",
