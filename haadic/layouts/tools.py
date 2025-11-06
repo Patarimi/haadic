@@ -218,7 +218,7 @@ class LayerStack:
         patch_file = realpath(
             join(
                 dirname(__file__),
-                "../../pdk/patches",
+                "../patches",
                 f"{self.techno}.json",
             )
         )

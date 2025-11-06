@@ -11,7 +11,7 @@ import haadic.techno as techno
 log_path = os.path.join(os.path.curdir, "haadic.log")
 if not logging.getLogger().hasHandlers():
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.INFO,
         handlers=[
             logging.FileHandler(log_path),
             logging.StreamHandler(),
