@@ -7,6 +7,7 @@ import logging
 import math
 import klayout.db as db
 from haadic.layouts.tools import LayerStack, ViaLayer, Layer
+from typing import Optional
 
 
 def via(layout: db.Layout, layer: ViaLayer, size: tuple[float, float]) -> db.Cell:
@@ -86,21 +87,35 @@ def via_stack(
     return v
 
 
-def get_dtext(layout: db.Layout, label: str) -> tuple[db.DText, int]:
+def get_dtext(
+    layout: db.Layout, label: Optional[str] = None, cell: Optional[str] = None
+) -> tuple[db.DText, int]:
     """
     This function  return the dtext with the associated label in the layout.
     :param layout: Layout to be explored.
-    :param label: label (string) to be found.
+    :param label: label (string) to be found, if None, return all label.
+    :param cell: if cell is not None, only look inside this cell.
     :return: DText
     """
-    for cell in layout.each_cell():
+    if label is None:
+        labels = list()
+    if cell is None:
+        cells = layout.each_cell()
+    else:
+        cells = (layout.cell(cell),)
+    for cell in cells:
         for lyr in layout.layer_indexes():
             for shape in cell.shapes(lyr):
                 if not shape.is_text():
                     continue
-                if shape.dtext.string == label:
+                if label is None:
+                    labels.append([shape.dtext, lyr])
+                elif shape.dtext.string == label:
                     return shape.dtext, lyr
-    raise ValueError(f"label {label} not found in layout")
+    if label is None:
+        return labels
+    else:
+        raise ValueError(f"label {label} not found in layout")
 
 
 def get_shape(layout: db.Layout, point: db.DPoint, layer: int) -> tuple[db.DBox, int]:
