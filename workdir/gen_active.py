@@ -2,7 +2,7 @@ from pathlib import Path
 from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
-from haadic.layouts.active import mosfet, line, connect
+from haadic.layouts.active import mosfet, line, pattern_connect
 from haadic.layouts.general import set_as_port
 from haadic.layouts.tools import LayerStack
 from haadic.models.ekv import EKV
@@ -14,13 +14,13 @@ ekv = EKV(techno)
 
 
 def local_model(target: dict[str, float]) -> dict[str, float]:
-    ekv.width = 1
-    ekv.n_finger = 80
     if Path("model.json").is_file():
         ekv.load("model.json")
         ekv.length = target["length"] * 1e6
     else:
         ekv.length = 20 * target["length"] * 1e6
+    ekv.width = 1
+    ekv.n_finger = 80
     ekv.dump("model.json")
     return ekv.shape
 
@@ -36,11 +36,9 @@ def layout(
     line(cell, "gate", layerstack.get_gate_layer())
     line(cell, "drain", layerstack.get_metal_layer(1))
     line(cell, "gnd", layerstack.get_metal_layer(1), below=True)
-    for i in range(n_finger + 1):
-        if i < n_finger:
-            connect(cell, layerstack, "gate", f"g{i}")
-        drain = "drain" if i % 2 == 0 else "gnd"
-        connect(cell, layerstack, drain, f"dr{i}")
+    pattern_connect(
+        cell, layerstack, f"nmos_{n_finger}", ("drain", "gate", "gnd", "gate")
+    )
     set_as_port(cell, "gate")
     set_as_port(cell, "drain")
     set_as_port(cell, "gnd")

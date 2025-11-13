@@ -143,3 +143,19 @@ def connect(
         top, bottom = box_v.bottom, box_h.bottom
     cell.shapes(lyr_v).insert(db.DBox(box_v.left, bottom, box_v.right, top))
     return cell
+
+
+def pattern_connect(
+    cell: db.Cell, layers: LayerStack, device_name: str, pattern: list[str]
+) -> db.Cell:
+    """ """
+    layout = cell.layout()
+    labels = get_dtext(layout, cell=device_name)
+    print(labels)
+    for lbl, lyr in labels:
+        i = 2 * int(lbl.string.lstrip("gdr"))
+        if lbl.string.startswith("g"):
+            i += 1
+        i = i % len(pattern)
+        connect(cell, layers, pattern[i], lbl.string)
+    return cell
