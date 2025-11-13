@@ -17,12 +17,8 @@ def parse_raw(results: Path) -> pd.DataFrame:
                 case "Index", *k:
                     if "headers" not in locals():
                         headers = line.split()
-                case [ind, *k] if (
-                    "headers" in locals() and len(k) == len(headers) - 1
-                ):  # ty: ignore[unresolved-reference]
-                    for head, val in zip(
-                        headers, k
-                    ):  # ty: ignore[unresolved-reference]
+                case [ind, *k] if "headers" in locals() and len(k) == len(headers) - 1:  # ty: ignore[unresolved-reference]
+                    for head, val in zip(headers, k):  # ty: ignore[unresolved-reference]
                         if head not in data.keys():
                             data[head] = [
                                 float(val),
