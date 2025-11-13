@@ -7,8 +7,7 @@ Xdut gate drain 0 top
 
 .control
 sp lin 10 1G 10G
-let gm = @m.xdut.Xnmos_80_0.x0.msky130_fd_pr__nfet_01v8[gm]
 let d = -i(vdrain)
 set filetype = ASCII
-write {bench_path} s_1_1 s_2_1 s_1_2 s_2_2 d gm
+write {bench_path} y_1_1 y_2_1 y_1_2 y_2_2 d
 .endc
