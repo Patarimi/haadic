@@ -91,6 +91,7 @@ jobs:
         uv run haadic pdk install sky130
         uv run haadic pdk install gf180mcu
         uv run haadic pdk install gf180mcu
+        uv run haadic pdk install asap7
         uv run haadic pdk list
     - name: Test with Pytest
       run: |
