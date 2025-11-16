@@ -8,7 +8,7 @@ ref_path = "./tests/test_steps/design.py"
 
 def test_import():
     des = step.import_or_default(ref_path)
-    assert "layout" in des
+    assert "layout" in des.__dict__
     with pytest.raises(ValidationError):
         step.import_or_default(ref_path.replace("design.py", "design wrong.py"))
 

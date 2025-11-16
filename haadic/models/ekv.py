@@ -13,7 +13,7 @@ import scipy
 from haadic.layouts.active import connect, line, mosfet
 from haadic.layouts.general import set_as_port
 from haadic.layouts.tools import LayerStack
-from haadic.steps.step import FlowStep
+from haadic.steps.step import Dim, FlowStep
 from haadic.techno import Available_PDK, get_file
 from haadic.steps import flow
 
@@ -40,7 +40,7 @@ class EKV:
         working_dir = get_file(self.techno, "base_dir") / "haadic"
         model_file = f"{self.techno}.json"
         if (working_dir / model_file).is_file():
-            self.load(working_dir / model_file)
+            self.load(str(working_dir / model_file))
             if self.lbda_c != 0:
                 return
 
@@ -118,7 +118,7 @@ class EKV:
         ref = np.min(n_ext)
         start = np.nonzero(n_ext < 1.05 * ref)[0][0]
         logging.debug(f"{start=}")
-        self.n = np.median(n_ext[start:])
+        self.n = float(np.median(n_ext[start:]))
         self.i_spec = np.max((gm * self.n * self.ut) ** 2 / id * self.ratio)
         stop = np.nonzero(self.ic(id) < 15)[0][-1]
         logging.debug(f"{stop=}")
@@ -138,8 +138,10 @@ class EKV:
         return id / self.i_spec * self.ratio
 
     @property
-    def shape(self) -> dict[str, float]:
-        return {"length": self.length, "width": self.width, "n_finger": self.n_finger}
+    def shape(self) -> Dim:
+        return Dim(
+            {"length": self.length, "width": self.width, "n_finger": self.n_finger}
+        )
 
     @property
     def ratio(self) -> float:

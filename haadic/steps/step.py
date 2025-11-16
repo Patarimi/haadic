@@ -20,12 +20,14 @@ from haadic.wrappers.tools import to_wsl
 
 default_dict = {"extract": None}
 
+
 @pydantic.dataclasses.dataclass
 class Dim:
     dict: dict[str, int | float]
 
     def __getitem__(self, key: str) -> int | float:
         return self.dict[key]
+
 
 @pydantic.dataclasses.dataclass
 class FlowStep:
