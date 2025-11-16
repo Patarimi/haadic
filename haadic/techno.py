@@ -83,16 +83,19 @@ def install(pdk_name: str):
 def print_pdk() -> None:
     """Display the list of available PDK."""
     process_d = list_pdk()
-    print("Available PDKs are:")
-    table = Table("Name", "State", show_header=False, box=None)
+    table = Table(
+        "Name",
+        "Status",
+        "Installation Folder",
+        show_header=True,
+        box=None,
+        title="Available PDK",
+    )
     for k in process_d:
-        pdk = load_pdk(k)
-        if pdk["base_dir"] == "$PDK_ROOT":
-            base_dir = PDK_INSTALL_DIR
-        else:
-            base_dir = pdk["base_dir"]
         table.add_row(
-            k, "[green]installed[/green]" if isdir(base_dir) else "not installed"
+            k,
+            "[green]installed[/green]" if is_installed(k) else "not installed",
+            str(get_file(k, "base_dir")) if is_installed(k) else "-",
         )
     print(table)
 
@@ -108,7 +111,7 @@ def list_pdk():
 
 def is_installed(pdk_name: str) -> bool:
     """Check if a PDK is installed."""
-    return pdk_name in list_pdk()
+    return isdir(get_file(pdk_name, "base_dir"))
 
 
 def load_pdk(pdk_name: str, path: Optional[str] = None) -> dict:
