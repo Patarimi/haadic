@@ -13,18 +13,22 @@ default_options = {"flow": {"reload_result": True}, "extract": "RC"}
 
 def flow(
     techno: str,
-    target: dict[str, str],
+    target: step.Dim,
     layout: Callable,
     benches: list[Path] | tuple[Path],
     evaluate: Callable,
-    local_model: Optional[Callable] = None,
-    dimensions: Optional[dict[str, float]] = None,
+    local_model: Optional[Callable[[step.Dim], step.Dim]] = None,
+    dimensions: Optional[step.Dim] = None,
     options: dict[str, str] = default_options,
 ):
     if local_model is not None:
         geo = local_model(target)
     else:
         geo = dimensions
+    if geo is None:
+        raise RuntimeError(
+            "Please provide a local_model function or a dimensions dict."
+        )
     for defa in default_options:
         if defa not in options.keys():
             options[defa] = default_options[defa]
@@ -63,11 +67,11 @@ def flow(
         else evaluate(data, options["evaluate"])
     )
     if perf is not None:
-        res = [(key, perf[key], target.get(key, "N/A")) for key in perf]
+        res = [(key, perf[key], target.dct.get(key, "N/A")) for key in perf]
         logging.info(
             "\n" + tabulate(res, headers=["obtained", "targeted"], tablefmt="grid")
         )
 
     logging.info("compare performances to targets")
-    cost = step.compare_to(perf, target)  # type: ignore[unresolved-attribute]
+    cost = step.compare_to(perf, target.dct)
     logging.info(f"current cost: {cost}")

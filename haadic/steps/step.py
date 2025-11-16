@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 import shutil
 import sys
-from typing import Optional
+from typing import Optional, Self
 
 import pandas as pd
 from klayout import db
@@ -22,33 +22,48 @@ default_dict = {"extract": None}
 
 
 @pydantic.dataclasses.dataclass
+class Dim:
+    dct: dict[str, int | float] = pydantic.Field(default_factory=dict)
+
+    def __getitem__(self, key: str) -> int | float:
+        return self.dct[key]
+
+
+@pydantic.dataclasses.dataclass
 class FlowStep:
-    layout: Callable
+    layout: (
+        Callable[[db.Cell, LayerStack, Dim], None]
+        | Callable[[db.Cell, LayerStack], None]
+    )
     techno: str
-    benches: list[Path] | Path
+    benches: list[Path] | list[str]
     evaluate: Optional[Callable] = None
-    target: dict = pydantic.Field(default_factory=dict)
-    local_model: Optional[Callable] = None
-    dimensions: Optional[dict] = None
+    target: Dim = pydantic.Field(default_factory=Dim)
+    local_model: Optional[Callable[[], Dim]] = None
+    dimensions: Optional[Dim] = None
     options: dict = pydantic.Field(default_factory=lambda: default_dict)
 
     @pydantic.model_validator(mode="after")
-    def check_model_or_dimensions(self):
+    def check_model_or_dimensions(self) -> Self:
         if self.local_model is None and self.dimensions is None:
             raise RuntimeError(
                 "Please provide a local_model function or a dimensions dict."
             )
+        return self
 
 
-def import_or_default(source: Path | str) -> dict:
+def import_or_default(source: Path | str) -> FlowStep:
+    imp_d = dict()
     for name in FlowStep.__dataclass_fields__.keys():
         source = Path(source)
         if str(source.parent.absolute()) not in sys.path:
             sys.path.append(str(source.parent.absolute()))
         src_name = str(source.stem)
         imp = __import__(src_name, fromlist=name).__dict__
-        imp_d = FlowStep(**imp).__dict__
-    return imp_d
+        if imp.get(name, None) is not None:
+            imp_d[name] = imp[name]
+    logging.debug(f"Imported design from {source}: {imp_d.keys()}")
+    return FlowStep(**imp_d)
 
 
 def setup(design_py: str, run_folder: Path, timestamp: bool = True):
@@ -56,8 +71,8 @@ def setup(design_py: str, run_folder: Path, timestamp: bool = True):
 
     design = import_or_default(design_py)
     expected_benches = list()
-    for bench in design["benches"]:
-        if bench.is_absolute():
+    for bench in design.benches:
+        if Path(bench).is_absolute():
             expected_benches.append(bench)
         else:
             expected_benches.append(Path(design_py).parent / bench)
@@ -95,13 +110,13 @@ def cleanup():
             shutil.rmtree(dir_path)
 
 
-def layout_generation(techno: str, layout: Callable, geo: dict[str, float] = {}):
+def layout_generation(techno: str, layout: Callable, geo: Dim):
     top_cell_name = "top"
     layerstack = LayerStack(techno)
 
     lib = db.Layout()
     lib.dbu = layerstack.grid * 1e6
-    layout(lib.create_cell(top_cell_name), layerstack, **geo)
+    layout(lib.create_cell(top_cell_name), layerstack, geo)
     lib.write(f"{top_cell_name}.gds")
 
 
@@ -142,9 +157,10 @@ def load_result(data_name: Path | str = "bench.raw") -> pd.DataFrame:
 def compare_to(perf: dict, target: dict):
     cost = 0
     for key in target:
-        if key in perf:
-            cost += (target[key] - perf[key]) ** 2
-        else:
+        if perf is None or key not in perf:
             logging.warning(f"Key {key} not found in performance dictionary")
             cost += target[key] ** 2
+        else:
+            cost += (target[key] - perf[key]) ** 2
+
     return cost

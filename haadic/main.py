@@ -58,9 +58,9 @@ def run_cli(
         starting_dir = os.getcwd()
         design, run_dir = setup(design_py, Path(sub_folder), timestamp)
         logging.info(f"Running design {design_py} in {run_dir}")
-        design["options"]["flow"] = {"reload_result": reload_result}
+        design.options["flow"] = {"reload_result": reload_result}
         os.chdir(run_dir)
-        flow(**design)
+        flow(**(design.__dict__))
 
     finally:
         os.chdir(starting_dir)

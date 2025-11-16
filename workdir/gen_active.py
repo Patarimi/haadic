@@ -6,14 +6,15 @@ from haadic.layouts.active import mosfet, line, pattern_connect
 from haadic.layouts.general import set_as_port
 from haadic.layouts.tools import LayerStack
 from haadic.models.ekv import EKV
+from haadic.steps.step import Dim
 
 techno = "sky130"
-target: dict[str, float] = {"IC": 5, "id": 0.1e-3, "length": 0.15e-6}
+target = Dim({"IC": 5, "id": 0.1e-3, "length": 0.15e-6})
 
 ekv = EKV(techno)
 
 
-def local_model(target: dict[str, float]) -> dict[str, float]:
+def local_model(target: Dim) -> Dim:
     if Path("model.json").is_file():
         ekv.load("model.json")
         ekv.length = target["length"] * 1e6
@@ -28,10 +29,11 @@ def local_model(target: dict[str, float]) -> dict[str, float]:
 def layout(
     cell,
     layerstack: LayerStack,
-    width: float = 1,
-    length: float = 2,
-    n_finger: int = 80,
+    shape: Dim,
 ):
+    n_finger = int(shape["n_finger"])
+    width = shape["width"]
+    length = shape["length"]
     mosfet(cell, layerstack, width=width, length=length, nf=n_finger)
     line(cell, "gate", layerstack.get_gate_layer())
     line(cell, "drain", layerstack.get_metal_layer(1))
