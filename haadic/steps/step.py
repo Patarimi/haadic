@@ -31,9 +31,9 @@ class Dim:
 
 @pydantic.dataclasses.dataclass
 class FlowStep:
-    layout: Callable[[db.Cell, LayerStack, Optional[Dim]], None]
+    layout: Callable[[db.Cell, LayerStack, Dim], None] | Callable[[db.Cell, LayerStack], None]
     techno: str
-    benches: list[Path] | Path
+    benches: list[Path] | list[str]
     evaluate: Optional[Callable] = None
     target: Dim = pydantic.Field(default_factory=Dim)
     local_model: Optional[Callable[[], Dim]] = None
@@ -113,7 +113,7 @@ def layout_generation(techno: str, layout: Callable, geo: Dim):
 
     lib = db.Layout()
     lib.dbu = layerstack.grid * 1e6
-    layout(lib.create_cell(top_cell_name), layerstack, **(geo.dict))
+    layout(lib.create_cell(top_cell_name), layerstack, Dim(geo.dict))
     lib.write(f"{top_cell_name}.gds")
 
 
@@ -154,9 +154,10 @@ def load_result(data_name: Path | str = "bench.raw") -> pd.DataFrame:
 def compare_to(perf: dict, target: dict):
     cost = 0
     for key in target:
-        if key in perf:
-            cost += (target[key] - perf[key]) ** 2
-        else:
+        if perf is None or key not in perf:
             logging.warning(f"Key {key} not found in performance dictionary")
             cost += target[key] ** 2
+        else:
+            cost += (target[key] - perf[key]) ** 2
+            
     return cost
