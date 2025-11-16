@@ -39,9 +39,8 @@ class EKV:
             raise ValueError(f"Techno {self.techno} not supported in EKV model.")
 
         working_dir = get_file(self.techno, "base_dir") / "haadic"
-        model_file = f"{self.techno}.json"
-        if (working_dir / model_file).is_file():
-            self.load(str(working_dir / model_file))
+        if get_file(self.techno, "haadic").is_file():
+            self.load(str(get_file(self.techno, "haadic")))
             if self.lbda_c != 0:
                 return
 

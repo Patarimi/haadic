@@ -1,5 +1,4 @@
 .idea/
-/haadic/simulators/simulator.yml
 *.env
 /site/
 /pdk/*
