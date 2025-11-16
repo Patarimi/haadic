@@ -23,15 +23,18 @@ default_dict = {"extract": None}
 
 @pydantic.dataclasses.dataclass
 class Dim:
-    dict: dict[str, int | float]
+    dct: dict[str, int | float] = pydantic.Field(default_factory=dict)
 
     def __getitem__(self, key: str) -> int | float:
-        return self.dict[key]
+        return self.dct[key]
 
 
 @pydantic.dataclasses.dataclass
 class FlowStep:
-    layout: Callable[[db.Cell, LayerStack, Dim], None] | Callable[[db.Cell, LayerStack], None]
+    layout: (
+        Callable[[db.Cell, LayerStack, Dim], None]
+        | Callable[[db.Cell, LayerStack], None]
+    )
     techno: str
     benches: list[Path] | list[str]
     evaluate: Optional[Callable] = None
@@ -113,7 +116,7 @@ def layout_generation(techno: str, layout: Callable, geo: Dim):
 
     lib = db.Layout()
     lib.dbu = layerstack.grid * 1e6
-    layout(lib.create_cell(top_cell_name), layerstack, Dim(geo.dict))
+    layout(lib.create_cell(top_cell_name), layerstack, geo)
     lib.write(f"{top_cell_name}.gds")
 
 
@@ -159,5 +162,5 @@ def compare_to(perf: dict, target: dict):
             cost += target[key] ** 2
         else:
             cost += (target[key] - perf[key]) ** 2
-            
+
     return cost

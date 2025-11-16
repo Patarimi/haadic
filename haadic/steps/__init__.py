@@ -67,11 +67,11 @@ def flow(
         else evaluate(data, options["evaluate"])
     )
     if perf is not None:
-        res = [(key, perf[key], target.dict.get(key, "N/A")) for key in perf]
+        res = [(key, perf[key], target.dct.get(key, "N/A")) for key in perf]
         logging.info(
             "\n" + tabulate(res, headers=["obtained", "targeted"], tablefmt="grid")
         )
 
     logging.info("compare performances to targets")
-    cost = step.compare_to(perf, target.dict)  # type: ignore[unresolved-attribute]
+    cost = step.compare_to(perf, target.dct)
     logging.info(f"current cost: {cost}")
