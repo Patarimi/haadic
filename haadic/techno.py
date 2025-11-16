@@ -106,6 +106,11 @@ def list_pdk():
     return process_l
 
 
+def is_installed(pdk_name: str) -> bool:
+    """Check if a PDK is installed."""
+    return pdk_name in list_pdk()
+
+
 def load_pdk(pdk_name: str, path: Optional[str] = None) -> dict:
     if path is not None:
         PATHS.insert(0, path)
@@ -144,8 +149,10 @@ def add_reference(
 def get_file(pdk_name: str, file_type: str) -> Path:
     pdk = load_pdk(pdk_name)
     if file_type == "base_dir":
-        return PDK_INSTALL_DIR / pdk[file_type]
-    return PDK_INSTALL_DIR / pdk["base_dir"] / Path(pdk[file_type])
+        if pdk_name == "mock":
+            return Path(__file__).parent.parent / "pdk/mock"
+        return PDK_INSTALL_DIR / pdk["base_dir"]
+    return get_file(pdk_name, "base_dir") / Path(pdk[file_type])
 
 
 def _read_tech(tech_file: str | Path) -> dict:
