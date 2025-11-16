@@ -1,6 +1,9 @@
+import logging
+import shutil
 import numpy as np
 import pytest
 from haadic.models.ekv import EKV
+from haadic.techno import get_file, load_pdk
 
 
 def test_ekv_model(tmp_path):
@@ -33,6 +36,16 @@ def test_ekv_model(tmp_path):
 
 
 def test_ekv_sky130():
-    ekv = EKV("sky130")
+    techno = "sky130"
+    # remove existing haadic file if any
+    if "haadic" in load_pdk(techno):
+        try:
+            haadic_dir = get_file(techno, "base_dir") / "haadic"
+            logging.info(f"Removing existing directory: {haadic_dir}")
+            shutil.rmtree(haadic_dir)
+        except FileNotFoundError:
+            pass
+    ekv = EKV(techno)
     assert ekv.length == 0.18
     assert pytest.approx(ekv.n, abs=1e-3) == 1.501
+    assert get_file(techno, "haadic").is_file()
