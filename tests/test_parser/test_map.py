@@ -1,12 +1,9 @@
-import os.path
-
 import pytest
 
 from haadic.parsers.layermap import load_map, get_number
+from haadic.techno import is_installed
 
-pytestmark = pytest.mark.skipif(
-    not (os.path.isdir("./pdk/mock")), reason="PDK not installed."
-)
+pytestmark = pytest.mark.skipif(not is_installed("mock"), reason="PDK not installed.")
 
 
 def test_load_map():

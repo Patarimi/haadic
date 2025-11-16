@@ -65,7 +65,7 @@ class LayerStack:
             path = get_file(self.techno, "techlef")
             self.load_from_tlef(path)
             logging.info(f"LayerStack loaded from {path}")
-            path_json = get_file("base_dir") / f"{self.techno}.json"
+            path_json = get_file(self.techno, "base_dir") / f"{self.techno}.json"
             with open(path_json, "w") as f:
                 json.dump(self, fp=f, default=lambda dc: dc.__dict__, indent=2)
             add_reference(self.techno, "haadic", f"{self.techno}.json")

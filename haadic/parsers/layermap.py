@@ -1,9 +1,8 @@
 from dataclasses import dataclass
-from os.path import dirname, isabs, join
 from haadic.parsers.tools import parse
 from lark import Transformer
 
-from haadic.techno import load_pdk
+from haadic.techno import get_file
 
 
 @dataclass
@@ -54,11 +53,7 @@ class LayerMap(Transformer):
 
 
 def load_map(techno: str) -> dict[str, Map]:
-    pdk = load_pdk(techno)
-    if isabs(pdk["base_dir"]):
-        map_path = join(pdk["base_dir"], pdk["layermap"])
-    else:
-        map_path = join(dirname(dirname(__file__)), pdk["base_dir"], pdk["layermap"])
+    map_path = get_file(techno, "layermap")
     t = parse(map_path, "layermap")
     map_list = LayerMap().transform(t)
     return map_list
