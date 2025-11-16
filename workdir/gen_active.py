@@ -29,10 +29,11 @@ def local_model(target: Dim) -> Dim:
 def layout(
     cell,
     layerstack: LayerStack,
-    width: float = 1,
-    length: float = 2,
-    n_finger: int = 80,
+    shape: Dim,
 ):
+    n_finger = int(shape["n_finger"])
+    width = shape["width"]
+    length = shape["length"]
     mosfet(cell, layerstack, width=width, length=length, nf=n_finger)
     line(cell, "gate", layerstack.get_gate_layer())
     line(cell, "drain", layerstack.get_metal_layer(1))

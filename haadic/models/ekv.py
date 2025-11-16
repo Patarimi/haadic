@@ -9,6 +9,7 @@ from typing import get_args
 import numpy as np
 import pandas as pd
 import scipy
+from klayout import db
 
 from haadic.layouts.active import connect, line, mosfet
 from haadic.layouts.general import set_as_port
@@ -163,12 +164,13 @@ def _gm(id: np.ndarray, l_c: float, n: float, i_ssq: float) -> np.ndarray:
 
 
 def layout(
-    cell,
+    cell: db.Cell,
     layerstack: LayerStack,
-    width: float = 1,
-    length: float = 2,
-    n_finger: int = 80,
+    shape: Dim,
 ):
+    width = shape["width"]
+    length = shape["length"]
+    n_finger = int(shape["n_finger"])
     mosfet(cell, layerstack, width=width, length=length, nf=n_finger)
     line(cell, "gate", layerstack.get_gate_layer())
     line(cell, "drain", layerstack.get_metal_layer(1))
