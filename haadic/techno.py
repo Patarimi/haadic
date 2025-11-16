@@ -20,12 +20,15 @@ pkd_app = App("pdk", help="Manage the PDKs")  # ty: ignore[unknown-argument]
 # define search paths for techno.yml and design.yml
 PATHS = [Path((dirname(__file__))) / "techno.yml", Path(os.getcwd()) / "design.yml"]
 Available_PDK = Literal["sky130", "gf180mcu"]
+PDK_INSTALL_DIR = Path(
+    os.getenv("PDK_ROOT") or os.path.join(os.path.expanduser("~"), ".ciel")
+)
 
 
 @pkd_app.command(name="install")
 def install(pdk_name: str):
     """Install the _pdk_name_ technology in its default location."""
-    base_install = Path(dirname(__file__)) / "../pdk/"
+    base_install = Path(PDK_INSTALL_DIR)
     tech = load_pdk(pdk_name)
     base_url = tech["source_url"]
     cmd = []
@@ -49,9 +52,7 @@ def install(pdk_name: str):
             str(base_install),
             tech["version"],
         ]
-        ret = run(cmd, capture_output=True, text=True)
-        print(ret.stdout)
-        console.print(ret.stderr)
+        run(cmd, capture_output=False, text=True)
         return
     if not (isdir(base_install / pdk_name)):
         os.makedirs(base_install / pdk_name)
@@ -66,6 +67,7 @@ def install(pdk_name: str):
     logging.info("downloading files, might take some times...")
     ext = ".zip" if ".zip" in base_url else ".tar.bz2"
     file_name = (base_install / pdk_name).with_suffix(ext)
+    logging.info(f"download complete, file available at {file_name}")
     urllib.request.urlretrieve(base_url, file_name)
     logging.info("extracting, please wait...")
     if ext == ".tar.bz2":
@@ -81,13 +83,19 @@ def install(pdk_name: str):
 def print_pdk() -> None:
     """Display the list of available PDK."""
     process_d = list_pdk()
-    print("Available PDKs are:")
-    table = Table("Name", "State", show_header=False, box=None)
+    table = Table(
+        "Name",
+        "Status",
+        "Installation Folder",
+        show_header=True,
+        box=None,
+        title="Available PDK",
+    )
     for k in process_d:
-        pdk = load_pdk(k)
-        base_dir = join(dirname(__file__), pdk["base_dir"])
         table.add_row(
-            k, "[green]installed[/green]" if isdir(base_dir) else "not installed"
+            k,
+            "[green]installed[/green]" if is_installed(k) else "not installed",
+            str(get_file(k, "base_dir")) if is_installed(k) else "-",
         )
     print(table)
 
@@ -99,6 +107,11 @@ def list_pdk():
             process_d = _read_tech(path)
             process_l += list(process_d.keys())
     return process_l
+
+
+def is_installed(pdk_name: str) -> bool:
+    """Check if a PDK is installed."""
+    return isdir(get_file(pdk_name, "base_dir"))
 
 
 def load_pdk(pdk_name: str, path: Optional[str] = None) -> dict:
@@ -139,8 +152,10 @@ def add_reference(
 def get_file(pdk_name: str, file_type: str) -> Path:
     pdk = load_pdk(pdk_name)
     if file_type == "base_dir":
-        return Path(dirname(__file__)) / Path(pdk["base_dir"])
-    return Path(dirname(__file__)) / Path(pdk["base_dir"]) / Path(pdk[file_type])
+        if pdk_name == "mock":
+            return Path(__file__).parent.parent / "pdk/mock"
+        return PDK_INSTALL_DIR / pdk["base_dir"]
+    return get_file(pdk_name, "base_dir") / Path(pdk[file_type])
 
 
 def _read_tech(tech_file: str | Path) -> dict:

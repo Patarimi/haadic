@@ -1,6 +1,18 @@
+import pytest
 from haadic import techno
+from pathlib import Path
 
 pdk_exp = ["sky130", "asap7", "gf180mcu"]
+
+
+@pytest.mark.parametrize("pdk", pdk_exp)
+def test_install_pdk(pdk):
+    techno.install(pdk)
+
+
+@pytest.mark.parametrize("pdk_name", pdk_exp)
+def test_is_installed(pdk_name):
+    assert techno.is_installed(pdk_name) is True
 
 
 def test_list_pdk():
@@ -10,16 +22,12 @@ def test_list_pdk():
         assert pdk in pdk_act
 
 
-def test_load_pdk():
-    for pdk in pdk_exp:
-        tech = techno.load_pdk(pdk)
-        assert isinstance(tech, dict)
-        techno.get_file(pdk, "process")
-
-
-def test_install_pdk():
-    for pdk in pdk_exp:
-        techno.install(pdk)
+@pytest.mark.parametrize("pdk", pdk_exp)
+def test_load_pdk(pdk):
+    tech = techno.load_pdk(pdk)
+    assert isinstance(tech, dict)
+    path = techno.get_file(pdk, "layermap")
+    assert Path(path).is_file()
 
 
 def test_print_pdk(capsys):

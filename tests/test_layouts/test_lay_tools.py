@@ -1,8 +1,9 @@
-from os.path import dirname, isdir
+from os.path import dirname
 import os
 from pathlib import Path
 import pytest
 from haadic.layouts import tools
+from haadic.techno import is_installed
 import logging
 
 REF_PATH = Path(dirname(__file__)).parent / "ref_files"
@@ -20,7 +21,7 @@ def test_tools():
 
 
 @pytest.mark.skipif(
-    not isdir("./pdk/gf180mcuD"), reason="The PDK gf180mcu not installed."
+    not is_installed("gf180mcu"), reason="The PDK gf180mcu not installed."
 )
 def test_layer_stack_gf():
     layer_stack = tools.LayerStack("gf180mcu")
@@ -46,7 +47,7 @@ def test_layer_stack_gf():
     )
 
 
-@pytest.mark.skipif(not isdir("./pdk/sky130A"), reason="The PDK sky130 not installed.")
+@pytest.mark.skipif(not is_installed("sky130"), reason="The PDK sky130 not installed.")
 def test_layer_stack_sw():
     layer_stack = tools.LayerStack("sky130")
     logging.debug(layer_stack)

@@ -1,16 +1,13 @@
-from pathlib import Path
 import pytest
 from haadic.parsers.tlef import load_tlef, get_metal, get_via
-from haadic.techno import load_pdk
-from os.path import join, dirname, isdir
+from haadic.techno import get_file, is_installed
 import logging
 
-pytestmark = pytest.mark.skipif(not (isdir("./pdk/mock")), reason="PDK not installed.")
+pytestmark = pytest.mark.skipif((not is_installed("mock")), reason="PDK not installed.")
 
 
 def test_load_tlef():
-    pdk = load_pdk("mock")
-    path = Path(join(dirname(dirname(__file__)), pdk["base_dir"], pdk["techlef"]))
+    path = get_file("mock", "techlef")
     layers = load_tlef(path)
     logging.debug(layers)
 

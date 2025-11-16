@@ -2,7 +2,7 @@ import logging
 from dataclasses import dataclass, field
 from os.path import join, dirname, realpath
 from pathlib import Path
-from haadic.techno import add_reference, load_pdk
+from haadic.techno import add_reference, load_pdk, get_file
 from haadic.parsers.tlef import load_tlef
 from haadic.parsers.layermap import load_map, get_number
 import klayout.db as kdb
@@ -57,16 +57,15 @@ class LayerStack:
 
     def __post_init__(self):
         pdk = load_pdk(self.techno)
-        root = Path(join(dirname(__file__), "../", pdk["base_dir"]))
-        if "haadic" in pdk.keys() and (root / pdk["haadic"]).is_file():
-            path_json = root / pdk["haadic"]
+        if "haadic" in pdk.keys() and get_file(self.techno, "haadic").is_file():
+            path_json = get_file(self.techno, "haadic")
             self.load_from_json(path_json)
             logging.info(f"LayerStack loaded from {path_json}")
         else:
-            path = root / pdk["techlef"]
+            path = get_file(self.techno, "techlef")
             self.load_from_tlef(path)
             logging.info(f"LayerStack loaded from {path}")
-            path_json = root / f"{self.techno}.json"
+            path_json = get_file(self.techno, "base_dir") / f"{self.techno}.json"
             with open(path_json, "w") as f:
                 json.dump(self, fp=f, default=lambda dc: dc.__dict__, indent=2)
             add_reference(self.techno, "haadic", f"{self.techno}.json")

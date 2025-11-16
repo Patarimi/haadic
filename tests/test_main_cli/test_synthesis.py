@@ -1,9 +1,9 @@
-import os
 from haadic.main import run_cli, smoke_test_cli
+from haadic.techno import is_installed
 import pytest
 
 pytestmark = pytest.mark.skipif(
-    not (os.path.isdir("./pdk/sky130B")) or not (os.path.isdir("./pdk/gf180mcuD")),
+    (not is_installed("sky130") or not is_installed("gf180mcu")),
     reason="PDK not installed.",
 )
 
