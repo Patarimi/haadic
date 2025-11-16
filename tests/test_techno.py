@@ -1,4 +1,5 @@
 from haadic import techno
+from pathlib import Path
 
 pdk_exp = ["sky130", "asap7", "gf180mcu"]
 
@@ -14,7 +15,8 @@ def test_load_pdk():
     for pdk in pdk_exp:
         tech = techno.load_pdk(pdk)
         assert isinstance(tech, dict)
-        techno.get_file(pdk, "process")
+        path = techno.get_file(pdk, "layermap")
+        assert Path(path).is_file()
 
 
 def test_install_pdk():
