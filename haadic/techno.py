@@ -23,6 +23,8 @@ Available_PDK = Literal["sky130", "gf180mcu"]
 PDK_INSTALL_DIR = Path(
     os.getenv("PDK_ROOT") or os.path.join(os.path.expanduser("~"), ".ciel")
 )
+# enforce setting the env variable so shell.nix is properly setup
+os.environ["PDK_ROOT"] = PDK_INSTALL_DIR
 
 
 @pkd_app.command(name="install")
