@@ -48,7 +48,7 @@ def nix_run(cmd: list[str]) -> CompletedProcess:
     ]
     if os.name == "nt":
         over_head = [
-            "WSLENV=PDK_ROOT/up", # propagate PDK_ROOT to WSL
+            "WSLENV=PDK_ROOT/up",  # propagate PDK_ROOT to WSL
             "wsl",
             "-d",
             "NixOS",
