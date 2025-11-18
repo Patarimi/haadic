@@ -47,7 +47,14 @@ def nix_run(cmd: list[str]) -> CompletedProcess:
         "--command",
     ]
     if os.name == "nt":
-        over_head = ["wsl", "-d", "NixOS", "--shell-type", "login"] + over_head
+        over_head = [
+            "WSLENV=PDK_ROOT/up", # propagate PDK_ROOT to WSL
+            "wsl",
+            "-d",
+            "NixOS",
+            "--shell-type",
+            "login",
+        ] + over_head
     over_head.append(" ".join(cmd))
     shell_path = dirname(__file__) + "/shell.nix"
     over_head.append(to_wsl(shell_path))
