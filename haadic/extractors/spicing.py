@@ -95,7 +95,7 @@ def extract_spice_magic(
         f.writelines(buff_out)
     logging.info(f"Command file generated: {tcl_file}")
     cmd = [
-        f"export PDK_ROOT={to_wsl(PDK_INSTALL_DIR)}",
+        f"export PDK_ROOT={to_wsl(PDK_INSTALL_DIR)} &&",
         "magic",
         "-dnull",
         "-noconsole",
