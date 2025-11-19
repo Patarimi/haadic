@@ -10,6 +10,7 @@ from typing import Literal
 
 from klayout import db as kl
 from haadic.wrappers.tools import nix_run, to_wsl
+from haadic.techno import PDK_INSTALL_DIR
 
 ExtractOptions = Literal["NoPar", "Ronly", "COnly", "RC"]
 
@@ -94,6 +95,7 @@ def extract_spice_magic(
         f.writelines(buff_out)
     logging.info(f"Command file generated: {tcl_file}")
     cmd = [
+        f"export PDK_ROOT={to_wsl(PDK_INSTALL_DIR)}",
         "magic",
         "-dnull",
         "-noconsole",
