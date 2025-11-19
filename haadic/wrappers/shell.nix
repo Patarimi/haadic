@@ -10,5 +10,4 @@ pkgs.mkShellNoCC {
     ngspice
   ];
 
-  PDK_ROOT= builtins.toString ~/.ciel;
 }
