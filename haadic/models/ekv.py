@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 import json
 import logging
 import os
@@ -19,7 +19,7 @@ from haadic.techno import Available_PDK, get_file
 from haadic.steps import flow
 
 
-@dataclass
+@dataclass(slots=True)
 class EKV:
     techno: Available_PDK = "mock"
     length: float = 0.18
@@ -39,8 +39,8 @@ class EKV:
             raise ValueError(f"Techno {self.techno} not supported in EKV model.")
 
         working_dir = get_file(self.techno, "base_dir") / "haadic"
-        if get_file(self.techno, "haadic").is_file():
-            self.load(str(get_file(self.techno, "haadic")))
+        if (working_dir / "ekv.json").is_file():
+            self.load(str(working_dir / "ekv.json"))
             if self.lbda_c != 0:
                 return
 
@@ -51,7 +51,7 @@ class EKV:
                 self.extract_small_l(gm, id)
             else:
                 self.extract_big_l(gm, id)
-            self.dump(f"{self.techno}.json")
+            self.dump(str(working_dir / "ekv.json"))
 
         try:
             starting_dir = os.getcwd()
@@ -88,7 +88,11 @@ class EKV:
 
     def dump(self, filename: str):
         with open(filename, "w") as f:
-            json.dump(self.__dict__, f, indent=2)
+            json.dump(self.model, f, indent=2)
+
+    @property
+    def model(self) -> dict:
+        return asdict(self)
 
     def extract(self, gm: np.ndarray, id: np.ndarray):
         if self.n > 0:
