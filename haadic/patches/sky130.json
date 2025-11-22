@@ -51,30 +51,12 @@
   },
   "_stack": [
     {
-      "layer": 66,
-      "datatype": 44,
-      "name": "licon1",
-      "width": 0.17,
-      "spacing": 0.17,
-      "_pin": 0,
-      "enclosure": 0
-    },
-    {
       "layer": 67,
       "datatype": 20,
       "name": "li1",
       "width": 0.17,
       "spacing": 0,
       "_pin": 16
-    },
-    {
-      "layer": 67,
-      "datatype": 44,
-      "name": "mcon",
-      "width": 0.17,
-      "spacing": 0.19,
-      "_pin": 0,
-      "enclosure": 0.03
     },
     {
       "layer": 68,
@@ -85,30 +67,12 @@
       "_pin": 20
     },
     {
-      "layer": 68,
-      "datatype": 44,
-      "name": "via",
-      "width": 0.15,
-      "spacing": 0.17,
-      "_pin": 0,
-      "enclosure": 0.055
-    },
-    {
       "layer": 69,
       "datatype": 20,
       "name": "met2",
       "width": 0.14,
       "spacing": 0,
       "_pin": 20
-    },
-    {
-      "layer": 69,
-      "datatype": 44,
-      "name": "via2",
-      "width": 0.2,
-      "spacing": 0.2,
-      "_pin": 0,
-      "enclosure": 0.065
     },
     {
       "layer": 70,
@@ -119,15 +83,6 @@
       "_pin": 20
     },
     {
-      "layer": 70,
-      "datatype": 44,
-      "name": "via3",
-      "width": 0.2,
-      "spacing": 0.2,
-      "_pin": 0,
-      "enclosure": 0.065
-    },
-    {
       "layer": 71,
       "datatype": 20,
       "name": "met4",
@@ -136,21 +91,92 @@
       "_pin": 20
     },
     {
-      "layer": 71,
-      "datatype": 44,
-      "name": "via4",
-      "width": 0.8,
-      "spacing": 0.8,
-      "_pin": 0,
-      "enclosure": 0.31
-    },
-    {
       "layer": 72,
       "datatype": 20,
       "name": "met5",
       "width": 1.6,
       "spacing": 0,
       "_pin": 20
+    }
+  ],
+  "_via_list": [
+    {
+      "layer": 66,
+      "datatype": 44,
+      "name": "licon1",
+      "width": 0.17,
+      "spacing": 0.17,
+      "_pin": 0,
+      "enclosure": 0,
+      "between": [
+        0,
+        1
+      ]
+    },
+    {
+      "layer": 67,
+      "datatype": 44,
+      "name": "mcon",
+      "width": 0.17,
+      "spacing": 0.19,
+      "_pin": 0,
+      "between": [
+        1,
+        2
+      ],
+      "enclosure": 0.03
+    },
+    {
+      "layer": 68,
+      "datatype": 44,
+      "name": "via",
+      "width": 0.15,
+      "spacing": 0.17,
+      "_pin": 0,
+      "between": [
+        2,
+        3
+      ],
+      "enclosure": 0.055
+    },
+    {
+      "layer": 69,
+      "datatype": 44,
+      "name": "via2",
+      "width": 0.2,
+      "spacing": 0.2,
+      "_pin": 0,
+      "between": [
+        3,
+        4
+      ],
+      "enclosure": 0.065
+    },
+    {
+      "layer": 70,
+      "datatype": 44,
+      "name": "via3",
+      "width": 0.2,
+      "spacing": 0.2,
+      "_pin": 0,
+      "between": [
+        4,
+        5
+      ],
+      "enclosure": 0.065
+    },
+    {
+      "layer": 71,
+      "datatype": 44,
+      "name": "via4",
+      "width": 0.8,
+      "spacing": 0.8,
+      "_pin": 0,
+      "between": [
+        5,
+        6
+      ],
+      "enclosure": 0.31
     }
   ]
 }
