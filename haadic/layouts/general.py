@@ -87,7 +87,7 @@ def via_stack(
     return v
 
 
-type Label = tuple[db.DText, int]
+Label = tuple[db.DText, int]
 
 
 def get_dtext(
