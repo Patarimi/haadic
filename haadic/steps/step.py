@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 import shutil
 import sys
-from typing import Optional, Self
+from typing import Optional, Self, Sequence
 
 import pandas as pd
 from klayout import db
@@ -36,7 +36,7 @@ class FlowStep:
         | Callable[[db.Cell, LayerStack], None]
     )
     techno: str
-    benches: list[Path] | list[str]
+    benches: Sequence[Path | str]
     evaluate: Optional[Callable] = None
     target: Dim = pydantic.Field(default_factory=Dim)
     local_model: Optional[Callable[[], Dim]] = None

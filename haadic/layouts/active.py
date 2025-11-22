@@ -1,5 +1,5 @@
 import logging
-from typing import Literal
+from typing import Literal, Sequence
 
 import klayout.db as db
 from haadic.layouts.tools import LayerStack, Layer
@@ -133,8 +133,8 @@ def connect(
     :return: the cell containing the connection.
     """
     layout = cell.layout()
-    lbl_h, lyr_hp = get_dtext(layout, label_line)
-    lbl_v, lyr_vp = get_dtext(layout, label_mos)
+    lbl_h, lyr_hp = get_dtext(layout, label_line)[0]
+    lbl_v, lyr_vp = get_dtext(layout, label_mos)[0]
     box_v, lyr_v = get_shape(layout, lbl_v.position(), lyr_vp)
     box_h, lbl_h = get_shape(layout, lbl_h.position(), lyr_hp)
     if box_h.center().y > box_v.center().y:
@@ -146,7 +146,7 @@ def connect(
 
 
 def pattern_connect(
-    cell: db.Cell, layers: LayerStack, device_name: str, pattern: list[str]
+    cell: db.Cell, layers: LayerStack, device_name: str, pattern: Sequence[str]
 ) -> db.Cell:
     """ """
     layout = cell.layout()

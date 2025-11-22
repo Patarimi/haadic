@@ -35,7 +35,7 @@ class Process(Transformer):
         return float(number)
 
     def __init__(self):
-        self.scale = {"length": 1}
+        self.scale = {"length": 1.0}
         self.DielectricLayers = []
         self.MetalLayers: dict[str, MetalLayer] = {}
         self.Definitions: dict[str, str] = {}

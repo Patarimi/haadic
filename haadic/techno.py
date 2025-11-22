@@ -116,7 +116,7 @@ def is_installed(pdk_name: str) -> bool:
 
 def load_pdk(pdk_name: str, path: Optional[str] = None) -> dict:
     if path is not None:
-        PATHS.insert(0, path)
+        PATHS.insert(0, Path(path))
         logging.info(f"Paths list updated: {PATHS}")
     for file in PATHS:
         if not os.path.isfile(file):
