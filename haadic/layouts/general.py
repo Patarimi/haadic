@@ -87,9 +87,12 @@ def via_stack(
     return v
 
 
+Label = tuple[db.DText, int]
+
+
 def get_dtext(
     layout: db.Layout, label: Optional[str] = None, cell: Optional[str] = None
-) -> tuple[db.DText, int]:
+) -> list[Label]:
     """
     This function  return the dtext with the associated label in the layout.
     :param layout: Layout to be explored.
@@ -103,15 +106,17 @@ def get_dtext(
         cells = layout.each_cell()
     else:
         cells = (layout.cell(cell),)
-    for cell in cells:
+    for c in cells:
         for lyr in layout.layer_indexes():
-            for shape in cell.shapes(lyr):
+            for shape in c.shapes(lyr):
                 if not shape.is_text():
                     continue
                 if label is None:
-                    labels.append([shape.dtext, lyr])
+                    labels.append((shape.dtext, lyr))
                 elif shape.dtext.string == label:
-                    return shape.dtext, lyr
+                    return [
+                        (shape.dtext, lyr),
+                    ]
     if label is None:
         return labels
     else:
@@ -144,7 +149,7 @@ def set_as_port(cell: db.Cell, label: str):
             res = get_dtext(lay.cell(subcell).layout(), label)
         except ValueError:
             continue
-        txt, lyr = res
+        txt, lyr = res[0] if isinstance(res, list) else res
         cell.shapes(lyr).insert(txt)
 
 

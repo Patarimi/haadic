@@ -32,15 +32,15 @@ def test_via_stack(tmp_path):
 
 def test_dtext():
     lib = kl.Layout()
-    lib.read(REF_PATH / "ref_line.gds")
-    gnd, lyr = get_dtext(lib, "gnd")
+    lib.read(str(REF_PATH / "ref_line.gds"))
+    gnd, lyr = get_dtext(lib, "gnd")[0]
     assert gnd == kl.DText("gnd", 0, -0.9)
     assert lyr == 0
 
 
 def test_shape():
     lib = kl.Layout()
-    lib.read(REF_PATH / "ref_line.gds")
+    lib.read(str(REF_PATH / "ref_line.gds"))
     box, lyr = get_shape(lib, kl.DPoint(0, -0.9), 0)
     assert box is not None
     assert lyr == 0
