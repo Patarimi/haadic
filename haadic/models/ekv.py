@@ -39,7 +39,7 @@ class EKV:
             raise ValueError(f"Techno {self.techno} not supported in EKV model.")
 
         working_dir = get_file(self.techno, "base_dir") / "haadic"
-        if (working_dir/"ekv.json").is_file():
+        if (working_dir / "ekv.json").is_file():
             self.load(str(working_dir / "ekv.json"))
             if self.lbda_c != 0:
                 return
@@ -51,7 +51,8 @@ class EKV:
                 self.extract_small_l(gm, id)
             else:
                 self.extract_big_l(gm, id)
-            self.dump(str(working_dir/"ekv.json"))
+            self.dump(str(working_dir / "ekv.json"))
+
         try:
             starting_dir = os.getcwd()
             if not working_dir.is_dir():
@@ -88,7 +89,7 @@ class EKV:
     def dump(self, filename: str):
         with open(filename, "w") as f:
             json.dump(self.model, f, indent=2)
-    
+
     @property
     def model(self) -> dict:
         return asdict(self)
