@@ -83,4 +83,4 @@ def evaluate(bench_data: pd.DataFrame, dis_plot: bool = True) -> dict[str, float
         ax[1].set_ylim(0, 30)
         plt.savefig(f"fit_{ekv.length=}.png")
     ekv.dump("model.json")
-    return ekv.__dict__
+    return ekv.model
