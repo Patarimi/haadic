@@ -36,7 +36,12 @@ class Layer:
 
 @dataclass
 class ViaLayer(Layer):
+    between: tuple[int, int] = (0, 0)
     enclosure: float | tuple[float, float] = 0
+
+    def __post_init__(self):
+        if isinstance(self.between, list):
+            self.between = (self.between[0], self.between[1])
 
 
 def default_layer():
@@ -46,7 +51,8 @@ def default_layer():
 @dataclass
 class LayerStack:
     techno: str
-    _stack: list[Layer | ViaLayer] = field(init=False)
+    _stack: list[Layer] = field(default_factory=list)
+    _via_list: list[ViaLayer] = field(default_factory=list)
     _pad: Layer = field(init=False)
     _gate: Layer = field(default_factory=default_layer)
     _nplus: Layer = field(default_factory=default_layer)
@@ -76,15 +82,8 @@ class LayerStack:
 
     def get_metal_layer(self, num: int) -> Layer:
         if num == 0:
-            raise ValueError("nbr cannot be 0")
-        try:
-            pard = 0 if isinstance(self._stack[-1], ViaLayer) else 1
-            paru = 1 if isinstance(self._stack[0], ViaLayer) else 2
-            return self._stack[2 * num - paru if num > 0 else 2 * num + pard]
-        except IndexError:
-            raise IndexError(
-                f"Layer {num} not found. Available layers are {self._stack}"
-            )
+            return self._gate
+        return self._stack[num - 1 if num > 0 else num]
 
     def get_id(self, layer: int, datatype: int = 0):
         for i, lyr in enumerate(self._stack):
@@ -99,18 +98,12 @@ class LayerStack:
         return self._gate
 
     def get_via_layer(self, num: int) -> ViaLayer:
-        if num == 0 and not isinstance(self._stack[0], ViaLayer):
-            raise ValueError(
-                "Contact layer not found. First layer in stack is a metal Layer"
-            )
-        if num == -1 and not isinstance(self._stack[0], ViaLayer):
-            raise ValueError(
-                "Last Via layer not found. Last layer in stack is a metal Layer\n"
-                + "".join("\t" + lyr.name for lyr in self._stack)
-            )
-        pard = 1 if isinstance(self._stack[-1], ViaLayer) else 2
-        paru = 0 if isinstance(self._stack[0], ViaLayer) else 1
-        return self._stack[2 * num - paru if num >= 0 else 2 * num + pard]
+        if num < 0:
+            num = len(self._stack) + num + 1
+        for vlyr in self._via_list:
+            if vlyr.between[0] == num:
+                return vlyr
+        raise IndexError(f"No via layer found for metal layer {num}.")
 
     def load_from_json(self, path_json: Path | str):
         with open(path_json, "r") as f:
@@ -122,18 +115,21 @@ class LayerStack:
             self._nwell = Layer(**data.get("_nwell", {}))
             self._active = Layer(**data.get("_active", {}))
             self._pad = Layer(**data.get("pad", default_layer().__dict__))
-            self._stack = []
-            for i, lyr in enumerate(data.get("_stack")):
-                if "enclosure" in lyr.keys():
-                    self._stack.append(ViaLayer(**lyr))
-                else:
+            if data.get("_stack") is not None:
+                self._stack = []
+                for i, lyr in enumerate(data.get("_stack")):
                     self._stack.append(Layer(**lyr))
+            if data.get("_via_list") is not None:
+                self._via_list = []
+                for i, lyr in enumerate(data.get("_via_list", [])):
+                    self._via_list.append(ViaLayer(**lyr))
 
     def load_from_tlef(self, path: Path | str):
         t_stack = load_tlef(path)
         self.grid = t_stack.unit
         layer_map = load_map(self.techno)
         stack = []
+        via_list = []
         for layer in t_stack.layers:
             if layer.name not in layer_map.keys():
                 logging.error(f"{layer.name} not found in layer map file.")
@@ -175,8 +171,9 @@ class LayerStack:
                     width=layer.width,
                     spacing=layer.spacing,
                     enclosure=layer.enclosure,
+                    between=(len(stack), len(stack) + 1),
                 )
-                stack.append(lyr)
+                via_list.append(lyr)
             elif layer.type == "MASTERSLICE":
                 try:
                     pin = get_number(layer_map, layer.name, "pin")
@@ -204,6 +201,7 @@ class LayerStack:
             logging.debug(f"{self._pad.name} set as Pad layer")
         logging.info("".join("\t" + lyr.name for lyr in stack))
         self._stack = stack
+        self._via_list = via_list
 
     def apply_patch(self):
         """

@@ -37,13 +37,13 @@ def test_layer_stack_gf():
     )
 
     assert layer_stack.get_via_layer(1) == tools.ViaLayer(
-        35, 0, "Via1", 0.26, 0.26, enclosure=0.01
+        35, 0, "Via1", 0.26, 0.26, enclosure=0.01, between=(1, 2)
     )
     assert layer_stack.get_via_layer(2) == tools.ViaLayer(
-        38, 0, "Via2", 0.26, 0.26, enclosure=0.01
+        38, 0, "Via2", 0.26, 0.26, enclosure=0.01, between=(2, 3)
     )
     assert layer_stack.get_via_layer(-2) == tools.ViaLayer(
-        41, 0, "Via4", 0.26, 0.26, enclosure=0.01
+        41, 0, "Via4", 0.26, 0.26, enclosure=0.01, between=(4, 5)
     )
 
 
@@ -58,11 +58,11 @@ def test_layer_stack_sw():
     assert layer_stack.get_metal_layer(-1) == tools.Layer(72, 20, "met5", 1.6, _pin=20)
 
     assert layer_stack.get_via_layer(2) == tools.ViaLayer(
-        68, 44, "via", 0.15, 0.17, enclosure=0.055
+        68, 44, "via", 0.15, 0.17, enclosure=0.055, between=(2, 3)
     )
     assert layer_stack.get_via_layer(3) == tools.ViaLayer(
-        69, 44, "via2", 0.2, 0.2, enclosure=0.065
+        69, 44, "via2", 0.2, 0.2, enclosure=0.065, between=(3, 4)
     )
     assert layer_stack.get_via_layer(-2) == tools.ViaLayer(
-        71, 44, "via4", 0.8, 0.8, enclosure=0.31
+        71, 44, "via4", 0.8, 0.8, enclosure=0.31, between=(5, 6)
     )

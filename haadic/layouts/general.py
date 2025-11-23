@@ -69,8 +69,8 @@ def via_stack(
     :return: a db.Cell containing the via stack.
     """
     v = layout.create_cell("via_stack")
-    id_top = id_top if id_top > 0 else int((len(layers) + 1) / 2 + id_top)
-    id_bot = id_bot if id_bot > 0 else int((len(layers) + 1) / 2 + id_bot)
+    id_top = id_top if id_top > 0 else int(len(layers) + 1) + id_top
+    id_bot = id_bot if id_bot > 0 else int(len(layers) + 1) + id_bot
     logging.info(f"Via Stack between : {id_top=}\t{id_bot=}")
     for i in range(id_bot, id_top + 1):
         lyr = layers.get_metal_layer(i)
