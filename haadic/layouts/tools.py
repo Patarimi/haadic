@@ -171,7 +171,7 @@ class LayerStack:
                     width=layer.width,
                     spacing=layer.spacing,
                     enclosure=layer.enclosure,
-                    between=(len(stack), len(stack)+1),
+                    between=(len(stack), len(stack) + 1),
                 )
                 via_list.append(lyr)
             elif layer.type == "MASTERSLICE":
