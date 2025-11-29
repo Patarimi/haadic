@@ -63,3 +63,23 @@ def eng(x: float, precision: int = 3, prefix: bool = True) -> str:
         return f"{x * 10 ** (-3 * pw):.{precision}f} {ref[pw]}"
     else:
         return f"{x * 10 ** (-3 * pw):.{precision}f}e{3 * pw}"
+
+
+def med_Xpercentile(data: np.ndarray, fun: str = "max", percent: float = 0.1) -> float:
+    """
+    Return the median of the _percent_ top (or bottom) percentile of the data.
+    :param data: input data array
+    :param fun: "max" or "min" to select top or bottom percentile
+    :param percent: percentile threshold (between 0 and 1)
+    """
+    if percent < 0 or percent > 1:
+        raise ValueError("percent must be between 0 and 1")
+    if fun == "max":
+        thres = (1 - percent) * np.max(data)
+        crop = data[data >= thres]
+        print(f"Max threshold: {thres}")
+    elif fun == "min":
+        thres = (1 + percent) * np.min(data)
+        crop = data[data <= thres]
+        print(f"Min threshold: {thres}")
+    return float(np.median(crop))
