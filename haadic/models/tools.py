@@ -2,10 +2,11 @@
 module for common rf functions and utilities.
 """
 
+from typing import Sequence
 import numpy as np
 
 
-def db20(*kwargs):
+def db20(x_lin: Sequence[complex] | complex | float, /) -> float:
     """
     Return the decibel value of the sum of the given complex number.
     :param kwargs: input complex numbers
@@ -14,7 +15,11 @@ def db20(*kwargs):
     db20(1) -> 0
     db20(0.5,0.5) -> 0
     """
-    sm = sum(np.abs(k) ** 2 for k in kwargs)
+    sm = (
+        sum(np.abs(k) ** 2 for k in x_lin)
+        if isinstance(x_lin, Sequence)
+        else abs(x_lin) ** 2
+    )
     return 10 * np.log10(sm)
 
 
