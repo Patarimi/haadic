@@ -94,12 +94,6 @@ class EKV:
     def model(self) -> dict:
         return asdict(self)
 
-    def extract(self, gm: np.ndarray, id: np.ndarray):
-        if self.n > 0:
-            self.extract_big_l(gm, id)
-        else:
-            self.extract_small_l(gm, id)
-
     def extract_small_l(self, gm, id):
         Gm_IC = gm * self.ut / id
         self.lbda_c = np.min(self.i_spec / self.ratio / (self.n * gm * self.ut))
