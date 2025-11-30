@@ -1,30 +1,20 @@
-import filecmp
 import pytest
 from os.path import dirname
 
-from haadic.wrappers.magic import extract_spice_magic
-from haadic.wrappers.klayout import check_diff, extract_spice_klayout
+from haadic.wrappers.magic import extract_spice
 from haadic.wrappers.tools import nix_check
+from haadic.wrappers.klayout import check_diff
 from haadic.techno import is_installed, get_file
 from pathlib import Path
 
 REF_PATH = Path(dirname(__file__)).parent / "ref_files"
 
 
-def test_spice_extractor(tmp_path):
-    output_path = tmp_path / "spice.cir"
-    extract_spice_klayout(
-        REF_PATH / "ref_ind.gds", techno="sky130", output_path=output_path
-    )
-    assert output_path.exists()
-    filecmp.cmp(output_path, REF_PATH / "ref_ind.cir")
-
-
 @pytest.mark.skipif(not is_installed("sky130"), reason="PDK not installed.")
 @pytest.mark.skipif(not nix_check(), reason="Nix not correctly installed")
 def test_spice_extractor_magic(tmp_path):
     output_path = tmp_path / "spice.cir"
-    extract_spice_magic(
+    extract_spice(
         REF_PATH / "sky130_fd_sc_hd.gds",
         get_file("sky130", "magic_rc"),
         output_path=output_path,
@@ -34,7 +24,7 @@ def test_spice_extractor_magic(tmp_path):
     assert check_diff(output_path, ref_path)
 
     nopar_out = output_path.with_suffix(".noRC.cir")
-    extract_spice_magic(
+    extract_spice(
         REF_PATH / "sky130_fd_sc_hd.gds",
         get_file("sky130", "magic_rc"),
         output_path=nopar_out,
