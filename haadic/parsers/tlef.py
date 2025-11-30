@@ -4,9 +4,11 @@ TLEF files give the information on the back-end composition and associated desig
 """
 
 import dataclasses
+import functools
 import logging
 from enum import Enum
 from pathlib import Path
+from typing import Literal
 from .tools import parse
 from lark import Discard, Transformer
 
@@ -17,7 +19,7 @@ class Enclosure:
     above: tuple[float, float] = (0, 0)
 
 
-Type = Enum("Type", ("ROUTING", "CUT", "MASTERSLICE", "NWELL", "PWELL"))
+Type = Literal["ROUTING", "CUT", "MASTERSLICE", "NWELL", "PWELL"]
 
 
 @dataclasses.dataclass
@@ -100,6 +102,7 @@ class TechLef(Transformer):
         return ss
 
 
+@functools.cache
 def load_tlef(tlef_path: str | Path) -> TechStack:
     """
     Load a TLEF file and return a dictionary of layer names.
@@ -109,7 +112,7 @@ def load_tlef(tlef_path: str | Path) -> TechStack:
     return TechLef().transform(t)
 
 
-def get_all_by_type(l_type: str, tlef_path: Path) -> list[str]:
+def get_all_by_type(l_type: str, tlef_path: Path) -> list[Layer]:
     """
     Return the layers of the given type.
     :param l_type: type of the layer
@@ -120,13 +123,13 @@ def get_all_by_type(l_type: str, tlef_path: Path) -> list[str]:
     full_stack = load_tlef(tlef_path)
     for layer in full_stack.layers:
         if layer.type == l_type:
-            layers.append(layer.name)
+            layers.append(layer)
     if not layers:
         raise ValueError(f"No layer of type {l_type} found in {full_stack}")
     return layers
 
 
-def get_by_type(l_type: str, tlef_path: Path, nbr: int) -> str:
+def get_by_type(l_type: str, tlef_path: Path, nbr: int) -> Layer:
     """
     Return the $nbr^{th}$ layer of the given type.
     :param l_type: layer type
@@ -135,16 +138,14 @@ def get_by_type(l_type: str, tlef_path: Path, nbr: int) -> str:
         if nbr is negative, the last layer of the given type is returned
     :return: layer name
     """
-    if nbr == 0:
-        raise ValueError("nbr cannot be 0")
     layers = get_all_by_type(l_type, tlef_path)
     try:
-        return layers[nbr - 1 if nbr > 0 else nbr]
+        return layers[nbr]
     except IndexError:
         raise IndexError(f"List out of range with {nbr} in {layers}")
 
 
-def get_metal(nbr: int, tlef_path: Path) -> str:
+def get_metal(nbr: int, tlef_path: Path) -> Layer:
     """
     Return the name of the $nbr^{th}$ metal (starting at 1).
     :param tlef_path: path to the TLEF file
@@ -154,7 +155,7 @@ def get_metal(nbr: int, tlef_path: Path) -> str:
     return get_by_type("ROUTING", tlef_path, nbr)
 
 
-def get_via(nbr: int, tlef_path: Path) -> str:
+def get_via(nbr: int, tlef_path: Path) -> Layer:
     """
     Return the name of the $nbr^{th}$ via (starting at 1).
     :param nbr: via layer number
