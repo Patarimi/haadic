@@ -1,3 +1,4 @@
+import functools
 import logging
 import os
 from pathlib import Path
@@ -114,6 +115,7 @@ def is_installed(pdk_name: str) -> bool:
     return isdir(get_file(pdk_name, "base_dir"))
 
 
+@functools.cache
 def load_pdk(pdk_name: str, path: Optional[str] = None) -> dict:
     if path is not None:
         PATHS.insert(0, Path(path))
