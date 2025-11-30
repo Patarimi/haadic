@@ -2,8 +2,8 @@ import filecmp
 import pytest
 from os.path import dirname
 
-from haadic.extractors.spicing import extract_spice_klayout, extract_spice_magic
-from haadic.extractors.tools import check_diff
+from haadic.wrappers.magic import extract_spice_magic
+from haadic.wrappers.klayout import check_diff, extract_spice_klayout
 from haadic.wrappers.tools import nix_check
 from haadic.techno import is_installed, get_file
 from pathlib import Path

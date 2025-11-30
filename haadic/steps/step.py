@@ -11,11 +11,11 @@ import pandas as pd
 from klayout import db
 import pydantic
 from haadic.layouts.tools import LayerStack
-from haadic.extractors.spicing import ExtractOptions, extract_spice_magic
+from haadic.wrappers.magic import ExtractOptions, extract_spice_magic
 from haadic.parsers.raw import parse_out
 from haadic.wrappers.ngspice import compute
 from haadic.techno import get_file, load_pdk
-from haadic.parsers.netlist import Netlist
+from haadic.exporters.netlist import Netlist
 from haadic.wrappers.tools import to_wsl
 
 default_dict = {"extract": None}

@@ -111,7 +111,7 @@ def load_tlef(tlef_path: str | Path) -> TechStack:
     return TechLef().transform(t)
 
 
-def get_all_by_type(l_type: str, tlef_path: Path) -> list[Layer]:
+def get_all_by_type(l_type: str, tlef_path: Path | str) -> list[Layer]:
     """
     Return the layers of the given type.
     :param l_type: type of the layer
