@@ -69,17 +69,16 @@ def via_stack(
     :return: a db.Cell containing the via stack.
     """
     v = layout.create_cell("via_stack")
-    id_top = id_top if id_top > 0 else int(len(layers) + 1) + id_top
-    id_bot = id_bot if id_bot > 0 else int(len(layers) + 1) + id_bot
+    route = layers.layers_from_to(id_bot, id_top)
     logging.info(f"Via Stack between : {id_top=}\t{id_bot=}")
-    for i in range(id_bot, id_top + 1):
+    for i in route:
         lyr = layers.get_metal_layer(i)
         layer = layout.layer(lyr.layer, lyr.datatype)
         logging.debug("Metal:\t" + lyr.name)
         # create the bottom metal plate of the vias
         v.shapes(layer).insert(db.DBox(0, 0, size[0], size[1]))
-        if i == id_top:
-            continue
+        if i == max(route):
+            continue  # no via above top layer
         lyr = layers.get_via_layer(i)
         logging.debug("Via:\t" + lyr.name)
         v.insert(db.DCellInstArray(via(layout, lyr, size), db.DVector(0, 0)))

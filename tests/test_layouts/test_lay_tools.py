@@ -45,6 +45,12 @@ def test_layer_stack_gf():
     assert layer_stack.get_via_layer(-2) == tools.ViaLayer(
         41, 0, "Via4", 0.26, 0.26, enclosure=0.01, between=(4, 5)
     )
+    assert layer_stack.get_layer_index(34, 0) == 1
+    assert layer_stack.get_layer_index(35, 0) == 1
+    with pytest.raises(ValueError):
+        layer_stack.get_layer_index(999, 0)
+    assert layer_stack.layers_from_to(1, 3) == [1, 2, 3]
+    assert layer_stack.layers_from_to(-3, -1) == [3, 4, 5]
 
 
 @pytest.mark.skipif(not is_installed("sky130"), reason="The PDK sky130 not installed.")
@@ -53,6 +59,9 @@ def test_layer_stack_sw():
     logging.debug(layer_stack)
     assert layer_stack.get_metal_layer(1) == tools.Layer(
         layer=67, datatype=20, _pin=16, name="li1", width=0.17, spacing=0
+    )
+    assert layer_stack.get_metal_layer(0) == tools.Layer(
+        66, 20, "poly", 0.15, 0.27, _pin=16
     )
     assert layer_stack.get_metal_layer(2) == tools.Layer(68, 20, "met1", 0.14, _pin=20)
     assert layer_stack.get_metal_layer(-1) == tools.Layer(72, 20, "met5", 1.6, _pin=20)
@@ -66,3 +75,6 @@ def test_layer_stack_sw():
     assert layer_stack.get_via_layer(-2) == tools.ViaLayer(
         71, 44, "via4", 0.8, 0.8, enclosure=0.31, between=(5, 6)
     )
+    assert layer_stack.get_pad_layer() == tools.Layer(0, 0, "NotFound", 0, 0)
+    with pytest.raises(IndexError):
+        layer_stack.get_via_layer(999)
