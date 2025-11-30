@@ -10,7 +10,7 @@ from haadic.techno import PDK_INSTALL_DIR
 ExtractOptions = Literal["NoPar", "Ronly", "COnly", "RC"]
 
 
-def extract_spice_magic(
+def extract_spice(
     gds_file: Path,
     rc_file: Path,
     cell_name: str = "None",

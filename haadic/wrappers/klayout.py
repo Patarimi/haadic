@@ -1,5 +1,6 @@
 from pathlib import Path
 from os.path import dirname
+from typing import Optional
 
 from klayout import db as kl
 
@@ -20,8 +21,8 @@ def check_diff(file1: Path, file2: Path) -> bool:
     return comp.compare(net1, net2)
 
 
-def extract_spice_klayout(
-    gds_file: Path, techno: str, output_path: Path = Path()
+def extract_spice(
+    gds_file: Path, techno: str, output_path: Optional[Path] = None
 ) -> Path:
     """
     Extract the equivalent spice schematic of a gdsii file.
@@ -29,8 +30,8 @@ def extract_spice_klayout(
     :param techno: name of technology to be used in the simulation.
     :return: A spice schematic to be used by ngspice
     """
-    if output_path is Path():
-        output_path = Path(f"{dirname(gds_file)}/{gds_file.name}.spice")
+    if output_path is None:
+        output_path = Path(f"{dirname(gds_file)}/{gds_file.stem}.cir")
     layout = kl.Layout()
     layout.read(str(gds_file))
     RSI = kl.RecursiveShapeIterator(layout, layout.top_cell(), layout.layer_indices())
