@@ -77,9 +77,7 @@ def med_Xpercentile(data: np.ndarray, fun: str = "max", percent: float = 0.1) ->
     if fun == "max":
         thres = (1 - percent) * np.max(data)
         crop = data[data >= thres]
-        print(f"Max threshold: {thres}")
     elif fun == "min":
         thres = (1 + percent) * np.min(data)
         crop = data[data <= thres]
-        print(f"Min threshold: {thres}")
     return float(np.median(crop))
