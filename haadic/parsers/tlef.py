@@ -6,7 +6,6 @@ TLEF files give the information on the back-end composition and associated desig
 import dataclasses
 import functools
 import logging
-from enum import Enum
 from pathlib import Path
 from typing import Literal
 from .tools import parse
