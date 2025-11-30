@@ -19,7 +19,7 @@ uvx --with="git+https://github.com/Patarimi/haadic.git" haadic smoke-test
 
 ## Design flow
 
-Starting from the specifications written in a python file, the following flow is run [see](#working-directory).
+Starting from the specifications written in a python file, the following flow is run [see](#setup-a-new-project).
 
 ```mermaid
 flowchart TD

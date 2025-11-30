@@ -1,6 +1,6 @@
 from math import sqrt, pi, atan
 import numpy as np
-from haadic.parsers.netlist import Component
+from haadic.exporters.netlist import Component
 from haadic.models.tools import quality
 from enum import Enum
 

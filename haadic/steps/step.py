@@ -11,11 +11,11 @@ import pandas as pd
 from klayout import db
 import pydantic
 from haadic.layouts.tools import LayerStack
-from haadic.extractors.spicing import ExtractOptions, extract_spice_magic
+from haadic.wrappers.magic import ExtractOptions, extract_spice
 from haadic.parsers.raw import parse_out
 from haadic.wrappers.ngspice import compute
 from haadic.techno import get_file, load_pdk
-from haadic.parsers.netlist import Netlist
+from haadic.exporters.netlist import Netlist
 from haadic.wrappers.tools import to_wsl
 
 default_dict = {"extract": None}
@@ -123,7 +123,7 @@ def layout_generation(techno: str, layout: Callable, geo: Dim):
 def extract_from_layout(
     techno: str, top_cell_name: str = "top", options: ExtractOptions = "RC"
 ):
-    extract_spice_magic(
+    extract_spice(
         Path(f"{top_cell_name}.gds"),
         get_file(techno, "magic_rc"),
         top_cell_name,

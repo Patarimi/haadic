@@ -1,5 +1,5 @@
 import filecmp
-from haadic.parsers.netlist import Component, Netlist
+from haadic.exporters.netlist import Component, Netlist
 from skrf import DefinedGammaZ0, Frequency, c
 
 
