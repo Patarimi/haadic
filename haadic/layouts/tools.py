@@ -85,11 +85,14 @@ class LayerStack:
             return self._gate
         return self._stack[num - 1 if num > 0 else num]
 
-    def get_id(self, layer: int, datatype: int = 0):
+    def get_layer_index(self, layer: int, datatype: int = 0) -> int:
         for i, lyr in enumerate(self._stack):
             if lyr.layer == layer and lyr.datatype == datatype:
-                return i
-        return None
+                return i + 1
+        for i, vlyr in enumerate(self._via_list):
+            if vlyr.layer == layer and vlyr.datatype == datatype:
+                return i + 1
+        raise ValueError(f"Layer {layer}/{datatype} not found in LayerStack.")
 
     def get_pad_layer(self) -> Layer:
         return self._pad
@@ -104,6 +107,9 @@ class LayerStack:
             if vlyr.between[0] == num:
                 return vlyr
         raise IndexError(f"No via layer found for metal layer {num}.")
+
+    def layers_from_to(self, start: int, end: int) -> list[Layer]:
+        pass
 
     def load_from_json(self, path_json: Path | str):
         with open(path_json, "r") as f:
