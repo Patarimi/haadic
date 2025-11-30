@@ -108,8 +108,12 @@ class LayerStack:
                 return vlyr
         raise IndexError(f"No via layer found for metal layer {num}.")
 
-    def layers_from_to(self, start: int, end: int) -> list[Layer]:
-        pass
+    def layers_from_to(self, start: int, end: int) -> list[int]:
+        if start < 0:
+            start = len(self._stack) + start + 1
+        if end < 0:
+            end = len(self._stack) + end + 1
+        return list(range(start, end + 1))
 
     def load_from_json(self, path_json: Path | str):
         with open(path_json, "r") as f:

@@ -49,6 +49,8 @@ def test_layer_stack_gf():
     assert layer_stack.get_layer_index(35, 0) == 1
     with pytest.raises(ValueError):
         layer_stack.get_layer_index(999, 0)
+    assert layer_stack.layers_from_to(1, 3) == [1, 2, 3]
+    assert layer_stack.layers_from_to(-3, -1) == [3, 4, 5]
 
 
 @pytest.mark.skipif(not is_installed("sky130"), reason="The PDK sky130 not installed.")
