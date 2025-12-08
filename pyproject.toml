@@ -38,13 +38,14 @@ update_all = "uv lock --upgrade"
 test = 'coverage run -m pytest --basetemp=tmp'
 cover = "coverage report -m --skip-covered"
 publish = "poetry publish --build --username __token__ --password $PYPI_TOKEN"
-doc = "mkdocs gh-deploy"
+doc = "mkdocs build"
 
 [tool.poe.tasks.precommit]
 sequence = [
     {ref = "update_all"},
     {cmd = "uvx ruff format"},
     {cmd = "uvx ruff check"},
+    {ref = "doc"},
     {ref = "test"},
     {ref = "cover"}
 ]
