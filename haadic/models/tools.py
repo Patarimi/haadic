@@ -9,7 +9,7 @@ import numpy as np
 def db20(x_lin: Sequence[complex] | complex | float, /) -> float:
     """
     Return the decibel value of the sum of the given complex number.
-    :param kwargs: input complex numbers
+    :param x_lin: input complex numbers
     :return: sum of absolute value of the input complex numbers in decibel
     examples:
     db20(1) -> 0

@@ -20,14 +20,14 @@ pkd_app = App("pdk", help="Manage the PDKs")  # ty: ignore[unknown-argument]
 
 # define search paths for techno.yml and design.yml
 PATHS = [Path((dirname(__file__))) / "techno.yml", Path(os.getcwd()) / "design.yml"]
-Available_PDK = Literal["sky130", "gf180mcu"]
+Available_PDK = Literal["sky130", "gf180mcu", "asap7"]
 PDK_INSTALL_DIR = Path(
     os.getenv("PDK_ROOT") or os.path.join(os.path.expanduser("~"), ".ciel")
 )
 
 
 @pkd_app.command(name="install")
-def install(pdk_name: str):
+def install(pdk_name: Available_PDK):
     """Install the _pdk_name_ technology in its default location."""
     base_install = Path(PDK_INSTALL_DIR)
     tech = load_pdk(pdk_name)

@@ -19,7 +19,7 @@ if not logging.getLogger().hasHandlers():
         format="|%(levelname)-7s| %(filename)s:%(lineno)d | %(message)s",
     )
 
-app = App()
+app = App(name="haadic")
 app.command(techno.pkd_app)
 
 
