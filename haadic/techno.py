@@ -27,7 +27,7 @@ PDK_INSTALL_DIR = Path(
 
 
 @pkd_app.command(name="install")
-def install(pdk_name: str):
+def install(pdk_name: Available_PDK):
     """Install the _pdk_name_ technology in its default location."""
     base_install = Path(PDK_INSTALL_DIR)
     tech = load_pdk(pdk_name)
