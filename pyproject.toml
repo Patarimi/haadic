@@ -68,12 +68,8 @@ dev = [
 doc = [
     "cyclopts[mkdocs]>=4.4.1",
     "mkdocs>=1.6.1",
-    "mkdocs-gen-files>=0.5.0",
-    "mkdocs-literate-nav>=0.6.2",
+    "mkdocs-api-autonav>=0.4.0",
     "mkdocs-material>=9.6.16",
-    "mkdocs-section-index>=0.3.10",
-    "mkdocstrings>=0.30.0",
-    "mkdocstrings-python>=1.16.12",
 ]
 
 

@@ -6,7 +6,6 @@ watch:
 nav:
   - Home: README.md
   - CLI-Command: CLI-ref.md
-  - API-Reference: reference/
 
 theme:
   name: material
@@ -19,16 +18,11 @@ markdown_extensions:
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
 plugins:
-  - autorefs
   - cyclopts
-  - gen-files:
-      scripts:
-        - docs/gen_ref_pages.py
-  - section-index
-  - literate-nav:
-      nav_file: SUMMARY.md
   - mkdocstrings:
       handlers:
         python:
           options:
             docstring_style: sphinx
+  - api-autonav:
+      modules: ['haadic']
