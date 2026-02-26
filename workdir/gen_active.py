@@ -6,11 +6,11 @@ from haadic.layouts.active import mosfet, line, pattern_connect
 from haadic.layouts.general import set_as_port
 from haadic.layouts.tools import LayerStack
 from haadic.models.ekv import EKV
+from haadic.models.tools import med_Xpercentile
 from haadic.steps.step import Dim
 
 techno = "sky130"
 target = Dim({"IC": 5, "id": 0.1e-3, "length": 0.15e-6})
-
 ekv = EKV(techno)
 
 
@@ -49,38 +49,58 @@ def layout(
 benches = ("bench.cir", "bench_ac.cir")
 
 
-def evaluate(bench_data: pd.DataFrame, dis_plot: bool = True) -> dict[str, float]:
+def evaluate(bench_data: pd.DataFrame, dis_plot: bool = False) -> dict[str, float]:
     bench_data[0].to_csv("bench_data.csv")
-    ekv.load("model.json")
     id = bench_data[0]["i(d)"]
-    gm = np.gradient(id, bench_data[0]["v(g)"])
-    IC = ekv.ic(id)
-    gm_IC_simu = gm * ekv.ut / id
-    gm_IC_model = ekv.gm_IC(id)
+    bench_data[0]["IC"] = ekv.ic(id)
+    _, ax = plt.subplots()
+    croped = bench_data[0].query("IC >= 0.01 and IC <= 30")
+    croped.plot.line(x="IC", y="v(g)", ax=ax, logx=True)
+    ax.set_xlabel("IC (-)")
+    ax.set_ylabel("Vg (V)")
+    ax.grid(True)
+    plt.savefig("ic_vs_vg.png")
+
+    bench_data[1].to_csv("bench_ac_data.csv")
+    ekv.load("model.json")
+    y = dict()
+    for i in (1, 2):
+        for j in (1, 2):
+            port = f"y_{i}_{j}"
+            y[f"{i}{j}"] = bench_data[1][port]
+    f = np.real(bench_data[1]["frequency"])
+    cgd_simu = np.imag(y["11"]) / (2 * np.pi * f)
+    cgd_ext = med_Xpercentile(cgd_simu, "max")
+    print(f"Extracted Cgd: {cgd_ext * 1e15:.2f} fF")
+    cm_simu = cgd_ext - np.imag(y["21"]) / (2 * np.pi * f)
+    cm_ext = med_Xpercentile(cm_simu, "min")
+    print(f"Extracted Cm: {cm_ext * 1e15:.2f} fF")
+    rg = np.real(y["11"]) / (2 * np.pi * f * cgd_ext) ** 2
+    rg_ext = med_Xpercentile(rg, "min")
+    print(f"Extracted Rg: {rg_ext:.2f} Ohm")
+    gm = np.real(y["21"]) + (2 * np.pi * f) ** 2 * rg_ext * cgd_ext * (cgd_ext + cm_ext)
+    gm_ext = med_Xpercentile(gm, "max")
+    print(f"Extracted Gm: {gm_ext * 1e3:.2f} mS")
     if dis_plot:
-        _, ax = plt.subplots(2, 1, sharex=True)
-        ax[0].loglog(IC, gm_IC_simu, label="$(n g_m U_t)/i_d$")
-        ax[0].loglog(
-            IC,
-            gm_IC_model,
-            label="model",
-            linestyle="dotted",
-            linewidth=2,
-            color="C2",
-        )
-        ax[0].set_ylim(top=2)
-        ax[1].set_xlabel("IC (-)")
-        ax[0].legend()
-        ax[1].plot(
-            IC,
-            np.abs(gm_IC_simu - gm_IC_model) / gm_IC_simu * 100,
-            linestyle="dashed",
-            color="C2",
-            label="Error (%)",
-        )
-        plt.legend()
-        ax[1].set_ylabel("Error (%)")
-        ax[1].set_ylim(0, 30)
-        plt.savefig(f"fit_{ekv.length=}.png")
+        _, ax = plt.subplots(2, 2, sharex=True)
+        for i in (1, 2):
+            for j in (1, 2):
+                ax[0][0].semilogx(f, np.imag(y[f"{i}{j}"]), label=f"y{i}{j} simu")
+                ax[0][1].semilogx(f, np.real(y[f"{i}{j}"]), label=f"y{i}{j} simu")
+        ax[0][1].set_title("Y parameters real part")
+        ax[0][0].set_title("Y parameters imaginary part")
+        ax[1][0].semilogx(f, cgd_simu * 1e15, label="Cg simu")
+        ax[1][0].semilogx(f, cm_simu * 1e15, label="Cm simu")
+        ax[1][0].axhline(cgd_ext * 1e15, color="k", linestyle="--", label="Cgd ext")
+        ax[1][0].axhline(cm_ext * 1e15, color="r", linestyle="--", label="Cm ext")
+        ax[1][0].legend()
+        ax[1][1].semilogx(f, rg, label="Rg simu")
+        ax[1][1].axhline(rg_ext, color="k", linestyle="--", label="Rg ext")
+        ax_s = ax[1][1].twinx()
+        ax_s.semilogx(f, gm * 1e3, color="g", label="Gm simu")
+        ax_s.axhline(gm_ext * 1e3, color="r", linestyle="--", label="Gm ext")
+        ax_s.legend()
+        plt.tight_layout()
+        plt.show()
     ekv.dump("model.json")
     return ekv.model
