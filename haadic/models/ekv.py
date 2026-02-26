@@ -28,6 +28,10 @@ class EKV:
     n: float = 0
     i_spec: float = 0
     lbda_c: float = 0
+    cgd: float = 0
+    cm: float = 0
+    rg: float = 0
+    gm: float = 0
 
     def __post_init__(self):
         if self.techno == "mock":

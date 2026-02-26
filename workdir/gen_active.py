@@ -102,5 +102,9 @@ def evaluate(bench_data: pd.DataFrame, dis_plot: bool = False) -> dict[str, floa
         ax_s.legend()
         plt.tight_layout()
         plt.show()
+    ekv.cgd = cgd_ext
+    ekv.cm = cm_ext
+    ekv.rg = rg_ext
+    ekv.gm = gm_ext
     ekv.dump("model.json")
     return ekv.model
