@@ -94,8 +94,8 @@ def evaluate(bench_data: pd.DataFrame, dis_plot: bool = False) -> dict[str, floa
         for j in range(2):
             ax[i][j].legend()
             ax[i][j].grid(True)
-            ax[i][j].set_ylim(top=np.ceil(10*ax[i][j].get_ylim()[1])/10)
-            ax[i][j].set_ylim(bottom=np.floor(10*ax[i][j].get_ylim()[0])/10)
+            ax[i][j].set_ylim(top=np.ceil(10 * ax[i][j].get_ylim()[1]) / 10)
+            ax[i][j].set_ylim(bottom=np.floor(10 * ax[i][j].get_ylim()[0]) / 10)
             ax[1][j].set_xlabel("Frequency (Hz)")
     plt.tight_layout()
     plt.savefig("rf_extract.png")
