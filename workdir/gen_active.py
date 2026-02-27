@@ -1,4 +1,3 @@
-from pathlib import Path
 from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
@@ -9,21 +8,21 @@ from haadic.models.ekv import EKV
 from haadic.models.tools import med_Xpercentile
 from haadic.steps.step import Dim
 
+# configuration of the flow.
+options = {"extract": "RC"}
+
+# Technology selection and model initialization
 techno = "sky130"
-target = Dim({"IC": 5, "id": 0.1e-3, "length": 0.15e-6})
 ekv = EKV(techno)
 
-
-def local_model(target: Dim) -> Dim:
-    if Path("model.json").is_file():
-        ekv.load("model.json")
-        ekv.length = target["length"] * 1e6
-    else:
-        ekv.length = 20 * target["length"] * 1e6
-    ekv.width = 1
-    ekv.n_finger = 80
-    ekv.dump("model.json")
-    return ekv.shape
+# Dimension of the layout to be generated. The layout function will be called with these dimensions as argument. They can be used to generate different layouts and see how the performance evolve.
+dimensions = Dim(
+    {
+        "n_finger": 4,
+        "width": 1,
+        "length": 0.15,
+    }
+)
 
 
 def layout(
@@ -46,6 +45,7 @@ def layout(
     set_as_port(cell, "gnd")
 
 
+# List of test benches to run. The flow will look for these files in the current folder and run them with the extracted spice netlist.
 benches = ("bench.cir", "bench_ac.cir")
 
 
@@ -64,7 +64,6 @@ def evaluate(bench_data: pd.DataFrame, dis_plot: bool = False) -> dict[str, floa
         plt.show()
 
     bench_data[1].to_csv("bench_ac_data.csv")
-    ekv.load("model.json")
     y = dict()
     for i in (1, 2):
         for j in (1, 2):
