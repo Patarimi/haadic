@@ -1,6 +1,6 @@
 import logging
 import os
-
+from typing import Optional
 from cyclopts import App
 from pathlib import Path
 
@@ -38,7 +38,7 @@ def run_cli(
     design_py: str = "design.py",
     sub_folder: str = "",
     timestamp: bool = True,
-    reload_result: bool = True,
+    reload_result: Optional[bool] = None,
 ) -> None:
     """
     Run the full haadic flow :
@@ -58,7 +58,12 @@ def run_cli(
         starting_dir = os.getcwd()
         design, run_dir = setup(design_py, Path(sub_folder), timestamp)
         logging.info(f"Running design {design_py} in {run_dir}")
-        design.options["flow"] = {"reload_result": reload_result}
+        if reload_result is not None:
+            design.options["flow"] = {"reload_result": reload_result}
+        logging.info(
+            "design parameters:\n\t"
+            + "\n\t".join([f"{k}: {v}" for k, v in design.__dict__.items()])
+        )
         os.chdir(run_dir)
         flow(**(design.__dict__))
 
