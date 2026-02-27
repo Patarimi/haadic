@@ -19,18 +19,21 @@ def flow(
     evaluate: Callable,
     local_model: Optional[Callable[[step.Dim], step.Dim]] = None,
     dimensions: Optional[step.Dim] = None,
-    options: dict[str, str] = default_options,
+    options: dict[str, str] = {},
 ):
     if local_model is not None:
         geo = local_model(target)
+    elif dimensions is None or len(dimensions.dct) == 0:
+        raise ValueError("No local model provided and no dimensions provided.")
     else:
         geo = dimensions
-    if geo is None:
-        raise RuntimeError(
-            "Please provide a local_model function or a dimensions dict."
-        )
+        logging.info("No local model provided, using dimensions as geometry.")
+        logging.debug(f"Dimensions: {dimensions}")
     for defa in default_options:
         if defa not in options.keys():
+            logging.info(
+                f"Option {defa} not provided, using default value: {default_options[defa]}"
+            )
             options[defa] = default_options[defa]
 
     logging.info("layout generation with geometry: " + str(geo))
