@@ -70,39 +70,55 @@ def evaluate(bench_data: pd.DataFrame, dis_plot: bool = False) -> dict[str, floa
             port = f"y_{i}_{j}"
             y[f"{i}{j}"] = bench_data[1][port]
     f = np.real(bench_data[1]["frequency"])
-    cgd_simu = np.imag(y["11"]) / (2 * np.pi * f)
-    cgd_ext = med_Xpercentile(cgd_simu, "max")
-    cm_simu = cgd_ext - np.imag(y["21"]) / (2 * np.pi * f)
-    cm_ext = med_Xpercentile(cm_simu, "min")
-    rg = np.real(y["11"]) / (2 * np.pi * f * cgd_ext) ** 2
-    rg_ext = med_Xpercentile(rg, "min")
-    gm = np.real(y["21"]) + (2 * np.pi * f) ** 2 * rg_ext * cgd_ext * (cgd_ext + cm_ext)
-    gm_ext = med_Xpercentile(gm, "max")
+    omega = 2 * np.pi * f
+    cg_simu = np.imag(y["11"]) / omega
+    cm_simu = cg_simu - np.imag(y["21"]) / omega
+    rg_simu = np.real(y["11"]) / (omega * cg_simu) ** 2
+    gm_simu = np.real(y["21"]) + omega**2 * rg_simu * cg_simu * (cg_simu + cm_simu)
+    cgd_simu = -np.imag(y["21"]) / omega
+    cbd_simu = np.imag(y["22"]) / omega - cgd_simu
+    cgs_gb_simu = cg_simu - cgd_simu
+    gds_simu = np.real(y["22"]) - omega**2 * rg_simu * cg_simu * (
+        cg_simu * cbd_simu + cg_simu * cgd_simu + cgd_simu * cm_simu
+    )
+    ekv.cgd = med_Xpercentile(cgd_simu, "max")
+    ekv.cbd = med_Xpercentile(cbd_simu, "min")
+    ekv.cgs_gb = med_Xpercentile(cgs_gb_simu, "min")
+    ekv.gds = med_Xpercentile(gds_simu, "min")
+    ekv.rg = med_Xpercentile(rg_simu, "min")
+    ekv.gm = med_Xpercentile(gm_simu, "max")
     _, ax = plt.subplots(2, 2, sharex=True)
-    ax[1][0].semilogx(f, cgd_simu * 1e15, label="Cg (spice PLS)")
-    ax[1][0].axhline(cgd_ext * 1e15, color="k", linestyle="--", label="Cgd extracted")
-    ax[0][0].semilogx(f, cm_simu * 1e15, label="Cm (spice PLS)")
-    ax[0][0].axhline(cm_ext * 1e15, color="k", linestyle="--", label="Cm extracted")
-    ax[0][0].set_title("Capacitances (fF)")
-    ax[0][1].semilogx(f, rg, label="Rg (spice PLS)")
-    ax[0][1].axhline(rg_ext, color="k", linestyle="--", label="Rg extracted")
-    ax[1][1].semilogx(f, gm * 1e3, label="Gm (spice PLS)")
-    ax[1][1].axhline(gm_ext * 1e3, color="k", linestyle="--", label="Gm extracted")
+    ax[0][0].semilogx(f, cgd_simu * 1e15, label=r"$C_{GD}$ (spice PLS)")
+    ax[0][0].axhline(
+        ekv.cgd * 1e15, color="k", linestyle="--", label=r"$C_{GD}$ extracted"
+    )
+    ax[0][0].semilogx(f, cbd_simu * 1e15, label=r"$C_{BD}$ (spice PLS)")
+    ax[0][0].axhline(
+        ekv.cbd * 1e15, color="k", linestyle="--", label=r"$C_{GD}$ extracted"
+    )
+    ax[0][0].semilogx(f, cgs_gb_simu * 1e15, label=r"$C_{GS+GB}$ (spice PLS)")
+    ax[0][0].axhline(
+        ekv.cgs_gb * 1e15, color="k", linestyle="--", label=r"$C_{GS+GB}$ extracted"
+    )
+    ax[0][0].set_title(f"Capacitances (fF) - {options['extract']}")
+    ax[0][1].semilogx(f, rg_simu, label="Rg (spice PLS)")
+    ax[0][1].axhline(ekv.rg, color="k", linestyle="--", label="Rg extracted")
+    ax[1][1].semilogx(f, gm_simu * 1e3, label="Gm (spice PLS)")
+    ax[1][1].axhline(ekv.gm * 1e3, color="k", linestyle="--", label="Gm extracted")
+    ax[1][0].semilogx(f, gds_simu * 1e3, label="Gds (spice PLS)")
+    ax[1][0].axhline(ekv.gds * 1e3, color="k", linestyle="--", label="Gds extracted")
     ax[0][1].set_title(r"Rg ($\Omega$) and Gm (mS)")
+    zoom = 100
     for i in range(2):
         for j in range(2):
             ax[i][j].legend()
             ax[i][j].grid(True)
-            ax[i][j].set_ylim(top=np.ceil(10 * ax[i][j].get_ylim()[1]) / 10)
-            ax[i][j].set_ylim(bottom=np.floor(10 * ax[i][j].get_ylim()[0]) / 10)
+            ax[i][j].set_ylim(top=np.ceil(zoom * ax[i][j].get_ylim()[1]) / zoom)
+            ax[i][j].set_ylim(bottom=np.floor(zoom * ax[i][j].get_ylim()[0]) / zoom)
             ax[1][j].set_xlabel("Frequency (Hz)")
     plt.tight_layout()
     plt.savefig("rf_extract.png")
     if dis_plot:
         plt.show()
-    ekv.cgd = cgd_ext
-    ekv.cm = cm_ext
-    ekv.rg = rg_ext
-    ekv.gm = gm_ext
     ekv.dump("model.json")
     return ekv.model
