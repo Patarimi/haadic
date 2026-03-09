@@ -1,5 +1,6 @@
 .idea/
 *.env
+/.venv/
 /site/
 /pdk/*
 /dist/haadic-*.tar.gz
