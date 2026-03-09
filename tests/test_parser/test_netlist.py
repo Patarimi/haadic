@@ -1,6 +1,8 @@
 import filecmp
 from haadic.exporters.netlist import Component, Netlist
-from skrf import DefinedGammaZ0, Frequency, c
+from skrf import Frequency
+from skrf.io.touchstone import DefinedGammaZ0
+from skrf.constants import c
 
 
 def test_component():
