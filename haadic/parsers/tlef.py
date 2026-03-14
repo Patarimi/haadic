@@ -87,7 +87,7 @@ class TechLef(Transformer):
             if key == "WELL":
                 layer["type"] = item[1]
         logging.debug(f"In block: {layer=}")
-        return Layer(**layer)  # ty: ignore[missing-argument]
+        return Layer(**layer)
 
     def start(self, start) -> TechStack:
         ss = TechStack()
