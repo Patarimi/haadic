@@ -49,7 +49,7 @@ def compute(
     input_file: Path,
     process: str,
     cell_name: str,
-    freq: list[float, float] | float,
+    freq: Sequence[float, float] | float,
     ports: Optional[list[Port]] = None,
     sim_path: Optional[Path] = Path("./."),
     show_model: bool = False,
