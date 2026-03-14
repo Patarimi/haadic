@@ -16,7 +16,7 @@ def db20(x_lin: Sequence[complex] | complex, /) -> float:
     db20(0.5,0.5) -> 0
     """
     sm = (
-        sum(np.abs(k) ** 2 for k in x_lin) #ty: ignore no-matching-overload
+        sum(np.abs(k) ** 2 for k in x_lin)  # ty: ignore no-matching-overload
         if isinstance(x_lin, Sequence)
         else abs(x_lin) ** 2
     )
