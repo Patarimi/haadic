@@ -36,7 +36,7 @@ class FlowStep:
         | Callable[[db.Cell, LayerStack], None]
     )
     techno: str
-    benches: Sequence[Path | str]
+    benches: Sequence[Path]
     evaluate: Optional[Callable] = None
     target: Dim = pydantic.Field(default_factory=Dim)
     local_model: Optional[Callable[[], Dim]] = None
@@ -52,7 +52,7 @@ class FlowStep:
         return self
 
 
-def import_or_default(source: Path | str) -> FlowStep:
+def import_or_default(source: Path) -> FlowStep:
     imp_d = dict()
     for name in FlowStep.__dataclass_fields__.keys():
         source = Path(source)

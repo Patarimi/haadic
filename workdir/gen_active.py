@@ -1,4 +1,5 @@
 from matplotlib import pyplot as plt
+from pathlib import Path
 import pandas as pd
 import numpy as np
 from haadic.layouts.active import mosfet, line, pattern_connect
@@ -15,7 +16,8 @@ options = {"extract": "RC"}
 techno = "sky130"
 ekv = EKV(techno)
 
-# Dimension of the layout to be generated. The layout function will be called with these dimensions as argument. They can be used to generate different layouts and see how the performance evolve.
+# Dimension of the layout to be generated. The layout function will be called with these dimensions as argument.
+# They can be used to generate different layouts and see how the performance evolve.
 dimensions = Dim(
     {
         "n_finger": 4,
@@ -46,7 +48,7 @@ def layout(
 
 
 # List of test benches to run. The flow will look for these files in the current folder and run them with the extracted spice netlist.
-benches = ("bench.cir", "bench_ac.cir")
+benches = (Path("bench.cir"), Path("bench_ac.cir"))
 
 
 def evaluate(bench_data: pd.DataFrame, dis_plot: bool = False) -> dict[str, float]:
