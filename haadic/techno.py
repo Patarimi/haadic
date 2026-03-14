@@ -16,7 +16,7 @@ from rich import print
 
 
 console = Console(stderr=True)
-pkd_app = App("pdk", help="Manage the PDKs")  # ty: ignore[unknown-argument]
+pkd_app = App("pdk", help="Manage the PDKs")
 
 # define search paths for techno.yml and design.yml
 PATHS = [Path((dirname(__file__))) / "techno.yml", Path(os.getcwd()) / "design.yml"]

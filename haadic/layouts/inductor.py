@@ -2,8 +2,13 @@ from .tools import LayerStack
 from haadic.layouts.general import via
 import klayout.db as db
 from numpy import tan, pi
-from typing import Optional
+from typing import Optional, Self, Any
 import logging
+
+
+class Path(list):
+    def __new__(cls, value: Any) -> Self:
+        return super().__new__(cls, list([(int(x), int(y)) for x, y in value]))  # ty: ignore too-many-positional-arguments
 
 
 def octagonal_inductor(
@@ -69,17 +74,19 @@ def octagonal_inductor(
         )
 
         # Define path points in nm
-        path = [
-            (-i * (w_dbu + g_dbu), 0 if (not end) and even_turn else p_gap_dbu / 2),
-            (-i * (w_dbu + g_dbu), d_a_dbu * si),
-            (d_a_dbu * (0.5 - si) - i * (w_dbu + g_dbu), d_a_dbu / 2),
-            (d_a_dbu * (0.5 + si) - i * (w_dbu + g_dbu), d_a_dbu / 2),
-            (d_a_dbu - i * (w_dbu + g_dbu), d_a_dbu * si),
-            (
-                d_a_dbu - i * (w_dbu + g_dbu),
-                b_gap_dbu / 2 if even_turn or not start else 0,
-            ),
-        ]
+        path = Path(
+            [
+                (-i * (w_dbu + g_dbu), 0 if (not end) and even_turn else p_gap_dbu / 2),
+                (-i * (w_dbu + g_dbu), d_a_dbu * si),
+                (d_a_dbu * (0.5 - si) - i * (w_dbu + g_dbu), d_a_dbu / 2),
+                (d_a_dbu * (0.5 + si) - i * (w_dbu + g_dbu), d_a_dbu / 2),
+                (d_a_dbu - i * (w_dbu + g_dbu), d_a_dbu * si),
+                (
+                    d_a_dbu - i * (w_dbu + g_dbu),
+                    b_gap_dbu / 2 if even_turn or not start else 0,
+                ),
+            ]
+        )
 
         if end:
             path.insert(0, (-p_ext_dbu, p_gap_dbu / 2))

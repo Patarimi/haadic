@@ -7,7 +7,7 @@ import sys
 from math import inf
 from os.path import dirname
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Sequence
 
 from cyclopts import App
 from klayout import db
@@ -49,7 +49,7 @@ def compute(
     input_file: Path,
     process: str,
     cell_name: str,
-    freq: list[float, float] | float,
+    freq: Sequence[float, float] | float,
     ports: Optional[list[Port]] = None,
     sim_path: Optional[Path] = Path("./."),
     show_model: bool = False,

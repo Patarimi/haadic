@@ -45,6 +45,7 @@ sequence = [
     {ref = "update_all"},
     {cmd = "uvx ruff format"},
     {cmd = "uvx ruff check"},
+    {cmd = "uvx ty check"},
     {ref = "doc"},
     {ref = "test"},
     {ref = "cover"}

@@ -6,7 +6,7 @@ from typing import Sequence
 import numpy as np
 
 
-def db20(x_lin: Sequence[complex] | complex | float, /) -> float:
+def db20(x_lin: Sequence[complex] | complex, /) -> float:
     """
     Return the decibel value of the sum of the given complex number.
     :param x_lin: input complex numbers
@@ -16,7 +16,7 @@ def db20(x_lin: Sequence[complex] | complex | float, /) -> float:
     db20(0.5,0.5) -> 0
     """
     sm = (
-        sum(np.abs(k) ** 2 for k in x_lin)
+        sum(np.abs(k) ** 2 for k in x_lin)  # ty: ignore no-matching-overload
         if isinstance(x_lin, Sequence)
         else abs(x_lin) ** 2
     )
