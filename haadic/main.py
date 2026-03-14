@@ -41,22 +41,26 @@ def run_cli(
     reload_result: Optional[bool] = None,
 ) -> None:
     """
-    Run the full haadic flow :
-        - Generate the layout using the specified technology.
-        - Extract equivalent spice schematic.
-        - Run test benches.
-        - Compute circuit performances.
+    Run the full haadic flow :\n
+        \t- Generate the layout using the specified technology.\n
+        - Extract equivalent spice schematic.\n
+        - Run test benches.\n
+        - Compute circuit performances.\n
     :param design_py: a python file with at least the following function : layout, bench, evaluate.
     :param sub_folder: All files are stored inside this folder.
     :param timestamp: If true, a new folder named <sub_folder>_<current_time> is created and the flow is run inside it.
+    :param reload_result: If true, try to reload results. Else, run the full flow and recompute everything.
     :return: Nothing.
     """
     from haadic.steps import flow
-    from haadic.steps.step import setup
+    from haadic.steps.step import setup, import_or_default
 
     try:
         starting_dir = os.getcwd()
-        design, run_dir = setup(design_py, Path(sub_folder), timestamp)
+        design = import_or_default(Path(design_py))
+        run_dir = setup(
+            design.benches, Path(sub_folder), Path(design_py).with_suffix(""), timestamp
+        )
         logging.info(f"Running design {design_py} in {run_dir}")
         if reload_result is not None:
             design.options["flow"] = {"reload_result": reload_result}
@@ -64,7 +68,6 @@ def run_cli(
             "design parameters:\n\t"
             + "\n\t".join([f"{k}: {v}" for k, v in design.__dict__.items()])
         )
-        os.chdir(run_dir)
         flow(**(design.__dict__))
 
     finally:
