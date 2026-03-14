@@ -2,13 +2,15 @@ import logging
 import os
 from pathlib import Path
 import shutil
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 from tabulate import tabulate
 
 import haadic.steps.step as step
 from haadic.layouts.tools import check_diff
 
 default_options = {"flow": {"reload_result": True}, "extract": "RC"}
+
+Config = dict[str, Union["Config", str] | bool]
 
 
 def flow(
@@ -19,7 +21,7 @@ def flow(
     evaluate: Callable,
     local_model: Optional[Callable[[step.Dim], step.Dim]] = None,
     dimensions: Optional[step.Dim] = None,
-    options: dict[str, str] = {},
+    options: Config = {},
 ):
     if local_model is not None:
         geo = local_model(target)

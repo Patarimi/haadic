@@ -7,7 +7,7 @@ import sys
 from math import inf
 from os.path import dirname
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Sequence
 
 from cyclopts import App
 from klayout import db
