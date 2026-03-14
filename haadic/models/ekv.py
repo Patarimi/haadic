@@ -21,7 +21,7 @@ from haadic.steps import flow
 
 @dataclass(slots=True)
 class EKV:
-    techno: Available_PDK = "mock"
+    techno: Available_PDK = "mock"  # ty: ignore invalid-assignment
     length: float = 0.18
     width: float = 0.18
     n_finger: int = 1
