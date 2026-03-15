@@ -9,7 +9,7 @@
 !/pdk/patches/
 /tmp/
 *.log
-/workdir/gen_active*/
+/workdir/*/
 */__pycache__/*
 *.vhdx
 *.pyc
