@@ -74,6 +74,10 @@ def setup(
 ) -> Path:
     """
     Configure folder and return running folder.
+    benches: list of bench files to copy in the running folder. Can be absolute or relative to root_folder.
+    run_folder: path of the running folder to create in root_folder. If timestamp is True, the current date and time will be appended to the folder name.
+    root_folder: folder where the running folder will be created. Default is current folder.
+    timestamp: whether to append the current date and time to the running folder name. Default is True.
     """
     expected_benches = list()
     for bench in benches:
@@ -95,7 +99,6 @@ def setup(
         os.mkdir(run_dir)
     for expected_bench in expected_benches:
         shutil.copy(expected_bench, run_dir)
-    os.chdir(run_dir)
     return Path(run_dir)
 
 
