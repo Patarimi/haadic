@@ -76,8 +76,8 @@ def med_Xpercentile(data: np.ndarray, fun: str = "max", percent: float = 0.1) ->
         raise ValueError("percent must be between 0 and 1")
     if fun == "max":
         thres = (1 - percent) * np.max(data)
-        crop = data[data >= thres]
+        crop = data[data >= thres] if thres > 0 else data[data <= thres]
     elif fun == "min":
         thres = (1 + percent) * np.min(data)
-        crop = data[data <= thres]
+        crop = data[data <= thres] if thres > 0 else data[data >= thres]
     return float(np.median(crop))
