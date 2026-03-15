@@ -23,10 +23,13 @@ default_dict = {"extract": None}
 
 @pydantic.dataclasses.dataclass
 class Dim:
-    dct: dict[str, int | float] = pydantic.Field(default_factory=dict)
+    dct: dict[str, float] = pydantic.Field(default_factory=dict)
 
-    def __getitem__(self, key: str) -> int | float:
+    def __getitem__(self, key: str) -> float:
         return self.dct[key]
+
+    def __setitem__(self, key: str, value: float) -> None:
+        self.dct[key] = float(value)
 
 
 @pydantic.dataclasses.dataclass
