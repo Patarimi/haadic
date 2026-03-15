@@ -42,7 +42,7 @@ def run_cli(
 ) -> None:
     """
     Run the full haadic flow :\n
-        \t- Generate the layout using the specified technology.\n
+        - Generate the layout using the specified technology.\n
         - Extract equivalent spice schematic.\n
         - Run test benches.\n
         - Compute circuit performances.\n
