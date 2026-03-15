@@ -40,12 +40,17 @@ cover = "coverage report -m --skip-covered"
 publish = "poetry publish --build --username __token__ --password $PYPI_TOKEN"
 doc = "mkdocs build"
 
-[tool.poe.tasks.precommit]
+[tool.poe.tasks.lint]
 sequence = [
-    {ref = "update_all"},
     {cmd = "uvx ruff format"},
     {cmd = "uvx ruff check"},
     {cmd = "uvx ty check"},
+]
+
+[tool.poe.tasks.precommit]
+sequence = [
+    {ref = "update_all"},
+    {ref = "lint"},
     {ref = "doc"},
     {ref = "test"},
     {ref = "cover"}

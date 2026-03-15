@@ -23,10 +23,13 @@ default_dict = {"extract": None}
 
 @pydantic.dataclasses.dataclass
 class Dim:
-    dct: dict[str, int | float] = pydantic.Field(default_factory=dict)
+    dct: dict[str, float] = pydantic.Field(default_factory=dict)
 
-    def __getitem__(self, key: str) -> int | float:
+    def __getitem__(self, key: str) -> float:
         return self.dct[key]
+
+    def __setitem__(self, key: str, value: float) -> None:
+        self.dct[key] = float(value)
 
 
 @pydantic.dataclasses.dataclass
@@ -36,7 +39,7 @@ class FlowStep:
         | Callable[[db.Cell, LayerStack], None]
     )
     techno: str
-    benches: Sequence[Path | str]
+    benches: Sequence[Path]
     evaluate: Optional[Callable] = None
     target: Dim = pydantic.Field(default_factory=Dim)
     local_model: Optional[Callable[[], Dim]] = None
@@ -52,7 +55,7 @@ class FlowStep:
         return self
 
 
-def import_or_default(source: Path | str) -> FlowStep:
+def import_or_default(source: Path) -> FlowStep:
     imp_d = dict()
     for name in FlowStep.__dataclass_fields__.keys():
         source = Path(source)
@@ -66,23 +69,30 @@ def import_or_default(source: Path | str) -> FlowStep:
     return FlowStep(**imp_d)
 
 
-def setup(design_py: str, run_folder: Path, timestamp: bool = True):
-    des = Path(design_py)
-
-    design = import_or_default(design_py)
+def setup(
+    benches: Sequence[Path],
+    run_folder: Path,
+    root_folder: Path = Path("."),
+    timestamp: bool = True,
+) -> Path:
+    """
+    Configure folder and return running folder.
+    benches: list of bench files to copy in the running folder. Can be absolute or relative to root_folder.
+    run_folder: path of the running folder to create in root_folder. If timestamp is True, the current date and time will be appended to the folder name.
+    root_folder: folder where the running folder will be created. Default is current folder.
+    timestamp: whether to append the current date and time to the running folder name. Default is True.
+    """
     expected_benches = list()
-    for bench in design.benches:
+    for bench in benches:
         if Path(bench).is_absolute():
             expected_benches.append(bench)
         else:
-            expected_benches.append(Path(design_py).parent / bench)
+            expected_benches.append(root_folder / bench)
         if not expected_benches[-1].is_file():
             raise FileNotFoundError(
                 f"Bench file {str(expected_benches)} not found or is not a file."
             )
 
-    if run_folder == Path("."):
-        run_folder = des.parent / des.stem
     run_dir = (
         run_folder
         if not timestamp
@@ -92,7 +102,7 @@ def setup(design_py: str, run_folder: Path, timestamp: bool = True):
         os.mkdir(run_dir)
     for expected_bench in expected_benches:
         shutil.copy(expected_bench, run_dir)
-    return design, run_dir
+    return Path(run_dir)
 
 
 def cleanup():

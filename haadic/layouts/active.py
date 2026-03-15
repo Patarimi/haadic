@@ -151,7 +151,6 @@ def pattern_connect(
     """ """
     layout = cell.layout()
     labels = get_dtext(layout, cell=device_name)
-    print(labels)
     for lbl, lyr in labels:
         i = 2 * int(lbl.string.lstrip("gdr"))
         if lbl.string.startswith("g"):

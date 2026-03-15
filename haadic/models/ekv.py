@@ -74,7 +74,7 @@ class EKV:
             flowprep = FlowStep(
                 layout=layout,
                 techno=self.techno,
-                benches=("ekv_bench.cir",),
+                benches=(Path("ekv_bench.cir"),),
                 evaluate=evaluate,
                 dimensions=self.shape,
             )
