@@ -36,7 +36,7 @@ def smoke_test_cli():
 @app.command(name="run")
 def run_cli(
     design_py: str = "design.py",
-    sub_folder: str = "",
+    sub_folder: Optional[str] = None,
     timestamp: bool = True,
     reload_result: Optional[bool] = None,
 ) -> None:
@@ -56,9 +56,10 @@ def run_cli(
     from haadic.steps.step import setup, import_or_default
 
     design = import_or_default(Path(design_py))
-    run_dir = setup(
-        design.benches, Path(sub_folder), Path(design_py).with_suffix(""), timestamp
+    sub_folder_p = (
+        Path(sub_folder) if sub_folder is not None else Path(design_py).with_suffix("")
     )
+    run_dir = setup(design.benches, sub_folder_p, Path(design_py).parent, timestamp)
     logging.info(f"Running design {design_py} in {run_dir}")
     if reload_result is not None:
         design.options["flow"] = {"reload_result": reload_result}
