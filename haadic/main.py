@@ -55,23 +55,18 @@ def run_cli(
     from haadic.steps import flow
     from haadic.steps.step import setup, import_or_default
 
-    try:
-        starting_dir = os.getcwd()
-        design = import_or_default(Path(design_py))
-        run_dir = setup(
-            design.benches, Path(sub_folder), Path(design_py).with_suffix(""), timestamp
-        )
-        logging.info(f"Running design {design_py} in {run_dir}")
-        if reload_result is not None:
-            design.options["flow"] = {"reload_result": reload_result}
-        logging.info(
-            "design parameters:\n\t"
-            + "\n\t".join([f"{k}: {v}" for k, v in design.__dict__.items()])
-        )
-        flow(**(design.__dict__))
-
-    finally:
-        os.chdir(starting_dir)
+    design = import_or_default(Path(design_py))
+    run_dir = setup(
+        design.benches, Path(sub_folder), Path(design_py).with_suffix(""), timestamp
+    )
+    logging.info(f"Running design {design_py} in {run_dir}")
+    if reload_result is not None:
+        design.options["flow"] = {"reload_result": reload_result}
+    logging.info(
+        "design parameters:\n\t"
+        + "\n\t".join([f"{k}: {v}" for k, v in design.__dict__.items()])
+    )
+    flow(**(design.__dict__), run_folder=run_dir)
 
 
 @app.command(name="new")
