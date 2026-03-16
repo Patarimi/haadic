@@ -6,6 +6,7 @@ from pathlib import Path
 
 from os.path import join
 import haadic.techno as techno
+from haadic.steps.step import cleanup
 
 # Skip logging configuration if it is already done (eg during tests)
 log_path = os.path.join(os.path.curdir, "haadic.log")
@@ -21,6 +22,8 @@ if not logging.getLogger().hasHandlers():
 
 app = App(name="haadic")
 app.command(techno.pkd_app)
+
+app.command(cleanup, name="clean")
 
 
 @app.command(name="smoke-test")
