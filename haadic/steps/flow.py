@@ -62,12 +62,12 @@ def flow(
             logging.info("extracting schematic...")
             step.extract_from_layout(techno, options=options["extract"])
             for bench in benches:
-                step.run_bench(bench, techno)
+                step.run_bench(bench.name, techno)
 
         logging.info("loading simulation results...")
         data = list()
         for bench in benches:
-            data.append(step.load_result(Path(bench).with_suffix(".raw")))
+            data.append(step.load_result(Path(bench.name).with_suffix(".raw")))
 
         logging.info("evaluate performances")
         perf = (
