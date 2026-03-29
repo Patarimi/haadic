@@ -1,13 +1,12 @@
 from matplotlib import pyplot as plt
 from pathlib import Path
-import pandas as pd
 import numpy as np
 from haadic.layouts.active import mosfet, line, pattern_connect
 from haadic.layouts.general import set_as_port
 from haadic.layouts.tools import LayerStack
 from haadic.models.ekv import EKV
 from haadic.models.tools import med_Xpercentile
-from haadic.steps.step import Dim
+from haadic.steps.step import Dim, SimRes
 
 # configuration of the flow.
 options = {"extract": "RC"}
@@ -51,7 +50,7 @@ def layout(
 benches = (Path("bench.cir"), Path("bench_ac.cir"))
 
 
-def evaluate(bench_data: pd.DataFrame, dis_plot: bool = False) -> dict[str, float]:
+def evaluate(bench_data: SimRes, geo: Dim, dis_plot: bool = False) -> dict[str, float]:
     bench_data[0].to_csv("bench_data.csv")
     id = bench_data[0]["i(d)"]
     bench_data[0]["IC"] = ekv.ic(id)

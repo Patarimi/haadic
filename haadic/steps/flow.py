@@ -71,9 +71,9 @@ def flow(
 
         logging.info("evaluate performances")
         perf = (
-            evaluate(data)
+            evaluate(data, geo)
             if "evaluate" not in options
-            else evaluate(data, options["evaluate"])
+            else evaluate(data, geo, options["evaluate"])
         )
         if target is not None:
             res = [(key, perf[key], target.dct.get(key, "N/A")) for key in perf]
