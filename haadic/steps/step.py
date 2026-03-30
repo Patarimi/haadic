@@ -32,6 +32,9 @@ class Dim:
         self.dct[key] = float(value)
 
 
+SimRes = Sequence[pd.DataFrame]
+
+
 @pydantic.dataclasses.dataclass
 class FlowStep:
     layout: (

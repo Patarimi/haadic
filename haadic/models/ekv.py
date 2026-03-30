@@ -1,22 +1,22 @@
 from dataclasses import dataclass, asdict
 import json
 import logging
-import os
 from pathlib import Path
 import shutil
-from typing import get_args
+from typing import get_args, Optional, Sequence
+from typing_extensions import Self
 
 import numpy as np
-import pandas as pd
-import scipy
 from klayout import db
+import matplotlib.pyplot as plt
 
 from haadic.layouts.active import connect, line, mosfet
 from haadic.layouts.general import set_as_port
 from haadic.layouts.tools import LayerStack
-from haadic.steps.step import Dim, FlowStep
+from haadic.steps import Dim, setup, flow, SimRes
 from haadic.techno import Available_PDK, get_file
-from haadic.steps import flow
+from haadic.models.constants import ut
+from haadic.models.tools import med_Xpercentile, eng
 
 
 @dataclass(slots=True)
@@ -26,8 +26,8 @@ class EKV:
     width: float = 0.18
     n_finger: int = 1
     n: float = 0
-    i_spec: float = 0
-    lbda_c: float = 0
+    i_spec_square: float = 0
+    l_c: float = 0  # modulated channel length
     cgd: float = 0
     cbd: float = 0
     cgs_gb: float = 0
@@ -35,111 +35,8 @@ class EKV:
     gm: float = 0
     gds: float = 0
 
-    def __post_init__(self):
-        if self.techno == "mock":
-            logging.warning(
-                "Using EKV model with mock techno for testing purposes only."
-            )
-            return
-        if self.techno not in get_args(Available_PDK):
-            raise ValueError(f"Techno {self.techno} not supported in EKV model.")
-
-        working_dir = get_file(self.techno, "base_dir") / "haadic"
-        if (working_dir / "ekv.json").is_file():
-            self.load(str(working_dir / "ekv.json"))
-            if self.lbda_c != 0:
-                return
-
-        def evaluate(bench_data: pd.DataFrame, small_l=False):
-            id = bench_data[0]["i(d)"]
-            gm = np.gradient(id, bench_data[0]["v(g)"])
-            if small_l:
-                self.extract_small_l(gm, id)
-            else:
-                self.extract_big_l(gm, id)
-            self.dump(str(working_dir / "ekv.json"))
-
-        try:
-            starting_dir = os.getcwd()
-            if not working_dir.is_dir():
-                logging.error(f"Creating dir: {working_dir}")
-                os.makedirs(working_dir)
-            shutil.copy(
-                Path(__file__).parent / "ekv_bench.cir", working_dir / "ekv_bench.cir"
-            )
-            os.chdir(working_dir)
-            self.n_finger = 80
-            self.width = 1
-            self.length = 3
-            flowprep = FlowStep(
-                layout=layout,
-                techno=self.techno,
-                benches=(Path("ekv_bench.cir"),),
-                evaluate=evaluate,
-                dimensions=self.shape,
-            )
-            flow(**flowprep.__dict__)
-            self.length = 0.18
-            flowprep.dimensions = self.shape
-            flowprep.options = {"evaluate": {"small_l": True}}
-            flow(**flowprep.__dict__)
-        finally:
-            os.chdir(starting_dir)
-
-    def load(self, filename: str):
-        with open(filename, "r") as f:
-            model = json.load(f)
-        for key in model:
-            setattr(self, key, model[key])
-
-    def dump(self, filename: str):
-        with open(filename, "w") as f:
-            json.dump(self.model, f, indent=2)
-
-    @property
-    def model(self) -> dict:
-        return asdict(self)
-
-    def extract_small_l(self, gm, id):
-        Gm_IC = gm * self.ut / id
-        self.lbda_c = np.min(self.i_spec / self.ratio / (self.n * gm * self.ut))
-        crop = np.nonzero(Gm_IC > 0.9 * np.max(Gm_IC))[0][0]
-        stop = np.nonzero(self.ic(id) < 15)[0][-1]
-        logging.debug(
-            f"Crop between {crop} and {stop}, {Gm_IC[crop]=:.3g}\t{Gm_IC[stop]=:.3g}"
-        )
-        lmb_opt = scipy.optimize.curve_fit(
-            lambda id, lc: _gm(id, lc, self.n, self.i_spec),
-            id[crop:stop] * self.ratio,
-            Gm_IC[crop:stop],
-            p0=[self.lbda_c],
-        )
-        self.lbda_c = lmb_opt[0][0]
-
-    def extract_big_l(self, gm, id):
-        Gm_IC = gm * self.ut / id
-        n_ext = 1 / Gm_IC
-        ref = np.min(n_ext)
-        start = np.nonzero(n_ext < 1.05 * ref)[0][0]
-        logging.debug(f"{start=}")
-        self.n = float(np.median(n_ext[start:]))
-        self.i_spec = np.max((gm * self.n * self.ut) ** 2 / id * self.ratio)
-        stop = np.nonzero(self.ic(id) < 15)[0][-1]
-        logging.debug(f"{stop=}")
-
-        def i_gm(id, n, iss):
-            return _gm(id, 0, n, iss)
-
-        i_spec_opt = scipy.optimize.curve_fit(
-            i_gm,
-            id[start:stop] * self.ratio,
-            (gm * self.ut / id)[start:stop],
-            p0=[self.n, self.i_spec],
-        )
-        self.n, self.i_spec = i_spec_opt[0]
-
     def ic(self, id: np.ndarray) -> np.ndarray:
-        return id / self.i_spec * self.ratio
+        return id / self.i_spec_square * self.ratio
 
     @property
     def shape(self) -> Dim:
@@ -151,15 +48,167 @@ class EKV:
     def ratio(self) -> float:
         return self.length / (self.width * self.n_finger)
 
-    @property
-    def ut(self) -> float:
-        return 0.0259
-
     def gm_IC(self, id: np.ndarray) -> np.ndarray:
-        return _gm(id * self.ratio, self.lbda_c, self.n, self.i_spec)
+        return _gm(id * self.ratio, self.l_c / self.length, self.n, self.i_spec_square)
+
+    def load(self, filename: str) -> Self:
+        with open(filename, "r") as f:
+            model = json.load(f)
+        for key in model:
+            setattr(self, key, model[key])
+        return self
+
+    def dump(self, filename: str):
+        with open(filename, "w") as f:
+            json.dump(self.model, f, indent=2)
+
+    @property
+    def model(self) -> dict:
+        return asdict(self)
+
+
+bench_ref = "ekv_bench.cir"
+
+
+def extract_ekv(techno: Available_PDK, working_dir: Optional[Path] = None) -> EKV:
+    if techno == "mock":
+        logging.warning("Using EKV model with mock techno for testing purposes only.")
+        return EKV(techno=techno)
+    if techno not in get_args(Available_PDK):
+        raise ValueError(f"Techno {techno} not supported in EKV model.")
+
+    if working_dir is None:
+        working_dir = get_file(techno, "base_dir") / "haadic"
+    shutil.copy(Path(__file__).parent / bench_ref, working_dir / bench_ref)
+    benches = (working_dir / bench_ref,)
+
+    param = dict()
+    for length in (3, 0.18):
+        run_dir = setup(
+            benches=benches, run_folder=working_dir / f"ekv_l_{length}", timestamp=False
+        )
+        param[length] = flow(
+            layout=layout,
+            techno=techno,
+            benches=benches,
+            dimensions=Dim({"length": length, "width": 1, "n_finger": 80}),
+            evaluate=extract_big_l if length == 3 else extract_small_l,
+            run_folder=run_dir,
+        )
+    ekv = EKV(techno=techno, **param[3].dct)
+    ekv.l_c = param[0.18]["l_c"]
+    ekv.length = 0.18
+    return ekv
+
+
+json_ekv_big_l = "../ekv_l_3/ekv_model.json"
+
+
+def extract_small_l(bench_data: SimRes, geo: Dim) -> Dim:
+    ekv = EKV(length=geo["length"], width=geo["width"], n_finger=int(geo["n_finger"]))
+    id = bench_data[0]["i(d)"]
+    gm = np.gradient(id, bench_data[0]["v(g)"])
+    Gm_IC = gm * ut / id
+    ekv.i_spec_square = EKV().load(json_ekv_big_l).i_spec_square
+    ekv.n = med_Xpercentile(1 / Gm_IC, "min")
+    lc = ekv.length * ekv.i_spec_square / ekv.ratio / (gm * ekv.n * ut)
+    ekv.l_c = med_Xpercentile(lc, "min")
+
+    export_graph(
+        ekv.ic(id),
+        [
+            (Gm_IC, "Gm/IC"),
+            (1 / ekv.n, f"1/n, n={ekv.n:.3g}"),
+            (
+                1 / (ekv.ic(id) * ekv.l_c / ekv.length),
+                f"l/(IC*λc), l_c={eng(ekv.l_c * 1e-6, 0)}m",
+            ),
+        ],
+        "gm_ic.png",
+    )
+
+    ekv_dict = ekv.model
+    ekv.dump("ekv_model.json")
+    ekv_dict.pop("techno")
+    return Dim(dct=ekv_dict)
+
+
+def extract_big_l(bench_data: SimRes, dimensions: Dim) -> Dim:
+    """
+    Extract the EKV model parameters from the bench data for a long channel transistor.
+    The parameters extracted are n and i_spec. (lambda_c is assumed to be 0).
+    """
+    bench_data[0].to_csv("bench_data_big_l.csv")
+    ekv = EKV(
+        length=dimensions["length"],
+        width=dimensions["width"],
+        n_finger=int(dimensions["n_finger"]),
+    )
+    logging.info(bench_data[0].head())
+    id = bench_data[0]["i(d)"]
+    gm = np.gradient(id, bench_data[0]["v(g)"])
+    Gm_IC = gm * ut / id
+    ekv.n = med_Xpercentile(1 / Gm_IC, "min")
+    i_spec_square = (gm * ekv.n * ut) ** 2 / id * ekv.ratio
+    ekv.i_spec_square = med_Xpercentile(i_spec_square, "max")
+    export_graph(
+        ekv.ic(id),
+        [
+            (Gm_IC, "Gm/IC"),
+            (1 / ekv.n, f"1/n, n={ekv.n:.3g}"),
+            (
+                1 / (np.sqrt(ekv.ic(id)) * ekv.n),
+                f"1/(sqrt(IC)*n), i_spec={eng(ekv.i_spec_square, 0)}A",
+            ),
+        ],
+        "gm_ic.png",
+    )
+    ekv_dict = ekv.model
+    ekv.dump("ekv_model.json")
+    ekv_dict.pop("techno")
+    return Dim(dct=ekv_dict)
+
+
+def export_graph(
+    x_data: np.ndarray,
+    y_data: Sequence[tuple[np.ndarray | float, str]],
+    filename: str,
+    show_graph: bool = False,
+):
+    for y, label in y_data:
+        if isinstance(y, float):
+            plt.axhline(y, linestyle="--", label=label)
+        else:
+            plt.loglog(x_data, y, label=label)
+    plt.xlabel("IC (-)")
+    plt.legend()
+    plt.grid(True)
+    plt.ylim(top=2 * np.max(y_data[0][0]))
+    plt.savefig(filename)
+    if show_graph:
+        plt.show()
+    else:
+        plt.close()
 
 
 def _gm(id: np.ndarray, l_c: float, n: float, i_ssq: float) -> np.ndarray:
+    """
+    Compute the transconductance of a MOS transistor in the EKV model.
+    Parameters
+    ----------
+    id : np.ndarray
+        The drain current of the transistor (in A).
+    l_c : float
+        The channel length modulation parameter (no units).
+    n : float
+        The subthreshold slope factor (no units).
+    i_ssq : float
+        The subthreshold square current factor (in A).
+    Returns
+    -------
+    np.ndarray
+        The transconductance of the transistor.
+    """
     IC = id / i_ssq
     return (np.sqrt((l_c * IC + 1) ** 2 + 4 * IC) - 1) / (
         IC * (l_c * (l_c * IC + 1) + 2) * n
@@ -170,7 +219,23 @@ def layout(
     cell: db.Cell,
     layerstack: LayerStack,
     shape: Dim,
-):
+) -> db.Cell:
+    """
+    Layout of a MOS transistor with given dimensions. The gate and the drain are on the top and the source on the bottom, connected to ground.
+
+    Parameters
+    ----------
+    cell : db.Cell
+        The cell to draw the layout in.
+    layerstack : LayerStack
+        The layerstack to use for the layout.
+    shape : Dim
+        The dimensions of the transistor, with keys "width", "length" and "n_finger".
+    Returns
+    -------
+    db.Cell
+        The cell with the drawn layout.
+    """
     width = shape["width"]
     length = shape["length"]
     n_finger = int(shape["n_finger"])
@@ -186,3 +251,4 @@ def layout(
     set_as_port(cell, "gate")
     set_as_port(cell, "drain")
     set_as_port(cell, "gnd")
+    return cell

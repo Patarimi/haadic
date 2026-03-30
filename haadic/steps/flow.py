@@ -18,7 +18,7 @@ def flow(
     layout: Callable,
     benches: Sequence[Path],
     evaluate: Callable,
-    target: step.Dim = step.Dim(),
+    target: Optional[step.Dim] = None,
     local_model: Optional[Callable[[step.Dim], step.Dim]] = None,
     dimensions: Optional[step.Dim] = None,
     options: Config = {},
@@ -71,19 +71,19 @@ def flow(
 
         logging.info("evaluate performances")
         perf = (
-            evaluate(data)
+            evaluate(data, geo)
             if "evaluate" not in options
-            else evaluate(data, options["evaluate"])
+            else evaluate(data, geo, options["evaluate"])
         )
-        if perf is not None:
+        if target is not None:
             res = [(key, perf[key], target.dct.get(key, "N/A")) for key in perf]
             logging.info(
                 "\n" + tabulate(res, headers=["obtained", "targeted"], tablefmt="grid")
             )
 
-        logging.info("compare performances to targets")
-        cost = step.compare_to(perf, target.dct)
-        logging.info(f"current cost: {cost}")
+            logging.info("compare performances to targets")
+            cost = step.compare_to(perf, target.dct)
+            logging.info(f"current cost: {cost}")
         return perf
     finally:
         os.chdir(starting_dir)

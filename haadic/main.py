@@ -6,6 +6,7 @@ from pathlib import Path
 
 from os.path import join
 import haadic.techno as techno
+from haadic.techno import Available_PDK
 from haadic.steps.step import cleanup
 
 # Skip logging configuration if it is already done (eg during tests)
@@ -71,6 +72,19 @@ def run_cli(
         + "\n\t".join([f"{k}: {v}" for k, v in design.__dict__.items()])
     )
     flow(**(design.__dict__), run_folder=run_dir)
+
+
+@app.command(name="extract-ekv")
+def extract_ekv_cli(
+    techno_name: Available_PDK,
+    output: str = os.getcwd() + "/ekv_model.json",
+) -> None:
+    """Extract EKV model parameters from a given technology and save them in a json file."""
+    from haadic.models.ekv import extract_ekv
+
+    ekv = extract_ekv(techno_name, working_dir=Path(output).parent)
+    ekv.dump(output)
+    logging.info(f"EKV model parameters saved in {output}")
 
 
 @app.command(name="new")
