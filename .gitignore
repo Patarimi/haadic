@@ -14,3 +14,6 @@
 *.vhdx
 *.pyc
 .coverage
+
+*.csv
+*.png
