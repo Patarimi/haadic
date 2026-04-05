@@ -18,6 +18,7 @@ mock:
   layermap: mock.map
   process: mock.proc
   techlef: mock.tlef
+  ekv_model: ekv_mock.json
 sky130:
   base_dir: sky130A
   haadic: sky130.json

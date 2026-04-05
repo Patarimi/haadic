@@ -65,6 +65,9 @@ class EKV:
         Self            The EKV model with the loaded parameters.
         """
         if filename is None:
+            logging.debug(
+                f"Loading EKV model from pdk install directory for {self.techno}"
+            )
             filename = get_file(self.techno, "ekv_model")
         if not Path(filename).exists():
             raise FileNotFoundError(

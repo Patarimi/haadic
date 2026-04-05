@@ -1,0 +1,15 @@
+{
+  "techno": "mock",
+  "length": 0.18,
+  "width": 1.0,
+  "n_finger": 80.0,
+  "n": 1.5,
+  "i_spec_square": 6e-07,
+  "l_c": 0.04,
+  "cgd": 0.0,
+  "cbd": 0.0,
+  "cgs_gb": 0.0,
+  "rg": 0.0,
+  "gm": 0.0,
+  "gds": 0.0
+}
