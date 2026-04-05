@@ -1,3 +1,5 @@
+from haadic.techno import get_file
+from ciel.manage import get
 from matplotlib import pyplot as plt
 from pathlib import Path
 import numpy as np
@@ -13,7 +15,6 @@ options = {"extract": "RC"}
 
 # Technology selection and model initialization
 techno = "sky130"
-ekv = EKV(techno)
 
 # Dimension of the layout to be generated. The layout function will be called with these dimensions as argument.
 # They can be used to generate different layouts and see how the performance evolve.
@@ -21,7 +22,7 @@ dimensions = Dim(
     {
         "n_finger": 4,
         "width": 1,
-        "length": 0.15,
+        "length": 0.18,
     }
 )
 
@@ -51,6 +52,10 @@ benches = (Path("bench.cir"), Path("bench_ac.cir"))
 
 
 def evaluate(bench_data: SimRes, geo: Dim, dis_plot: bool = False) -> dict[str, float]:
+    ekv = EKV(
+        techno, length=geo["length"], width=geo["width"], n_finger=int(geo["n_finger"])
+    )
+    ekv.load()
     bench_data[0].to_csv("bench_data.csv")
     id = bench_data[0]["i(d)"]
     bench_data[0]["IC"] = ekv.ic(id)
