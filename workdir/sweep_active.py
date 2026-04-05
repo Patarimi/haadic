@@ -1,3 +1,4 @@
+from rich import print
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import ticker
@@ -24,7 +25,12 @@ axs = fig.subplot_mosaic("AB;AC;AD", sharex=True)
 for extract in {"RC", "NoPar"}:
     models_params = pd.DataFrame()
     options["extract"] = extract
+    style = {
+        "linestyle": "--" if extract == "NoPar" else "-",
+        "marker": "o" if extract != "NoPar" else None,
+    }
     for dim in sweep[key]:
+        print(f"Sweeping {key}={dim:.2f} µm with extract option: [blue]{extract}[/]")
         dimensions[key] = dim
         run_folder = setup(
             benches,
@@ -46,7 +52,7 @@ for extract in {"RC", "NoPar"}:
         )
     models_params.to_csv(f"modele_parameters_{key}_{extract}.csv")
     models_params.filter((key, "cgd", "cbd", "cgs_gb")).plot(
-        x=key, ax=axs["A"], linestyle="--" if extract == "NoPar" else "-", label=extract
+        x=key, ax=axs["A"], **style
     )
     axs["A"].set_ylabel("Capacitance (fF)")
     axs["A"].set_xlabel(key.capitalize() + " (µm)")
@@ -55,13 +61,10 @@ for extract in {"RC", "NoPar"}:
     )
     for param, ref in zip(("rg", "gds", "gm"), "BCD"):
         models_params.filter((key, param)).plot(
-            x=key,
-            subplots=True,
-            ax=axs[ref],
-            linestyle="--" if extract == "NoPar" else "-",
-            label=extract,
+            x=key, subplots=True, ax=axs[ref], **style
         )
         axs[ref].set_ylabel(f"{param} (Ω)" if param == "rg" else f"{param} (S)")
+    axs["A"].set_prop_cycle(None)  # Reset the color cycle
 axs["D"].set_xlabel(key.capitalize() + " (µm)")
 plt.tight_layout()
 fig.savefig(f"parameter_vs_{key}.png")
