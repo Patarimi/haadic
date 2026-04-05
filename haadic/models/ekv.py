@@ -53,29 +53,33 @@ class EKV:
     def gm_IC(self, id: np.ndarray) -> np.ndarray:
         return _gm(id * self.ratio, self.l_c / self.length, self.n, self.i_spec_square)
 
-    def load(self, filename: str) -> Self:
+    def load(self, filename: Optional[str | Path] = None) -> Self:
         """
         Load the model parameters from a json file.
         Parameters
         ----------
-        filename : str
-            The name of the file to load the model from.
+        filename : str | Path
+            The name of the file to load the model from. If None, it will look for the model in the pdk install directory.
         Returns
         -------
         Self            The EKV model with the loaded parameters.
         """
+        if filename is None:
+            filename = get_file(self.techno, "ekv_model")
+        if not Path(filename).exists():
+            raise FileNotFoundError(f"EKV model file {filename} not found. Please run extract_ekv to extract the model parameters.")
         with open(filename, "r") as f:
             model = json.load(f)
         for key in model:
             setattr(self, key, model[key])
         return self
 
-    def dump(self, filename: str):
+    def dump(self, filename: str | Path) -> None:
         """
         Dump the model parameters to a json file.
         Parameters
         ----------
-        filename : str
+        filename : str | Path
             The name of the file to dump the model to.
         """
         with open(filename, "w") as f:
@@ -91,7 +95,7 @@ class EKV:
         Parameters
         ----------
         output_dir : Optional[Path], optional
-            The directory to save the extracted model, by default None (current directory).
+            The directory to save the extracted model, by default (pdk install directory).
         Returns
         -------
         Self

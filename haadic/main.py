@@ -6,7 +6,7 @@ from pathlib import Path
 
 from os.path import join
 import haadic.techno as techno
-from haadic.techno import Available_PDK
+from haadic.techno import Available_PDK, get_file
 from haadic.steps.step import cleanup
 
 # Skip logging configuration if it is already done (eg during tests)
@@ -77,11 +77,19 @@ def run_cli(
 @app.command(name="extract-ekv")
 def extract_ekv_cli(
     techno_name: Available_PDK,
-    output: str = os.getcwd() + "/ekv_model.json",
+    output: Optional[str | Path] = None,
 ) -> None:
-    """Extract EKV model parameters from a given technology and save them in a json file."""
+    """Extract EKV model parameters from a given technology and save them in a json file.
+     :param techno_name: name of the technology to extract the EKV model from. Must be one of the techno supported by haadic.
+     :param output: path of the json file to save the extracted model. If None, the model is saved in the pdk install directory with the name ekv_model_<techno_name>.json.
+     :return: None
+     """
     from haadic.models.ekv import extract_ekv
-
+    if output is None:
+        haadic_dir = get_file(techno_name, "base_dir") / "libs.tech/haadic"
+        if not haadic_dir.is_dir():
+            haadic_dir.mkdir()
+        output = haadic_dir / f"ekv_model_{techno_name}.json"
     ekv = extract_ekv(techno_name, working_dir=Path(output).parent)
     ekv.dump(output)
     logging.info(f"EKV model parameters saved in {output}")
