@@ -67,7 +67,9 @@ class EKV:
         if filename is None:
             filename = get_file(self.techno, "ekv_model")
         if not Path(filename).exists():
-            raise FileNotFoundError(f"EKV model file {filename} not found. Please run extract_ekv to extract the model parameters.")
+            raise FileNotFoundError(
+                f"EKV model file {filename} not found. Please run extract_ekv to extract the model parameters."
+            )
         with open(filename, "r") as f:
             model = json.load(f)
         for key in model:

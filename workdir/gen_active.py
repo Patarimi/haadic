@@ -1,5 +1,3 @@
-from haadic.techno import get_file
-from ciel.manage import get
 from matplotlib import pyplot as plt
 from pathlib import Path
 import numpy as np
