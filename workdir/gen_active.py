@@ -52,10 +52,9 @@ benches = (Path("bench.cir"), Path("bench_ac.cir"))
 
 
 def evaluate(bench_data: SimRes, geo: Dim, dis_plot: bool = False) -> dict[str, float]:
-    ekv = EKV(
-        techno, length=geo["length"], width=geo["width"], n_finger=int(geo["n_finger"])
-    )
-    ekv.load()
+    ekv = EKV(techno).load()
+    for key in geo.dct:
+        setattr(ekv, key, geo[key])
     bench_data[0].to_csv("bench_data.csv")
     id = bench_data[0]["i(d)"]
     bench_data[0]["IC"] = ekv.ic(id)
