@@ -95,8 +95,7 @@ jobs:
         uv run haadic pdk list
     - name: Test with Pytest
       run: |
-        uv run poe test -rxXs
-        uv run poe cover
+        uv run poe cover --cov-report markdown-append:$GITHUB_STEP_SUMMARY
     - name: Store reports
       if: failure()
       uses: actions/upload-artifact@v7

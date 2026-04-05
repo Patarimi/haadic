@@ -35,8 +35,8 @@ haadic = "haadic.main:app"
 [tool.poe.tasks]
 update_show = "uv lock --dry-run --upgrade"
 update_all = "uv sync --upgrade --all-groups --all-extras"
-test = 'coverage run -m pytest --basetemp=tmp'
-cover = "coverage report -m --skip-covered"
+test = 'pytest --basetemp=tmp'
+cover = "pytest --basetemp=tmp --cov-report term-missing:skip-covered --cov=haadic"
 publish = "poetry publish --build --username __token__ --password $PYPI_TOKEN"
 doc = "mkdocs build"
 
@@ -52,7 +52,6 @@ sequence = [
     {ref = "update_all"},
     {ref = "lint"},
     {ref = "doc"},
-    {ref = "test"},
     {ref = "cover"}
 ]
 
@@ -67,9 +66,9 @@ log_file = "./pytest.log"
 
 [dependency-groups]
 dev = [
-    "coverage>=7.10.6",
     "poethepoet>=0.36.0",
     "pytest>=8.4.1",
+    "pytest-cov>=7.1.0",
 ]
 doc = [
     "cyclopts[mkdocs]>=4.4.1",
