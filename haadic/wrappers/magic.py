@@ -35,7 +35,7 @@ def extract_spice(
     root_path = dirname(output_path) if dirname(output_path) != "/" else "."
     if root_path == "":
         root_path = "."
-    logging.warning(f"working dir :{root_path}")
+    logging.debug(f"working dir :{root_path}")
     if cell_name == "None":
         logging.warning("No cell name specified, using first cell in the layout.")
         layout = kl.Layout()
@@ -81,7 +81,6 @@ def extract_spice(
     logging.info("Extraction with command: " + " ".join(cmd))
     proc = nix_run(cmd)
     logging.info(proc.stdout)
-    logging.error(proc.stderr)
     try:
         proc.check_returncode()
     except CalledProcessError as e:
