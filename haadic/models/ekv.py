@@ -18,6 +18,8 @@ from haadic.techno import Available_PDK, get_file
 from haadic.models.constants import ut
 from haadic.models.tools import med_Xpercentile, eng
 
+LENGTH_RATIO = 15
+
 
 @dataclass(slots=True)
 class EKV:
@@ -51,14 +53,40 @@ class EKV:
     def gm_IC(self, id: np.ndarray) -> np.ndarray:
         return _gm(id * self.ratio, self.l_c / self.length, self.n, self.i_spec_square)
 
-    def load(self, filename: str) -> Self:
+    def load(self, filename: Optional[str | Path] = None) -> Self:
+        """
+        Load the model parameters from a json file.
+        Parameters
+        ----------
+        filename : str | Path
+            The name of the file to load the model from. If None, it will look for the model in the pdk install directory.
+        Returns
+        -------
+        Self            The EKV model with the loaded parameters.
+        """
+        if filename is None:
+            logging.debug(
+                f"Loading EKV model from pdk install directory for {self.techno}"
+            )
+            filename = get_file(self.techno, "ekv_model")
+        if not Path(filename).exists():
+            raise FileNotFoundError(
+                f"EKV model file {filename} not found. Please run extract_ekv to extract the model parameters."
+            )
         with open(filename, "r") as f:
             model = json.load(f)
         for key in model:
             setattr(self, key, model[key])
         return self
 
-    def dump(self, filename: str):
+    def dump(self, filename: str | Path) -> None:
+        """
+        Dump the model parameters to a json file.
+        Parameters
+        ----------
+        filename : str | Path
+            The name of the file to dump the model to.
+        """
         with open(filename, "w") as f:
             json.dump(self.model, f, indent=2)
 
@@ -66,11 +94,30 @@ class EKV:
     def model(self) -> dict:
         return asdict(self)
 
+    def extract_model(self, output_dir: Optional[Path] = None) -> Self:
+        """
+        Extract the EKV model parameters for a transistor.
+        Parameters
+        ----------
+        output_dir : Optional[Path], optional
+            The directory to save the extracted model, by default (pdk install directory).
+        Returns
+        -------
+        Self
+            The EKV model with the extracted parameters.
+        """
+        ekv = extract_ekv(self.techno, output_dir, self.length)
+        for key in ekv.model:
+            setattr(self, key, ekv.model[key])
+        return self
+
 
 bench_ref = "ekv_bench.cir"
 
 
-def extract_ekv(techno: Available_PDK, working_dir: Optional[Path] = None) -> EKV:
+def extract_ekv(
+    techno: Available_PDK, working_dir: Optional[Path] = None, l_min: float = 0.18
+) -> EKV:
     if techno == "mock":
         logging.warning("Using EKV model with mock techno for testing purposes only.")
         return EKV(techno=techno)
@@ -83,29 +130,31 @@ def extract_ekv(techno: Available_PDK, working_dir: Optional[Path] = None) -> EK
     benches = (working_dir / bench_ref,)
 
     param = dict()
-    for length in (3, 0.18):
+    for length in (LENGTH_RATIO * l_min, l_min):
         run_dir = setup(
-            benches=benches, run_folder=working_dir / f"ekv_l_{length}", timestamp=False
+            benches=benches,
+            run_folder=working_dir / f"ekv_l_{length:0.3f}",
+            timestamp=False,
         )
         param[length] = flow(
             layout=layout,
             techno=techno,
             benches=benches,
             dimensions=Dim({"length": length, "width": 1, "n_finger": 80}),
-            evaluate=extract_big_l if length == 3 else extract_small_l,
+            evaluate=extract_big_l
+            if length == LENGTH_RATIO * l_min
+            else extract_small_l,
             run_folder=run_dir,
         )
-    ekv = EKV(techno=techno, **param[3].dct)
-    ekv.l_c = param[0.18]["l_c"]
-    ekv.length = 0.18
+    ekv = EKV(techno=techno, **param[LENGTH_RATIO * l_min].dct)
+    ekv.l_c = param[l_min]["l_c"]
+    ekv.length = l_min
     return ekv
-
-
-json_ekv_big_l = "../ekv_l_3/ekv_model.json"
 
 
 def extract_small_l(bench_data: SimRes, geo: Dim) -> Dim:
     ekv = EKV(length=geo["length"], width=geo["width"], n_finger=int(geo["n_finger"]))
+    json_ekv_big_l = f"../ekv_l_{LENGTH_RATIO * geo['length']:0.3f}/ekv_model.json"
     id = bench_data[0]["i(d)"]
     gm = np.gradient(id, bench_data[0]["v(g)"])
     Gm_IC = gm * ut / id

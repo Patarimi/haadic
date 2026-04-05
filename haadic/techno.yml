@@ -18,12 +18,14 @@ mock:
   layermap: mock.map
   process: mock.proc
   techlef: mock.tlef
+  ekv_model: ekv_mock.json
 sky130:
   base_dir: sky130A
   haadic: sky130.json
   layermap: libs.tech/klayout/tech/sky130A.map
   lib_spice: libs.tech/combined/sky130.lib.spice
   magic_rc: libs.tech/magic/sky130A.magicrc
+  ekv_model: libs.tech/haadic/ekv_model_sky130.json
   source_url: ciel
   techlef: libs.ref/sky130_fd_sc_hvl/techlef/sky130_fd_sc_hvl__nom.tlef
   version: 0fe599b2afb6708d281543108caf8310912f54af
