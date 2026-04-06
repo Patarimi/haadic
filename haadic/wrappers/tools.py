@@ -52,5 +52,5 @@ def nix_run(cmd: list[str]) -> CompletedProcess:
     shell_path = dirname(__file__) + "/shell.nix"
     over_head.append(to_wsl(shell_path))
     logging.info('"' + '" "'.join(over_head))
-    proc = run(over_head, capture_output=True, text=True)
+    proc = run(over_head, capture_output=True, text=True, encoding="UTF-8")
     return proc
