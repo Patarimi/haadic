@@ -5,6 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import ticker
 from pathlib import Path
+import numpy as np
 
 from haadic.steps import flow, setup, Config
 
@@ -17,8 +18,8 @@ options: Config = {
 }
 
 sweep = {
-    "width": [1, 2, 4],
-    "length": [0.18, 0.3, 0.6],
+    "width": np.linspace(1, 8, 8),
+    "length": 0.18 * np.linspace(1, 8, 8),
 }
 key = "width"
 # key = "length"
