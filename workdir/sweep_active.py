@@ -19,7 +19,7 @@ options: Config = {
 
 sweep = {
     "width": np.linspace(1, 8, 8),
-    "length": 0.18*np.linspace(1, 8, 8),
+    "length": 0.18 * np.linspace(1, 8, 8),
 }
 key = "width"
 # key = "length"
