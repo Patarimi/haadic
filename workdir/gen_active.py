@@ -76,13 +76,13 @@ def evaluate(bench_data: SimRes, geo: Dim, dis_plot: bool = False) -> dict[str, 
     f = np.real(bench_data[1]["frequency"])
     omega = 2 * np.pi * f
     cg_simu = np.imag(y["11"]) / omega
-    cgd_simu = -np.imag(y["21"]) / omega
+    cgd_simu = -np.imag(y["12"]) / omega
     cm_simu = cgd_simu - np.imag(y["21"]) / omega
     rg_simu = np.real(y["11"]) / (omega * cg_simu) ** 2
-    gm_simu = np.real(y["21"]) + omega**2 * rg_simu * cg_simu * (cg_simu + cm_simu)
+    gm_simu = np.real(y["21"]) + omega**2 * rg_simu * cg_simu * (cgd_simu + cm_simu)
     cbd_simu = np.imag(y["22"]) / omega - cgd_simu
     cgs_gb_simu = cg_simu - cgd_simu
-    gds_simu = np.real(y["22"]) - omega**2 * rg_simu * cg_simu * (
+    gds_simu = np.real(y["22"]) - omega**2 * rg_simu * (
         cg_simu * cbd_simu + cg_simu * cgd_simu + cgd_simu * cm_simu
     )
     ekv.cgd = med_Xpercentile(cgd_simu, "max")
@@ -90,7 +90,7 @@ def evaluate(bench_data: SimRes, geo: Dim, dis_plot: bool = False) -> dict[str, 
     ekv.cgs_gb = med_Xpercentile(cgs_gb_simu, "min")
     ekv.gds = med_Xpercentile(gds_simu, "min")
     ekv.rg = med_Xpercentile(rg_simu, "min")
-    ekv.gm = med_Xpercentile(gm_simu, "min")
+    ekv.gm = med_Xpercentile(gm_simu, "max")
     fig, ax = plt.subplots(2, 2, sharex=True)
     ax[0][0].semilogx(f, cgd_simu * 1e15, label=r"$C_{GD}$ (spice PLS)")
     ax[0][0].axhline(
