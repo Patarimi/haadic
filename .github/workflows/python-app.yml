@@ -95,7 +95,6 @@ jobs:
         uv run haadic pdk list
     - name: Test with Pytest
       run: |
-        uv run poe test -rxXs
         uv run poe cover
     - name: Store reports
       if: failure()
