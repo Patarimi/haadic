@@ -45,7 +45,8 @@ def layout(
     set_as_port(cell, "gnd")
 
 
-# List of test benches to run. The flow will look for these files in the current folder and run them with the extracted spice netlist.
+# List of test benches to run. The flow will look for these files in the current folder
+# and run them with the extracted spice netlist.
 benches = (Path("bench.cir"), Path("bench_ac.cir"))
 
 
@@ -92,30 +93,32 @@ def evaluate(bench_data: SimRes, geo: Dim, dis_plot: bool = False) -> dict[str, 
     ekv.rg = med_Xpercentile(rg_simu, "min")
     ekv.gm = med_Xpercentile(gm_simu, "max")
     fig, ax = plt.subplots(2, 2, sharex=True)
-    ax[0][0].semilogx(f, cgd_simu * 1e15, label=r"$C_{GD}$ (spice PLS)")
+    ax[0][0].semilogx(f, cgd_simu * 1e15, label=r"$C_{GD}$ (sim. spice)")
+    ax[0][0].semilogx(f, cbd_simu * 1e15, label=r"$C_{BD}$ (sim. spice)")
+    ax[0][0].semilogx(f, cgs_gb_simu * 1e15, label=r"$C_{GS+GB}$ (sim. spice)")
+    ax[0][0].legend()
     ax[0][0].axhline(
-        ekv.cgd * 1e15, color="k", linestyle="--", label=r"$C_{GD}$ extracted"
+        ekv.cbd * 1e15, color="k", linestyle="--", label=r"$C_{BD}$ (model)"
     )
-    ax[0][0].semilogx(f, cbd_simu * 1e15, label=r"$C_{BD}$ (spice PLS)")
     ax[0][0].axhline(
-        ekv.cbd * 1e15, color="k", linestyle="--", label=r"$C_{GD}$ extracted"
+        ekv.cgd * 1e15, color="k", linestyle="--", label=r"$C_{GD}$ (model)"
     )
-    ax[0][0].semilogx(f, cgs_gb_simu * 1e15, label=r"$C_{GS+GB}$ (spice PLS)")
     ax[0][0].axhline(
-        ekv.cgs_gb * 1e15, color="k", linestyle="--", label=r"$C_{GS+GB}$ extracted"
+        ekv.cgs_gb * 1e15, color="k", linestyle="--", label=r"$C_{GS+GB}$ (model)"
     )
     ax[0][0].set_title(f"Capacitances (fF) - {options['extract']}")
-    ax[0][1].semilogx(f, rg_simu, label="Rg (spice PLS)")
-    ax[0][1].axhline(ekv.rg, color="k", linestyle="--", label="Rg extracted")
-    ax[1][1].semilogx(f, gm_simu * 1e3, label="Gm (spice PLS)")
-    ax[1][1].axhline(ekv.gm * 1e3, color="k", linestyle="--", label="Gm extracted")
-    ax[1][0].semilogx(f, gds_simu * 1e3, label="Gds (spice PLS)")
-    ax[1][0].axhline(ekv.gds * 1e3, color="k", linestyle="--", label="Gds extracted")
+    ax[0][1].semilogx(f, rg_simu, label="Rg (sim. spice)")
+    ax[0][1].axhline(ekv.rg, color="k", linestyle="--", label="Rg (model)")
+    ax[1][1].semilogx(f, gm_simu * 1e3, label="Gm (sim. spice)")
+    ax[1][1].axhline(ekv.gm * 1e3, color="k", linestyle="--", label="Gm (model)")
+    ax[1][0].semilogx(f, gds_simu * 1e3, label="Gds (sim. spice)")
+    ax[1][0].axhline(ekv.gds * 1e3, color="k", linestyle="--", label="Gds (model)")
     ax[0][1].set_title(r"Rg ($\Omega$) and Gm (mS)")
-    zoom = 100
+    zoom = 1e3
     for i in range(2):
         for j in range(2):
-            ax[i][j].legend()
+            if i != 0 or j != 0:
+                ax[i][j].legend()
             ax[i][j].grid(True)
             ax[i][j].set_ylim(top=np.ceil(zoom * ax[i][j].get_ylim()[1]) / zoom)
             ax[i][j].set_ylim(bottom=np.floor(zoom * ax[i][j].get_ylim()[0]) / zoom)
