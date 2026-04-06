@@ -23,25 +23,25 @@ Starting from the specifications written in a python file, the following flow is
 
 ```mermaid
 flowchart TD
-    start -- "specifications (.py)" --> app["Physical Model
-(haadic.devices)"]
+    start1 -- "specifications" --> app["Physical Model
+(haadic.models)"]
+    start2 -- "dimensions" --> pl
     app --dimensions --> pl["Parametric Layout
 (klayout + haadic.layouts)"]
-    pl --"geometries (.gdsII)" --> be_sim["RC extraction up to Mx
+    pl --"geometries (.gdsII)" --> be_ext["RC extraction up to Mx
 (Magic-VLSI)"]
-    pl --"geometries (.gdsII)" --> fe_sim["3D simulation from Mx
+    pl -."geometries (.gdsII)" .-> fe_ext["3D simulation from Mx
 (OpenEMS)"]
-    fe_sim -- "touchstone (.sNp)" --> ext["Spice simulation and spec. extraction.
-(NGSpice + Scikit-RF)"]
-    be_sim --"netlist (.cir)" --> ext
-    ext --"Performances (.yml)" --> atSpec{"Perf = Spec ?"}
-    atSpec --> |Yes| stop
-    atSpec --> |No| cal["Model Calibrator
-(haadic.calibrator)"]
-    cal --"Locally Optimized Parameters" --> app
+    fe_ext -. "touchstone (.sNp)" .-> sim["Spice simulation
+(NGSpice)"]
+    be_ext --"netlist (.cir)" --> sim
+    sim --"raw simulation (dataframe)" --> spec["Performances Evaluation
+    (haadic.evaluate)"]
+    spec --"performances (.csv)" --> stop
+
 ```
 
-When finished, a _.gds_ file is available for further design.
+When finished, a _.gds_ file is available for further design and a _.csv_ file with the performances of the design.
 
 ## PDKs configuration
 
