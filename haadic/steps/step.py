@@ -103,7 +103,7 @@ def setup(
         else str(run_folder) + "_" + datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
     )
     if not Path(run_dir).is_dir():
-        os.mkdir(run_dir)
+        os.makedirs(run_dir)
     for expected_bench in expected_benches:
         shutil.copy(expected_bench, run_dir)
     return Path(run_dir)
