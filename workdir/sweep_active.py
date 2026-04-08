@@ -38,7 +38,7 @@ for extract in extracts:
         dimensions[key] = dim
         run_folder = setup(
             benches,
-            Path(f"sweep_active_{key[0]}_{dim:.2f}um_{extract}"),
+            Path(f"results/sweep_active/{key[0]}_{dim:.2f}um_{extract}"),
             timestamp=False,
         )
         params = flow(
