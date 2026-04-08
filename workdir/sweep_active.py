@@ -18,15 +18,13 @@ options: Config = {
 }
 
 sweep = {
-    "width": np.linspace(1, 8, 8),
-    "length": 0.18 * np.linspace(1, 8, 8),
+    "width": np.linspace(1, 7, 8),
+    "length": 0.18 * np.linspace(1, 7, 8),
 }
-key = "width"
-# key = "length"
 fig = plt.figure()
 axs = fig.subplot_mosaic("AB;AC;AD", sharex=True)
 extracts = ["RC", "NoPar"]
-for extract in extracts:
+for extract, key in product(extracts, sweep.keys()):
     models_params = pd.DataFrame()
     options["extract"] = extract
     style = {
