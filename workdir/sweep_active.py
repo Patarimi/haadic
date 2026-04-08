@@ -18,15 +18,13 @@ options: Config = {
 }
 
 sweep = {
-    "width": np.linspace(1, 8, 8),
-    "length": 0.18 * np.linspace(1, 8, 8),
+    "width": np.linspace(1, 7, 8),
+    "length": 0.18 * np.linspace(1, 7, 8),
 }
-key = "width"
-# key = "length"
 fig = plt.figure()
 axs = fig.subplot_mosaic("AB;AC;AD", sharex=True)
 extracts = ["RC", "NoPar"]
-for extract in extracts:
+for extract, key in product(extracts, sweep.keys()):
     models_params = pd.DataFrame()
     options["extract"] = extract
     style = {
@@ -38,7 +36,7 @@ for extract in extracts:
         dimensions[key] = dim
         run_folder = setup(
             benches,
-            Path(f"sweep_active_{key[0]}_{dim:.2f}um_{extract}"),
+            Path(f"results/sweep_active/{key[0]}_{dim:.2f}um_{extract}"),
             timestamp=False,
         )
         params = flow(
