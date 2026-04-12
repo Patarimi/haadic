@@ -24,10 +24,10 @@ Starting from the specifications written in a python file, the following flow is
 ```mermaid
 flowchart TD
     start1 -- "specifications" --> app["Physical Model
-(haadic.models)"]
+(device.models)"]
     start2 -- "dimensions" --> pl
     app --dimensions --> pl["Parametric Layout
-(klayout + haadic.layouts)"]
+(klayout + device.layouts)"]
     pl --"geometries (.gdsII)" --> be_ext["RC extraction up to Mx
 (Magic-VLSI)"]
     pl -."geometries (.gdsII)" .-> fe_ext["3D simulation from Mx
@@ -36,7 +36,7 @@ flowchart TD
 (NGSpice)"]
     be_ext --"netlist (.cir)" --> sim
     sim --"raw simulation (dataframe)" --> spec["Performances Evaluation
-    (haadic.evaluate)"]
+    (device.evaluate)"]
     spec --"performances (.csv)" --> stop
 
 ```
