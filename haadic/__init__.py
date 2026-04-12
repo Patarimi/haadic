@@ -11,5 +11,5 @@ Haadic structure:
     - layouts: for layout generation and manipulation
     - models: for device and circuit modeling
     - evaluators: for performance evaluation
-    - components: 
+    - components: parameterized components (e.g., common sources) and design helpers (e.g., EKV model).
 """
