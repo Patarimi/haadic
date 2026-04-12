@@ -1,16 +1,20 @@
 from pathlib import Path
 from pydantic import ValidationError
 import pytest
-import haadic.steps.step as step
 
-ref_path = "./tests/test_steps/design.py"
+from haadic.config import REF_PATH
+import haadic.core.step as step
+
+ref_py = REF_PATH / "design.py"
 
 
 def test_import():
-    des = step.import_or_default(Path(ref_path))
+    des = step.import_or_default(Path(ref_py))
     assert "layout" in des.__dict__
     with pytest.raises(ValidationError):
-        step.import_or_default(Path(ref_path.replace("design.py", "design wrong.py")))
+        step.import_or_default(
+            Path(str(ref_py).replace("design.py", "design wrong.py"))
+        )
 
 
 def test_setup(tmp_path):

@@ -1,13 +1,10 @@
 import pytest
-from os.path import dirname
 
-from haadic.wrappers.magic import extract_spice
-from haadic.wrappers.tools import nix_check
-from haadic.wrappers.klayout import check_diff
-from haadic.techno import is_installed, get_file
-from pathlib import Path
-
-REF_PATH = Path(dirname(__file__)).parent / "ref_files"
+from haadic.config import REF_PATH
+from haadic.io.wrappers.magic import extract_spice
+from haadic.io.wrappers.tools import nix_check
+from haadic.io.wrappers.klayout import check_diff
+from haadic.core.techno import is_installed, get_file
 
 
 @pytest.mark.skipif(not is_installed("sky130"), reason="PDK not installed.")

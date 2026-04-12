@@ -2,7 +2,7 @@ from os.path import dirname
 from pathlib import Path
 
 try:
-    from haadic.wrappers.oems import compute
+    from haadic.io.wrappers.oems import compute
 except ImportError:
     import pytest
 

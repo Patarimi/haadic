@@ -1,5 +1,5 @@
 import pytest
-from haadic.models.ekv import EKV, extract_ekv
+from haadic.design.components.ekv import EKV, extract_ekv
 
 
 def test_ekv_model(tmp_path):

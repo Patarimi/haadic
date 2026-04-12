@@ -4,11 +4,10 @@ from typing import Optional
 from cyclopts import App
 from pathlib import Path
 
-from os.path import join
-import haadic.techno as techno
-from haadic.techno import Available_PDK, get_file
-from haadic.models.ekv import EKV
-from haadic.steps.step import cleanup
+from haadic.config import DATA_DIR
+from haadic.core.step import cleanup
+from haadic.core import techno
+from haadic.design.components.ekv import EKV
 
 # Skip logging configuration if it is already done (eg during tests)
 log_path = os.path.join(os.path.curdir, "haadic.log")
@@ -31,7 +30,7 @@ app.command(cleanup, name="clean")
 @app.command(name="smoke-test")
 def smoke_test_cli():
     """Run a 'smoke test' to check if haadic is installed correctly."""
-    from haadic.wrappers.tools import nix_check
+    from haadic.io.wrappers.tools import nix_check
 
     if not nix_check():
         raise SystemError(f"Error during nix check. Please check {log_path}.")
@@ -57,8 +56,8 @@ def run_cli(
     :param reload_result: If true, try to reload results. Else, run the full flow and recompute everything.
     :return: Nothing.
     """
-    from haadic.steps import flow
-    from haadic.steps.step import setup, import_or_default
+    from haadic.core.flow import flow
+    from haadic.core.step import setup, import_or_default
 
     design = import_or_default(Path(design_py))
     sub_folder_p = (
@@ -79,7 +78,7 @@ def run_cli(
 
 @app.command(name="extract-ekv")
 def extract_ekv_cli(
-    techno_name: Available_PDK,
+    techno_name: techno.Available_PDK,
     output: Optional[str | Path] = None,
 ) -> EKV:
     """Extract EKV model parameters from a given technology and save them in a json file.
@@ -87,10 +86,10 @@ def extract_ekv_cli(
     :param output: path of the json file to save the extracted model. If None, the model is saved in the pdk install directory with the name ekv_model_<techno_name>.json.
     :return: The extracted EKV model.
     """
-    from haadic.models.ekv import extract_ekv
+    from haadic.design.components.ekv import extract_ekv
 
     if output is None:
-        haadic_dir = get_file(techno_name, "base_dir") / "libs.tech/haadic"
+        haadic_dir = techno.get_file(techno_name, "base_dir") / "libs.tech/haadic"
         if not haadic_dir.is_dir():
             haadic_dir.mkdir()
         output = haadic_dir / f"ekv_model_{techno_name}.json"
@@ -101,9 +100,12 @@ def extract_ekv_cli(
 
 
 @app.command(name="new")
-def template() -> None:
+def template(output_dir: Path = Path(os.curdir), no_input: bool = False) -> None:
     """Create a new project using the haadic template."""
     import subprocess
 
-    template_dir = join(os.path.dirname(__file__), "./template")
-    subprocess.run(["uvx", "cookiecutter", template_dir], check=True)
+    template_dir = DATA_DIR / "template"
+    cmd = ["uvx", "cookiecutter", template_dir, "--output-dir", output_dir]
+    if no_input:
+        cmd.append("--no-input")
+    subprocess.run(cmd, check=True)

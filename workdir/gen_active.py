@@ -1,12 +1,12 @@
 from matplotlib import pyplot as plt
 from pathlib import Path
 import numpy as np
-from haadic.layouts.active import mosfet, line, pattern_connect
-from haadic.layouts.general import set_as_port
-from haadic.layouts.tools import LayerStack
-from haadic.models.ekv import EKV
-from haadic.models.tools import med_Xpercentile
-from haadic.steps.step import Dim, SimRes
+from haadic.design.layouts.active import mosfet, line, pattern_connect
+from haadic.design.layouts.general import set_as_port
+from haadic.design.layouts.tools import LayerStack
+from haadic.design.components.ekv import EKV
+from haadic.design.models.tools import med_Xpercentile
+from haadic.core.step import Dim, SimRes
 
 # configuration of the flow.
 options = {"extract": "RC"}

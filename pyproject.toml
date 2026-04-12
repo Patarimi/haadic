@@ -80,4 +80,4 @@ doc = [
 
 
 [tool.ty.src]
-exclude = ["haadic/wrappers/oems.py", "haadic/wrappers/ngsolve_w.py"]
+exclude = ["haadic/io/wrappers/oems.py", "haadic/io/wrappers/ngsolve_w.py"]

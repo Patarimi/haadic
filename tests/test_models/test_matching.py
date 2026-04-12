@@ -1,5 +1,5 @@
 import numpy as np
-import haadic.models.matching as mt
+import haadic.design.models.matching as mt
 import pytest
 
 

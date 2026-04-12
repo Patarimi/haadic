@@ -1,12 +1,10 @@
-from os.path import dirname
 import os
-from pathlib import Path
 import pytest
-from haadic.layouts import tools
-from haadic.techno import is_installed
 import logging
 
-REF_PATH = Path(dirname(__file__)).parent / "ref_files"
+from haadic.config import REF_PATH
+from haadic.design.layouts import tools
+from haadic.core.techno import is_installed
 
 
 def test_tools():

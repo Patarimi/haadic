@@ -1,17 +1,15 @@
-from os.path import dirname
-from pathlib import Path
 from klayout import db
 
-from haadic.layouts.microstrip import (
+from haadic.config import REF_PATH
+from haadic.design.layouts.microstrip import (
     straight_line,
     coupled_lines,
     lange_coupler,
     marchand_balun,
 )
-from haadic.layouts.tools import LayerStack, Port, check_diff
+from haadic.design.layouts.tools import LayerStack, Port, check_diff
 
 layerstack = LayerStack("mock")
-REF_PATH = Path(dirname(__file__)).parent / "ref_files"
 
 
 def test_straight_line(tmp_path):

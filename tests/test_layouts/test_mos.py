@@ -1,11 +1,9 @@
-from os.path import dirname
-from pathlib import Path
 from klayout import db
 
-from haadic.layouts.active import mosfet, line, connect
-from haadic.layouts.tools import check_diff, LayerStack, Layer
+from haadic.config import REF_PATH
+from haadic.design.layouts.active import mosfet, line, connect
+from haadic.design.layouts.tools import check_diff, LayerStack, Layer
 
-REF_PATH = Path(dirname(__file__)).parent / "ref_files"
 
 stack = LayerStack("mock")
 stack._nplus = Layer(1, 0, "Nwell")

@@ -1,10 +1,8 @@
 import filecmp
-from pathlib import Path
-from os.path import dirname
 import shutil
-from haadic.wrappers.klayout import check_diff, extract_spice
 
-REF_PATH = Path(dirname(__file__)).parent / "ref_files"
+from haadic.config import REF_PATH
+from haadic.io.wrappers.klayout import check_diff, extract_spice
 
 
 def test_check_diff():

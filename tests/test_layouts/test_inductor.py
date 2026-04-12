@@ -1,12 +1,12 @@
-from os.path import dirname, isdir
-from pathlib import Path
 import pytest
-from haadic.layouts.inductor import octagonal_inductor
-from haadic.layouts.tools import LayerStack, check_diff
 import klayout.db as db
 
-REF_PATH = Path(dirname(__file__)).parent / "ref_files"
-pytestmark = pytest.mark.skipif(not isdir("./pdk/mock"), reason="PDK not installed.")
+from haadic.config import REF_PATH
+from haadic.core.techno import is_installed
+from haadic.design.layouts.inductor import octagonal_inductor
+from haadic.design.layouts.tools import LayerStack, check_diff
+
+pytestmark = pytest.mark.skipif(not is_installed("mock"), reason="PDK not installed.")
 
 
 def test_inductor(tmp_path):

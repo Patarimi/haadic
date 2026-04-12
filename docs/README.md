@@ -7,7 +7,7 @@ software-agnostic design flow, from device sizing to layout and implementation.
 
 ## How to get started
 
-This application needs nix and python3. For windows, please install NixOS as shown [here](https://nixos.wiki/wiki/WSL).
+This application needs nix, uv and python3. For windows, please install NixOS as shown [here](https://nixos.wiki/wiki/WSL).
 
 Installation using [uvx](https://docs.astral.sh/uv/getting-started/installation/) is recommended.
 
@@ -24,10 +24,10 @@ Starting from the specifications written in a python file, the following flow is
 ```mermaid
 flowchart TD
     start1 -- "specifications" --> app["Physical Model
-(haadic.models)"]
+(device.models)"]
     start2 -- "dimensions" --> pl
     app --dimensions --> pl["Parametric Layout
-(klayout + haadic.layouts)"]
+(klayout + device.layouts)"]
     pl --"geometries (.gdsII)" --> be_ext["RC extraction up to Mx
 (Magic-VLSI)"]
     pl -."geometries (.gdsII)" .-> fe_ext["3D simulation from Mx
@@ -36,7 +36,7 @@ flowchart TD
 (NGSpice)"]
     be_ext --"netlist (.cir)" --> sim
     sim --"raw simulation (dataframe)" --> spec["Performances Evaluation
-    (haadic.evaluate)"]
+    (device.evaluate)"]
     spec --"performances (.csv)" --> stop
 
 ```
@@ -67,7 +67,7 @@ A directory with required files can be generated using :
 haadic new
 ```
 
-## Tests configuration
+## For developpers
 
 Install haadic with optional group dev :
 
