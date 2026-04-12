@@ -4,7 +4,7 @@ from typing import Optional
 from cyclopts import App
 from pathlib import Path
 
-from os.path import join
+from haadic.config import DATA_DIR
 from haadic.core.step import cleanup
 from haadic.core import techno
 from haadic.design.components.ekv import EKV
@@ -100,9 +100,12 @@ def extract_ekv_cli(
 
 
 @app.command(name="new")
-def template() -> None:
+def template(output_dir: Path = Path(os.curdir), no_input: bool = False) -> None:
     """Create a new project using the haadic template."""
     import subprocess
 
-    template_dir = join(os.path.dirname(__file__), "./template")
-    subprocess.run(["uvx", "cookiecutter", template_dir], check=True)
+    template_dir = DATA_DIR / "template"
+    cmd = ["uvx", "cookiecutter", template_dir, "--output-dir", output_dir]
+    if no_input:
+        cmd.append("--no-input")
+    subprocess.run(cmd, check=True)
