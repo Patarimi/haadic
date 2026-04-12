@@ -1,5 +1,5 @@
 from haadic.main import run_cli, smoke_test_cli, extract_ekv_cli
-from haadic.techno import is_installed
+from haadic.core.techno import is_installed
 import pytest
 
 pytestmark = pytest.mark.skipif(

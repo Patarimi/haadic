@@ -5,7 +5,7 @@ File for steps testing.
 from os.path import dirname
 from pathlib import Path
 
-from haadic.steps.step import Dim
+from haadic.core.step import Dim
 
 target = Dim({"length": 0.18, "width": 0.18, "n_finger": 1})
 

@@ -1,5 +1,5 @@
 import pytest
-import haadic.models.inductor as ind
+import haadic.design.models.inductor as ind
 
 
 def test_inductor():

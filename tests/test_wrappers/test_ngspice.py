@@ -5,10 +5,9 @@ import shutil
 
 import pytest
 
-from haadic.wrappers.ngspice import compute
-from haadic.wrappers.tools import nix_check
-
-REF_PATH = Path(__file__).parent.parent / "ref_files"
+from haadic.config import REF_PATH
+from haadic.io.wrappers.ngspice import compute
+from haadic.io.wrappers.tools import nix_check
 
 
 @pytest.mark.skipif(not nix_check(), reason="Nix not correctly installed")

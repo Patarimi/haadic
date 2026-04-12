@@ -1,5 +1,5 @@
 import pytest
-from haadic import techno
+import haadic.core.techno as techno
 from pathlib import Path
 
 pdk_exp = ["sky130", "asap7", "gf180mcu"]

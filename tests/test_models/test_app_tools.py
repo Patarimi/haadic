@@ -1,5 +1,5 @@
 import numpy as np
-from haadic.models import tools
+from haadic.design.models import tools
 from pytest import approx
 import pytest
 

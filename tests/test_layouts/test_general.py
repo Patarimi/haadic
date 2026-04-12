@@ -1,12 +1,16 @@
-from pathlib import Path
 import klayout.db as kl
 
-from haadic.layouts.general import via, via_stack, ground_plane, get_dtext, get_shape
-from haadic.layouts.tools import LayerStack, check_diff
-from os.path import dirname
+from haadic.design.layouts.general import (
+    via,
+    via_stack,
+    ground_plane,
+    get_dtext,
+    get_shape,
+)
+from haadic.design.layouts.tools import LayerStack, check_diff
+from haadic.config import REF_PATH
 
 stack = LayerStack("mock")
-REF_PATH = Path(dirname(__file__)).parent / "ref_files"
 
 
 def test_via(tmp_path):
