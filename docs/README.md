@@ -7,7 +7,7 @@ software-agnostic design flow, from device sizing to layout and implementation.
 
 ## How to get started
 
-This application needs nix and python3. For windows, please install NixOS as shown [here](https://nixos.wiki/wiki/WSL).
+This application needs nix, uv and python3. For windows, please install NixOS as shown [here](https://nixos.wiki/wiki/WSL).
 
 Installation using [uvx](https://docs.astral.sh/uv/getting-started/installation/) is recommended.
 
@@ -67,7 +67,7 @@ A directory with required files can be generated using :
 haadic new
 ```
 
-## Tests configuration
+## For developpers
 
 Install haadic with optional group dev :
 
