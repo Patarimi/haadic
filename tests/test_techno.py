@@ -48,7 +48,7 @@ def test_add_reference(tmp_path):
     base_dir: {tmp_path}
 """
     )
-    techno.add_reference(pdk_name, ref_name, str(path_file), str(path_tech))
+    techno.add_reference(pdk_name, ref_name, str(path_file), path_tech)
     pdk = techno.load_pdk(pdk_name, str(path_tech))
     assert ref_name in pdk
     assert pdk[ref_name] == str(path_file)

@@ -6,7 +6,7 @@ from subprocess import run
 import tarfile
 import urllib.request
 import zipfile
-from os.path import join, dirname, isdir
+from os.path import isdir
 import yaml
 from cyclopts import App
 from typing import Literal, Optional
@@ -131,7 +131,7 @@ def load_pdk(pdk_name: str, path: Optional[str] = None) -> dict:
 
 
 def add_reference(
-    pdk_name: str, ref_name: str, path_file: Path | str, path_tech: Optional[str] = None
+    pdk_name: str, ref_name: str, path_file: str, path_tech: Optional[Path] = None
 ) -> None:
     """
     Add a reference file to the techno.yml file.
@@ -143,7 +143,7 @@ def add_reference(
         path_file: Path to the reference file.
     """
     if path_tech is None:
-        path_tech = join(dirname(__file__), "techno.yml")
+        path_tech = DATA_DIR / "techno.yml"
     process_d = _read_tech(path_tech)
     if pdk_name not in process_d:
         raise KeyError(f"{pdk_name} not found in techno.yml")
