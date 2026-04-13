@@ -56,7 +56,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v6
-    - uses: Vampire/setup-wsl@v6
+    - uses: Vampire/setup-wsl@v7
       if: ${{runner.os == 'Windows' }}
     - name: Install Nix for windows
       if: ${{runner.os == 'Windows' }}
