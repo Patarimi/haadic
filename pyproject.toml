@@ -72,7 +72,7 @@ dev = [
     "pytest-cov>=7.1.0",
 ]
 doc = [
-    "cyclopts[mkdocs]>=4.4.1",
+    "cyclopts[mkdocs]>=4.10.2",
     "mkdocs>=1.6.1",
     "mkdocs-api-autonav>=0.4.0",
     "mkdocs-material>=9.6.16",
