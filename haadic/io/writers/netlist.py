@@ -1,8 +1,7 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal, Self
-from haadic.design.models.tools import eng
-import skrf as rf
+from typing import Literal, Optional, Self
+from haadic.core.tools import eng
 
 
 Unit = {"L": "H", "C": "F", "V": "V", "I": "A", "R": "Ω", "T": "rad", "K": ""}

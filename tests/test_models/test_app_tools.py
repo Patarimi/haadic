@@ -44,13 +44,6 @@ def test_norm_diff(a, b, expected_norm_diff):
     assert approx(tools.norm_diff(a, b)) == expected_norm_diff
 
 
-def test_eng():
-    assert tools.eng(1) == "1.000 "
-    assert tools.eng(1000) == "1.000 k"
-    assert tools.eng(1e-3, prefix=False, precision=0) == "1e-3"
-    assert tools.eng(-1000, precision=2) == "-1.00 k"
-
-
 @pytest.mark.parametrize(
     "data, percentile, exp_max, exp_min",
     [
