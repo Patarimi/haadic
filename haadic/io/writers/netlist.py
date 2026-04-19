@@ -61,13 +61,22 @@ class Netlist:
                 self.controls.append(line.rstrip())
         return self
 
-    def append(self, other: Component):
-        self.circuit.append(other)
+    def add_component(self, component: Component):
+        """
+        Add a component to the circuit.
+        """
+        self.circuit.append(component)
 
     def add_control(self, control: str):
+        """
+        Add an element to the netlist in the control section.
+        """
         self.controls.append(control)
 
     def add_other(self, other: str):
+        """
+        Add an other element to the netlist (not a component and not in the control section)
+        """
         self.others.append(other)
 
     def add_lib(self, lib_path: Path, section: Optional[str] = None):
@@ -80,6 +89,9 @@ class Netlist:
         self.add_other(" ".join(item))
 
     def spice(self):
+        """
+        Generate a spice netlist from content.
+        """
         spice = f"* {self.name}\n"
         for comp in self.circuit:
             spice += f"{comp}\n"
@@ -91,6 +103,9 @@ class Netlist:
         return spice
 
     def write(self, filename: Path | str = "netlist.cir"):
+        """
+        Write the spice netlist in the file given in parameter.
+        """
         with open(filename, "w") as f:
             f.write(self.spice())
         return filename

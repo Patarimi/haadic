@@ -1,5 +1,6 @@
 from haadic.core import tools
 
+
 def test_eng():
     assert tools.eng(1) == "1.000 "
     assert tools.eng(1000) == "1.000 k"

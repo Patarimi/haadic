@@ -13,7 +13,7 @@ def test_component():
 
 def test_netlist(tmp_path):
     net = Netlist("test")
-    net.append(Component("C", "5", 5e-12, ("gnd", "5")))
+    net.add_component(Component("C", "5", 5e-12, ("gnd", "5")))
     assert net.name == "test"
     assert net.spice() == "* test\nC5 gnd 5 5.000 pF\n"
     net.add_control("run")
