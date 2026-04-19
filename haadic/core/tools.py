@@ -27,4 +27,3 @@ def eng(x: float, precision: int = 3, prefix: bool = True) -> str:
         return f"{x * 10 ** (-3 * pw):.{precision}f} {ref[pw]}"
     else:
         return f"{x * 10 ** (-3 * pw):.{precision}f}e{3 * pw}"
-    

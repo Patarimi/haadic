@@ -28,23 +28,6 @@ class Component:
     def full_name(self):
         return str(self.type) + self.name
 
-    def network(self, media: rf.media.Media):
-        if "0" in self.node:
-            if self.type == "C":
-                sp = media.shunt_capacitor(self.value, name=self.full_name())  # ty: ignore invalid-argument-type
-            elif self.type == "L":
-                sp = media.shunt_inductor(self.value, name=self.full_name())  # ty: ignore invalid-argument-type
-            else:
-                raise ValueError("Unsupported type of components.")
-        else:
-            if self.type == "C":
-                sp = media.capacitor(self.value, name=self.full_name())  # ty: ignore invalid-argument-type
-            elif self.type == "L":
-                sp = media.inductor(self.value, name=self.full_name())  # ty: ignore invalid-argument-type
-            else:
-                raise ValueError("Unsupported type of components.")
-        return sp
-
 
 @dataclass
 class Netlist:

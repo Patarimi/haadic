@@ -1,5 +1,10 @@
 import numpy as np
 from haadic.design.models import tools
+from haadic.io.writers.netlist import Component
+from skrf import Frequency
+from skrf.io.touchstone import DefinedGammaZ0
+from skrf.constants import c
+
 from pytest import approx
 import pytest
 
@@ -63,3 +68,10 @@ def test_med_Xpercentile_invalid_percent():
         tools.med_Xpercentile(data, fun="max", percent=-0.1)
     with pytest.raises(ValueError):
         tools.med_Xpercentile(data, fun="min", percent=1.5)
+
+
+def test_network():
+    freq = Frequency(start=1, stop=10, npoints=41, unit="GHz")
+    media = DefinedGammaZ0(freq, z0=50, gamma=1j * freq.w / c)  # ty: ignore invalid-argument-type
+    net = tools.network(Component("C", "5", 5e-12, ("gnd", "5")), media)
+    assert net.s.shape == (41, 2, 2)
