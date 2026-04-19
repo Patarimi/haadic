@@ -172,7 +172,7 @@ def run_bench(bench_name: Path | str = "bench.cir", techno: str = "sky130"):
         section = (
             "tt" if "section" not in load_pdk(techno) else load_pdk(techno)["section"]
         )
-        spice.add_other(f".lib {to_wsl(get_file(techno, 'lib_spice'))} {section}")
+        spice.add_lib(to_wsl(get_file(techno, "lib_spice")), section)
     spice.write(bench_name)
 
     compute(Path(bench_name), data_file)

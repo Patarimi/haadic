@@ -24,7 +24,7 @@ def test_netlist(tmp_path):
     assert net.name == "test"
     assert net.spice() == "* test\nC5 gnd 5 5.000 pF\n"
     net.add_control("run")
-    net.add_other(".lib 'test.lib'")
+    net.add_lib("test.lib")
     expected_spice = """* test
 C5 gnd 5 5.000 pF
 

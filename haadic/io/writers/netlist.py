@@ -88,6 +88,15 @@ class Netlist:
     def add_other(self, other: str):
         self.others.append(other)
 
+    def add_lib(self, lib_path: Path, section: Optional[str] = None):
+        """
+        Add a library definition in the netlist.
+        """
+        item = [".lib", "'" + str(lib_path) + "'"]
+        if section is not None:
+            item.append(section)
+        self.add_other(" ".join(item))
+
     def spice(self):
         spice = f"* {self.name}\n"
         for comp in self.circuit:
