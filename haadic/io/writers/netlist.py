@@ -79,7 +79,7 @@ class Netlist:
         """
         self.others.append(other)
 
-    def add_lib(self, lib_path: Path, section: Optional[str] = None):
+    def add_lib(self, lib_path: Path | str, section: Optional[str] = None):
         """
         Add a library definition in the netlist.
         """
