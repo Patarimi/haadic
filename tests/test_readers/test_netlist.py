@@ -1,6 +1,6 @@
 import filecmp
 
-from haadic.config import REF_PATH
+from haadic._config import REF_PATH
 from haadic.io.writers.netlist import Component, Netlist
 
 

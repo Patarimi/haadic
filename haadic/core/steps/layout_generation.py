@@ -6,6 +6,12 @@ from haadic.core.steps.step import Dim
 
 
 def layout_generation(techno: str, layout: Callable, geo: Dim):
+    """Generate a layout in the requested techologies with the given parametric layout and the given set of parameters.
+
+    :param str techno: Target technologie (choose from AvaiblePDK).
+    :param Callable layout: parametric layout.
+    :param Dim geo: set of parameters for the layout.
+    """
     top_cell_name = "top"
     layerstack = LayerStack(techno)
 

@@ -1,7 +1,7 @@
 import pytest
 import klayout.db as db
 
-from haadic.config import REF_PATH
+from haadic._config import REF_PATH
 from haadic.core.techno import is_installed
 from haadic.design.layouts.inductor import octagonal_inductor
 from haadic.design.layouts.tools import LayerStack, check_diff

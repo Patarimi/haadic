@@ -5,7 +5,7 @@ import shutil
 
 import pytest
 
-from haadic.config import REF_PATH
+from haadic._config import REF_PATH
 from haadic.io.wrappers.ngspice import compute
 from haadic.io.wrappers.tools import nix_check
 

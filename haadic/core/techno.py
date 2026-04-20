@@ -14,7 +14,7 @@ from rich.console import Console
 from rich.table import Table
 from rich import print
 
-from haadic.config import DATA_DIR
+from haadic._config import DATA_DIR
 
 console = Console(stderr=True)
 pkd_app = App("pdk", help="Manage the PDKs")
@@ -29,7 +29,10 @@ PDK_INSTALL_DIR = Path(
 
 @pkd_app.command(name="install")
 def install(pdk_name: Available_PDK):
-    """Install the _pdk_name_ technology in its default location."""
+    """Install the _pdk_name_ technology in its default location.
+
+    :param Available_PDK pdk_name: name of the PDK to be installed.
+    """
     base_install = Path(PDK_INSTALL_DIR)
     tech = load_pdk(pdk_name)
     base_url = tech["source_url"]
@@ -153,6 +156,12 @@ def add_reference(
 
 
 def get_file(pdk_name: str, file_type: str) -> Path:
+    """Utility function to get a configuration file for a given technologie.
+
+    :param str pdk_name: selected technologie (from AvailablePDK).
+    :param str file_type: software configuration files.
+    :return Path: path to the requested files.
+    """
     pdk = load_pdk(pdk_name)
     if file_type == "base_dir":
         if pdk_name == "mock":

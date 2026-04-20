@@ -8,7 +8,7 @@ from haadic.design.layouts.general import (
     get_shape,
 )
 from haadic.design.layouts.tools import LayerStack, check_diff
-from haadic.config import REF_PATH
+from haadic._config import REF_PATH
 
 stack = LayerStack("mock")
 
