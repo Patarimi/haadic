@@ -1,8 +1,7 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal, Self
-from haadic.design.models.tools import eng
-import skrf as rf
+from typing import Literal, Optional, Self
+from haadic.core.tools import eng
 
 
 Unit = {"L": "H", "C": "F", "V": "V", "I": "A", "R": "Ω", "T": "rad", "K": ""}
@@ -28,23 +27,6 @@ class Component:
 
     def full_name(self):
         return str(self.type) + self.name
-
-    def network(self, media: rf.media.Media):
-        if "0" in self.node:
-            if self.type == "C":
-                sp = media.shunt_capacitor(self.value, name=self.full_name())  # ty: ignore invalid-argument-type
-            elif self.type == "L":
-                sp = media.shunt_inductor(self.value, name=self.full_name())  # ty: ignore invalid-argument-type
-            else:
-                raise ValueError("Unsupported type of components.")
-        else:
-            if self.type == "C":
-                sp = media.capacitor(self.value, name=self.full_name())  # ty: ignore invalid-argument-type
-            elif self.type == "L":
-                sp = media.inductor(self.value, name=self.full_name())  # ty: ignore invalid-argument-type
-            else:
-                raise ValueError("Unsupported type of components.")
-        return sp
 
 
 @dataclass
@@ -79,16 +61,37 @@ class Netlist:
                 self.controls.append(line.rstrip())
         return self
 
-    def append(self, other: Component):
-        self.circuit.append(other)
+    def add_component(self, component: Component):
+        """
+        Add a component to the circuit.
+        """
+        self.circuit.append(component)
 
     def add_control(self, control: str):
+        """
+        Add an element to the netlist in the control section.
+        """
         self.controls.append(control)
 
     def add_other(self, other: str):
+        """
+        Add an other element to the netlist (not a component and not in the control section)
+        """
         self.others.append(other)
 
+    def add_lib(self, lib_path: Path | str, section: Optional[str] = None):
+        """
+        Add a library definition in the netlist.
+        """
+        item = [".lib", "'" + str(lib_path) + "'"]
+        if section is not None:
+            item.append(section)
+        self.add_other(" ".join(item))
+
     def spice(self):
+        """
+        Generate a spice netlist from content.
+        """
         spice = f"* {self.name}\n"
         for comp in self.circuit:
             spice += f"{comp}\n"
@@ -100,6 +103,9 @@ class Netlist:
         return spice
 
     def write(self, filename: Path | str = "netlist.cir"):
+        """
+        Write the spice netlist in the file given in parameter.
+        """
         with open(filename, "w") as f:
             f.write(self.spice())
         return filename

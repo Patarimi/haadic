@@ -1,5 +1,10 @@
 import numpy as np
 from haadic.design.models import tools
+from haadic.io.writers.netlist import Component
+from skrf import Frequency
+from skrf.io.touchstone import DefinedGammaZ0
+from skrf.constants import c
+
 from pytest import approx
 import pytest
 
@@ -44,13 +49,6 @@ def test_norm_diff(a, b, expected_norm_diff):
     assert approx(tools.norm_diff(a, b)) == expected_norm_diff
 
 
-def test_eng():
-    assert tools.eng(1) == "1.000 "
-    assert tools.eng(1000) == "1.000 k"
-    assert tools.eng(1e-3, prefix=False, precision=0) == "1e-3"
-    assert tools.eng(-1000, precision=2) == "-1.00 k"
-
-
 @pytest.mark.parametrize(
     "data, percentile, exp_max, exp_min",
     [
@@ -70,3 +68,10 @@ def test_med_Xpercentile_invalid_percent():
         tools.med_Xpercentile(data, fun="max", percent=-0.1)
     with pytest.raises(ValueError):
         tools.med_Xpercentile(data, fun="min", percent=1.5)
+
+
+def test_network():
+    freq = Frequency(start=1, stop=10, npoints=41, unit="GHz")
+    media = DefinedGammaZ0(freq, z0=50, gamma=1j * freq.w / c)  # ty: ignore invalid-argument-type
+    net = tools.network(Component("C", "5", 5e-12, ("gnd", "5")), media)
+    assert net.s.shape == (41, 2, 2)

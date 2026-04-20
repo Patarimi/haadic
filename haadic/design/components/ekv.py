@@ -13,11 +13,12 @@ import matplotlib.pyplot as plt
 from haadic.design.layouts.active import connect, line, mosfet
 from haadic.design.layouts.general import set_as_port
 from haadic.design.layouts.tools import LayerStack
-from haadic.core.flow import flow
-from haadic.core.step import SimRes, Dim, setup
+from haadic.core.tools import eng
+from haadic.core.flow import flow, setup
+from haadic.core.steps.step import SimRes, Dim
 from haadic.core.techno import Available_PDK, get_file
 from haadic.design.models.constants import ut
-from haadic.design.models.tools import med_Xpercentile, eng
+from haadic.design.models.tools import med_Xpercentile
 
 LENGTH_RATIO = 15
 

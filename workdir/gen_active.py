@@ -6,7 +6,7 @@ from haadic.design.layouts.general import set_as_port
 from haadic.design.layouts.tools import LayerStack
 from haadic.design.components.ekv import EKV
 from haadic.design.models.tools import med_Xpercentile
-from haadic.core.step import Dim, SimRes
+from haadic.core.steps.step import Dim, SimRes
 
 # configuration of the flow.
 options = {"extract": "RC"}

@@ -1,11 +1,16 @@
+from datetime import datetime
 import logging
 import os
 from pathlib import Path
 import shutil
+import sys
 from typing import Callable, Optional, Union, Sequence
 from tabulate import tabulate
 
-import haadic.core.step as step
+import haadic.core.steps.step as step
+from haadic.core.steps.extraction import extract_from_layout
+from haadic.core.steps.layout_generation import layout_generation
+from haadic.core.steps.spice_simulation import run_bench
 from haadic.design.layouts.tools import check_diff
 
 default_options = {"flow": {"reload_result": True}, "extract": "RC"}
@@ -24,6 +29,19 @@ def flow(
     options: Config = {},
     run_folder: Path = Path("."),
 ) -> step.Dim:
+    """Run a complete conception flow.
+
+    :param str techno: Target technologie (from AvailablePdk)
+    :param Callable layout: parametric layout function.
+    :param Sequence[Path] benches: benches netlist to be simulated on extracted schematic from layout.
+    :param Callable evaluate: post-simulation computation, output obtained performances.
+    :param Optional[step.Dim] target: target performances, will be compared to obtained performances, defaults to None
+    :param Optional[Callable[[step.Dim], step.Dim]] local_model: function that computes layout parameters from target, defaults to None
+    :param Optional[step.Dim] dimensions: layout parameters (mandatory if no local_model is provided), defaults to None
+    :param Config options: control flow options, defaults to {}
+    :param Path run_folder: where flow is run, defaults to Path(".")
+    :return step.Dim: obtained performances
+    """
     try:
         if local_model is not None and target is not None:
             geo = local_model(target)
@@ -47,7 +65,7 @@ def flow(
         if Path("top.gds").is_file() and reload_result:
             logging.info("existing layout found, checking for changes...")
             shutil.move("top.gds", "old_top.gds")
-            step.layout_generation(techno, layout, geo)
+            layout_generation(techno, layout, geo)
             if not check_diff(Path("old_top.gds"), Path("top.gds")):
                 logging.info("Changes detected in layout, back to full flow.")
                 reload_result = False
@@ -56,13 +74,13 @@ def flow(
             logging.info("Running full flow.")
             if Path("top.gds").is_file():
                 step.cleanup()
-            step.layout_generation(techno, layout, geo)
+            layout_generation(techno, layout, geo)
             reload_result = False
         if not reload_result:
             logging.info("extracting schematic...")
-            step.extract_from_layout(techno, options=options["extract"])
+            extract_from_layout(techno, options=options["extract"])
             for bench in benches:
-                step.run_bench(bench.name, techno)
+                run_bench(bench.name, techno)
 
         logging.info("loading simulation results...")
         data = list()
@@ -87,3 +105,54 @@ def flow(
         return perf
     finally:
         os.chdir(starting_dir)
+
+
+def import_or_default(source: Path) -> step.FlowStep:
+    imp_d = dict()
+    for name in step.FlowStep.__dataclass_fields__.keys():
+        source = Path(source)
+        if str(source.parent.absolute()) not in sys.path:
+            sys.path.append(str(source.parent.absolute()))
+        src_name = str(source.stem)
+        imp = __import__(src_name, fromlist=name).__dict__
+        if imp.get(name, None) is not None:
+            imp_d[name] = imp[name]
+    logging.debug(f"Imported design from {source}: {imp_d.keys()}")
+    return step.FlowStep(**imp_d)
+
+
+def setup(
+    benches: Sequence[Path],
+    run_folder: Path,
+    root_folder: Path = Path("."),
+    timestamp: bool = True,
+) -> Path:
+    """
+    Configure folder and return running folder.
+
+    :param benches: list of bench files to copy in the running folder. Can be absolute or relative to root_folder.
+    :param run_folder: path of the running folder to create in root_folder. If timestamp is True, the current date and time will be appended to the folder name.
+    :param root_folder: folder where the running folder will be created. Default is current folder.
+    :param timestamp: whether to append the current date and time to the running folder name. Default is True.
+    """
+    expected_benches = list()
+    for bench in benches:
+        if Path(bench).is_absolute():
+            expected_benches.append(bench)
+        else:
+            expected_benches.append(root_folder / bench)
+        if not expected_benches[-1].is_file():
+            raise FileNotFoundError(
+                f"Bench file {str(expected_benches)} not found or is not a file."
+            )
+
+    run_dir = (
+        run_folder
+        if not timestamp
+        else str(run_folder) + "_" + datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
+    )
+    if not Path(run_dir).is_dir():
+        os.makedirs(run_dir)
+    for expected_bench in expected_benches:
+        shutil.copy(expected_bench, run_dir)
+    return Path(run_dir)

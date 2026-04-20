@@ -4,6 +4,10 @@ module for common rf functions and utilities.
 
 from typing import Sequence
 import numpy as np
+from skrf.media import Media
+from skrf import Network
+
+from haadic.io.writers.netlist import Component
 
 
 def db20(x_lin: Sequence[complex] | complex, /) -> float:
@@ -37,34 +41,6 @@ def norm_diff(a: float, b: float, /) -> float:
     return abs(a - b) / (abs(a) + abs(b))
 
 
-def eng(x: float, precision: int = 3, prefix: bool = True) -> str:
-    """
-    Convert a number to engineer notation (notation with an exponent multiple of 3).
-    :param x: number to convert
-    :param precision: after comma digit number.
-    :param prefix: If True, return number with prefix letters (fe: 1.3 p).
-        If False, return number with exponent (fe: 1.3e3).
-    :return: string representing the number
-    """
-    pw = int(np.log10(np.abs(x)) // 3)
-    if prefix:
-        ref = {
-            -5: "f",
-            -4: "p",
-            -3: "n",
-            -2: "µ",
-            -1: "m",
-            0: "",
-            1: "k",
-            2: "M",
-            3: "G",
-            4: "T",
-        }
-        return f"{x * 10 ** (-3 * pw):.{precision}f} {ref[pw]}"
-    else:
-        return f"{x * 10 ** (-3 * pw):.{precision}f}e{3 * pw}"
-
-
 def med_Xpercentile(data: np.ndarray, fun: str = "max", percent: float = 0.1) -> float:
     """
     Return the median of the _percent_ top (or bottom) percentile of the data.
@@ -81,3 +57,24 @@ def med_Xpercentile(data: np.ndarray, fun: str = "max", percent: float = 0.1) ->
         thres = (1 + percent) * np.min(data)
         crop = data[data <= thres] if thres > 0 else data[data >= thres]
     return float(np.median(crop))
+
+
+def network(component: Component, media: Media) -> Network:
+    """
+    Create a scikit-rf network from a component definition and a media.
+    """
+    if "0" in component.node:
+        if component.type == "C":
+            sp = media.shunt_capacitor(component.value, name=component.full_name())  # ty: ignore invalid-argument-type
+        elif component.type == "L":
+            sp = media.shunt_inductor(component.value, name=component.full_name())  # ty: ignore invalid-argument-type
+        else:
+            raise ValueError("Unsupported type of components.")
+    else:
+        if component.type == "C":
+            sp = media.capacitor(component.value, name=component.full_name())  # ty: ignore invalid-argument-type
+        elif component.type == "L":
+            sp = media.inductor(component.value, name=component.full_name())  # ty: ignore invalid-argument-type
+        else:
+            raise ValueError("Unsupported type of components.")
+    return sp
