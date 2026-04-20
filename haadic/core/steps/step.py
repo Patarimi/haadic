@@ -9,10 +9,6 @@ import pandas as pd
 from klayout import db
 import pydantic
 from haadic.io.readers.raw import parse_out
-from haadic.io.writers.netlist import Netlist
-from haadic.io.wrappers.ngspice import compute
-from haadic.io.wrappers.tools import to_wsl
-from haadic.core.techno import get_file, load_pdk
 from haadic.design.layouts.tools import LayerStack
 
 default_dict = {"extract": None}
@@ -82,34 +78,6 @@ def cleanup(folder: str = "", dry_run: bool = False):
                 print(f"Would remove directory: {dir_path}")
             else:
                 shutil.rmtree(dir_path)
-
-
-def layout_generation(techno: str, layout: Callable, geo: Dim):
-    top_cell_name = "top"
-    layerstack = LayerStack(techno)
-
-    lib = db.Layout()
-    lib.dbu = layerstack.grid * 1e6
-    layout(lib.create_cell(top_cell_name), layerstack, geo)
-    lib.write(f"{top_cell_name}.gds")
-
-
-def run_bench(bench_name: Path | str = "bench.cir", techno: str = "sky130"):
-    data_file = Path(bench_name).with_suffix(".raw")
-
-    spice = Netlist().load(bench_name)
-    skip_lib_add = False
-    for oth in spice.others:
-        if oth.startswith(".lib") and to_wsl(get_file(techno, "lib_spice")) in oth:
-            skip_lib_add = True
-    if not skip_lib_add:
-        section = (
-            "tt" if "section" not in load_pdk(techno) else load_pdk(techno)["section"]
-        )
-        spice.add_lib(to_wsl(get_file(techno, "lib_spice")), section)
-    spice.write(bench_name)
-
-    compute(Path(bench_name), data_file)
 
 
 def load_result(data_name: Path | str = "bench.raw") -> pd.DataFrame:

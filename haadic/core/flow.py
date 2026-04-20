@@ -9,6 +9,8 @@ from tabulate import tabulate
 
 import haadic.core.steps.step as step
 from haadic.core.steps.extraction import extract_from_layout
+from haadic.core.steps.layout_generation import layout_generation
+from haadic.core.steps.spice_simulation import run_bench
 from haadic.design.layouts.tools import check_diff
 
 default_options = {"flow": {"reload_result": True}, "extract": "RC"}
@@ -63,7 +65,7 @@ def flow(
         if Path("top.gds").is_file() and reload_result:
             logging.info("existing layout found, checking for changes...")
             shutil.move("top.gds", "old_top.gds")
-            step.layout_generation(techno, layout, geo)
+            layout_generation(techno, layout, geo)
             if not check_diff(Path("old_top.gds"), Path("top.gds")):
                 logging.info("Changes detected in layout, back to full flow.")
                 reload_result = False
@@ -72,13 +74,13 @@ def flow(
             logging.info("Running full flow.")
             if Path("top.gds").is_file():
                 step.cleanup()
-            step.layout_generation(techno, layout, geo)
+            layout_generation(techno, layout, geo)
             reload_result = False
         if not reload_result:
             logging.info("extracting schematic...")
             extract_from_layout(techno, options=options["extract"])
             for bench in benches:
-                step.run_bench(bench.name, techno)
+                run_bench(bench.name, techno)
 
         logging.info("loading simulation results...")
         data = list()
