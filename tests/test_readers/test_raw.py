@@ -1,4 +1,4 @@
-from haadic.config import REF_PATH
+from haadic._config import REF_PATH
 from haadic.io.readers.raw import parse_raw, parse_out
 
 

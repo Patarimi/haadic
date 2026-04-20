@@ -1,6 +1,6 @@
 import pytest
 
-from haadic.config import REF_PATH
+from haadic._config import REF_PATH
 from haadic.io.wrappers.magic import extract_spice
 from haadic.io.wrappers.tools import nix_check
 from haadic.io.wrappers.klayout import check_diff

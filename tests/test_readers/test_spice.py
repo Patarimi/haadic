@@ -1,4 +1,4 @@
-from haadic.config import REF_PATH
+from haadic._config import REF_PATH
 from haadic.io.readers.spice import SpiceTransformer
 from haadic.io.readers.tools import parse
 

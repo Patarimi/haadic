@@ -1,7 +1,7 @@
 import filecmp
 import shutil
 
-from haadic.config import REF_PATH
+from haadic._config import REF_PATH
 from haadic.io.wrappers.klayout import check_diff, extract_spice
 
 

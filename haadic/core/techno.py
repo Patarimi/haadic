@@ -14,7 +14,7 @@ from rich.console import Console
 from rich.table import Table
 from rich import print
 
-from haadic.config import DATA_DIR
+from haadic._config import DATA_DIR
 
 console = Console(stderr=True)
 pkd_app = App("pdk", help="Manage the PDKs")

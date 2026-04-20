@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 import klayout.db as kdb
 
-from haadic.config import DATA_DIR
+from haadic._config import DATA_DIR
 from haadic.io.readers.tlef import load_tlef
 from haadic.io.readers.layermap import load_map, get_number
 from haadic.core.techno import add_reference, load_pdk, get_file

@@ -2,7 +2,7 @@ from pathlib import Path
 from pydantic import ValidationError
 import pytest
 
-from haadic.config import REF_PATH
+from haadic._config import REF_PATH
 import haadic.core.flow as flow
 
 ref_py = REF_PATH / "design.py"

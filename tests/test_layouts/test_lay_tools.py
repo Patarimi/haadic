@@ -2,7 +2,7 @@ import os
 import pytest
 import logging
 
-from haadic.config import REF_PATH
+from haadic._config import REF_PATH
 from haadic.design.layouts import tools
 from haadic.core.techno import is_installed
 

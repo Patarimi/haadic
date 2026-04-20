@@ -1,6 +1,6 @@
 from klayout import db
 
-from haadic.config import REF_PATH
+from haadic._config import REF_PATH
 from haadic.design.layouts.active import mosfet, line, connect
 from haadic.design.layouts.tools import check_diff, LayerStack, Layer
 

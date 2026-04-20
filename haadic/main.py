@@ -4,7 +4,7 @@ from typing import Optional
 from cyclopts import App
 from pathlib import Path
 
-from haadic.config import DATA_DIR
+from haadic._config import DATA_DIR
 from haadic.core.steps.step import cleanup
 from haadic.core import techno
 from haadic.design.components.ekv import EKV

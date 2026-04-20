@@ -1,6 +1,6 @@
 from klayout import db
 
-from haadic.config import REF_PATH
+from haadic._config import REF_PATH
 from haadic.design.layouts.microstrip import (
     straight_line,
     coupled_lines,
