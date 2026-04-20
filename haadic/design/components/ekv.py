@@ -7,18 +7,15 @@ from typing import get_args, Optional, Sequence
 from typing_extensions import Self
 
 import numpy as np
-from klayout import db
 import matplotlib.pyplot as plt
 
-from haadic.design.layouts.active import connect, line, mosfet
-from haadic.design.layouts.general import set_as_port
-from haadic.design.layouts.tools import LayerStack
 from haadic.core.tools import eng
 from haadic.core.flow import flow, setup
 from haadic.core.steps.step import SimRes, Dim
 from haadic.core.techno import Available_PDK, get_file
 from haadic.design.models.constants import ut
 from haadic.design.models.tools import med_Xpercentile
+from haadic.design.layouts.commun_source import layout
 
 LENGTH_RATIO = 15
 
@@ -264,42 +261,3 @@ def _gm(id: np.ndarray, l_c: float, n: float, i_ssq: float) -> np.ndarray:
     return (np.sqrt((l_c * IC + 1) ** 2 + 4 * IC) - 1) / (
         IC * (l_c * (l_c * IC + 1) + 2) * n
     )
-
-
-def layout(
-    cell: db.Cell,
-    layerstack: LayerStack,
-    shape: Dim,
-) -> db.Cell:
-    """
-    Layout of a MOS transistor with given dimensions. The gate and the drain are on the top and the source on the bottom, connected to ground.
-
-    Parameters
-    ----------
-    cell : db.Cell
-        The cell to draw the layout in.
-    layerstack : LayerStack
-        The layerstack to use for the layout.
-    shape : Dim
-        The dimensions of the transistor, with keys "width", "length" and "n_finger".
-    Returns
-    -------
-    db.Cell
-        The cell with the drawn layout.
-    """
-    width = shape["width"]
-    length = shape["length"]
-    n_finger = int(shape["n_finger"])
-    mosfet(cell, layerstack, width=width, length=length, nf=n_finger)
-    line(cell, "gate", layerstack.get_gate_layer())
-    line(cell, "drain", layerstack.get_metal_layer(1))
-    line(cell, "gnd", layerstack.get_metal_layer(1), below=True)
-    for i in range(n_finger + 1):
-        if i < n_finger:
-            connect(cell, layerstack, "gate", f"g{i}")
-        drain = "drain" if i % 2 == 0 else "gnd"
-        connect(cell, layerstack, drain, f"dr{i}")
-    set_as_port(cell, "gate")
-    set_as_port(cell, "drain")
-    set_as_port(cell, "gnd")
-    return cell
