@@ -5,7 +5,7 @@ from cyclopts import App
 from pathlib import Path
 
 from haadic.config import DATA_DIR
-from haadic.core.step import cleanup
+from haadic.core.steps.step import cleanup
 from haadic.core import techno
 from haadic.design.components.ekv import EKV
 
@@ -56,8 +56,7 @@ def run_cli(
     :param reload_result: If true, try to reload results. Else, run the full flow and recompute everything.
     :return: Nothing.
     """
-    from haadic.core.flow import flow
-    from haadic.core.step import setup, import_or_default
+    from haadic.core.flow import flow, setup, import_or_default
 
     design = import_or_default(Path(design_py))
     sub_folder_p = (

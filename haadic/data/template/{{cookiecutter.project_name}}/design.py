@@ -1,6 +1,6 @@
 import pandas as pd
 from haadic.design.layouts.tools import LayerStack
-from haadic.core.step import Dim
+from haadic.core.steps.step import Dim
 from klayout.db import Cell
 
 
