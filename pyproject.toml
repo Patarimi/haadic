@@ -6,7 +6,7 @@ authors = [{name = "Patarimi", email="<38954040+Patarimi@users.noreply.github.co
 readme = "docs/README.md"
 requires-python = ">3.11,<3.14"
 dependencies = [
-    "ciel>=2.2.0",
+    "ciel>=2.4.1",
     "cyclopts>=3.22.3",
     "klayout>=0.30.2",
     "lark>=1.2.2",
