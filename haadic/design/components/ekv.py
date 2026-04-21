@@ -255,28 +255,28 @@ def extract_rf(bench_data: SimRes, dimensions: Dim, dis_plot: bool = False):
         ],
         "rf_extract_capa.png",
         dis_plot,
-        "lin"
+        "lin",
     )
     export_graph(
         freq,
         [Data(rg_simu, "Rg", "sim. spice"), Data(ekv.rg, "Rg", "model")],
         "rf_extract_rg.png",
         dis_plot,
-        "lin"
+        "lin",
     )
     export_graph(
         freq,
         [Data(gm_simu, "Rg", "sim. spice"), Data(ekv.gm, "Rg", "model")],
         "rf_extract_gm.png",
         dis_plot,
-        "lin"
+        "lin",
     )
     export_graph(
         freq,
         [Data(gds_simu, "Rg", "sim. spice"), Data(ekv.gds, "Rg", "model")],
         "rf_extract_gds.png",
         dis_plot,
-        "lin"
+        "lin",
     )
     return ekv.model
 

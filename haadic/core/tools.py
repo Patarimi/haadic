@@ -48,7 +48,7 @@ def export_graph(
     y_datas: Sequence[Data],
     filename: str,
     show_graph: bool = False,
-    x_scale: Literal["lin", "log"] = "log"
+    x_scale: Literal["lin", "log"] = "log",
 ):
     """Export a graph for the selected datas.
     The datas can be an array or a tuple of array and label.
@@ -79,5 +79,6 @@ def export_graph(
     else:
         plt.close()
 
-def _zoom(y1, y2, zoom = 1000):
+
+def _zoom(y1, y2, zoom=1000):
     return np.floor(zoom * y1 / zoom), np.ceil(zoom * y2 / zoom)
