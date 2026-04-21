@@ -182,7 +182,6 @@ def extract_big_l(bench_data: SimRes, dimensions: Dim) -> Dim:
     Extract the EKV model parameters from the bench data for a long channel transistor.
     The parameters extracted are n and i_spec. (lambda_c is assumed to be 0).
     """
-    bench_data[0].to_csv("bench_data_big_l.csv")
     ekv = EKV(
         length=dimensions["length"],
         width=dimensions["width"],

@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Literal, Sequence
 from dataclasses import dataclass
 import numpy as np
 import matplotlib.pyplot as plt
@@ -48,6 +48,7 @@ def export_graph(
     y_datas: Sequence[Data],
     filename: str,
     show_graph: bool = False,
+    x_scale: Literal["lin", "log"] = "log"
 ):
     """Export a graph for the selected datas.
     The datas can be an array or a tuple of array and label.
@@ -61,13 +62,22 @@ def export_graph(
         if isinstance(data.values, float):
             plt.axhline(data.values, linestyle="--", label=data.label)
         else:
-            plt.loglog(x_data.values, data.values, label=data.label)
+            if x_scale == "log":
+                plt.loglog(x_data.values, data.values, label=data.label)
+            else:
+                plt.semilogx(x_data.values, data.values, label=data.label)
     plt.xlabel(x_data.label)
     plt.legend()
     plt.grid(True)
-    plt.ylim(top=2 * np.max(y_datas[0].values))
+    if x_scale == "lin":
+        y_top = np.max([np.max(d.values) for d in y_datas])
+        y_bot = np.min([np.min(d.values) for d in y_datas])
+        plt.ylim(_zoom(y_bot, y_top))
     plt.savefig(filename)
     if show_graph:
         plt.show()
     else:
         plt.close()
+
+def _zoom(y1, y2, zoom = 1000):
+    return np.floor(zoom * y1 / zoom), np.ceil(zoom * y2 / zoom)

@@ -30,32 +30,22 @@ def layout(cell, layerstack, shape: Dim):
 
 # List of test benches to run. The flow will look for these files in the current folder
 # and run them with the extracted spice netlist.
-benches = (Path("bench.cir"), Path("bench_ac.cir"))
+benches = (Path("bench_ac.cir"),)
 
 
-def evaluate(bench_data: SimRes, geo: Dim, dis_plot: bool = False) -> dict[str, float]:
-    ekv = EKV(techno).load()
-    for key in geo.dct:
-        setattr(ekv, key, geo[key])
-
-    bench_data[0].to_csv("bench_data.csv")
-    id = bench_data[0]["i(d)"]
-    bench_data[0]["IC"] = ekv.ic(id)
-    export_graph(
-        Data(bench_data[0]["v(g)"], r"$V_g$", "V"),
-        [
-            Data(bench_data[0]["IC"], "IC"),
-        ],
-        "ic_vs_vg.png",
+def evaluate(bench_data: SimRes, geo: Dim, dis_plot: bool = True) -> dict[str, float]:
+    ekv = EKV(
+        length=geo["length"],
+        width=geo["width"],
+        n_finger=int(geo["n_finger"]),
     )
-
-    bench_data[1].to_csv("bench_ac_data.csv")
+    bench_data[0].to_csv("bench_ac_data.csv")
     y = dict()
     for i in (1, 2):
         for j in (1, 2):
             port = f"y_{i}_{j}"
-            y[f"{i}{j}"] = bench_data[1][port]
-    f = np.real(bench_data[1]["frequency"])
+            y[f"{i}{j}"] = bench_data[0][port]
+    f = np.real(bench_data[0]["frequency"])
     omega = 2 * np.pi * f
     cg_simu = np.imag(y["11"]) / omega
     cgd_simu = -np.imag(y["12"]) / omega
@@ -73,41 +63,41 @@ def evaluate(bench_data: SimRes, geo: Dim, dis_plot: bool = False) -> dict[str, 
     ekv.gds = med_Xpercentile(gds_simu, "min")
     ekv.rg = med_Xpercentile(rg_simu, "min")
     ekv.gm = med_Xpercentile(gm_simu, "max")
-    fig, ax = plt.subplots(2, 2, sharex=True)
-    ax[0][0].semilogx(f, cgd_simu * 1e15, label=r"$C_{GD}$ (sim. spice)")
-    ax[0][0].semilogx(f, cbd_simu * 1e15, label=r"$C_{BD}$ (sim. spice)")
-    ax[0][0].semilogx(f, cgs_gb_simu * 1e15, label=r"$C_{GS+GB}$ (sim. spice)")
-    ax[0][0].legend()
-    ax[0][0].axhline(
-        ekv.cbd * 1e15, color="k", linestyle="--", label=r"$C_{BD}$ (model)"
+    freq = Data(f, "Frequency", "GHz")
+    export_graph(
+        freq,
+        [
+            Data(cgd_simu * 1e15, r"$C_{GD}$", "sim. spice"),
+            Data(cbd_simu * 1e15, r"$C_{BD}$", "sim. spice"),
+            Data(cgs_gb_simu * 1e15, r"$C_{GS+GB}$", "sim. spice"),
+            Data(ekv.cbd * 1e15, r"$C_{BD}$", "model"),
+            Data(ekv.cgd * 1e15, r"$C_{GD}$", "model"),
+            Data(ekv.cgs_gb * 1e15, r"$C_{GS+GB}$", "model"),
+        ],
+        "rf_extract_capa.png",
+        dis_plot,
+        "lin"
     )
-    ax[0][0].axhline(
-        ekv.cgd * 1e15, color="k", linestyle="--", label=r"$C_{GD}$ (model)"
+    export_graph(
+        freq,
+        [Data(rg_simu, "Rg", "sim. spice"), Data(ekv.rg, "Rg", "model")],
+        "rf_extract_rg.png",
+        dis_plot,
+        "lin"
     )
-    ax[0][0].axhline(
-        ekv.cgs_gb * 1e15, color="k", linestyle="--", label=r"$C_{GS+GB}$ (model)"
+    export_graph(
+        freq,
+        [Data(gm_simu, "Rg", "sim. spice"), Data(ekv.gm, "Rg", "model")],
+        "rf_extract_gm.png",
+        dis_plot,
+        "lin"
     )
-    ax[0][0].set_title(f"Capacitances (fF) - {options['extract']}")
-    ax[0][1].semilogx(f, rg_simu, label="Rg (sim. spice)")
-    ax[0][1].axhline(ekv.rg, color="k", linestyle="--", label="Rg (model)")
-    ax[1][1].semilogx(f, gm_simu * 1e3, label="Gm (sim. spice)")
-    ax[1][1].axhline(ekv.gm * 1e3, color="k", linestyle="--", label="Gm (model)")
-    ax[1][0].semilogx(f, gds_simu * 1e3, label="Gds (sim. spice)")
-    ax[1][0].axhline(ekv.gds * 1e3, color="k", linestyle="--", label="Gds (model)")
-    ax[0][1].set_title(r"Rg ($\Omega$) and Gm (mS)")
-    zoom = 1e3
-    for i in range(2):
-        for j in range(2):
-            if i != 0 or j != 0:
-                ax[i][j].legend()
-            ax[i][j].grid(True)
-            ax[i][j].set_ylim(top=np.ceil(zoom * ax[i][j].get_ylim()[1]) / zoom)
-            ax[i][j].set_ylim(bottom=np.floor(zoom * ax[i][j].get_ylim()[0]) / zoom)
-            ax[1][j].set_xlabel("Frequency (Hz)")
-    plt.tight_layout()
-    plt.savefig("rf_extract.png")
-    if dis_plot:
-        plt.show()
-    plt.close(fig)
+    export_graph(
+        freq,
+        [Data(gds_simu, "Rg", "sim. spice"), Data(ekv.gds, "Rg", "model")],
+        "rf_extract_gds.png",
+        dis_plot,
+        "lin"
+    )
     ekv.dump("model.json")
     return ekv.model
