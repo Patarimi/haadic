@@ -1,9 +1,7 @@
 from matplotlib import pyplot as plt
 from pathlib import Path
 import numpy as np
-from haadic.design.layouts.active import mosfet, line, pattern_connect
-from haadic.design.layouts.general import set_as_port
-from haadic.design.layouts.tools import LayerStack
+from haadic.design.layouts.commun_source import layout as cs_layout
 from haadic.design.components.ekv import EKV
 from haadic.design.models.tools import med_Xpercentile
 from haadic.core.steps.step import Dim, SimRes
@@ -25,24 +23,8 @@ dimensions = Dim(
 )
 
 
-def layout(
-    cell,
-    layerstack: LayerStack,
-    shape: Dim,
-):
-    n_finger = int(shape["n_finger"])
-    width = shape["width"]
-    length = shape["length"]
-    mosfet(cell, layerstack, width=width, length=length, nf=n_finger)
-    line(cell, "gate", layerstack.get_gate_layer())
-    line(cell, "drain", layerstack.get_metal_layer(1))
-    line(cell, "gnd", layerstack.get_metal_layer(1), below=True)
-    pattern_connect(
-        cell, layerstack, f"nmos_{n_finger}", ("drain", "gate", "gnd", "gate")
-    )
-    set_as_port(cell, "gate")
-    set_as_port(cell, "drain")
-    set_as_port(cell, "gnd")
+def layout(cell, layerstack, shape: Dim):
+    cs_layout(cell, layerstack, shape)
 
 
 # List of test benches to run. The flow will look for these files in the current folder
