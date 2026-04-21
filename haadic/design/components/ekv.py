@@ -99,7 +99,7 @@ class EKV:
         :param output_dir: The directory to save the extracted model, by default (pdk install directory).
         :returns Self: The EKV model with the extracted parameters.
         """
-        ekv = extract_ekv(self.techno, output_dir, self.length)
+        ekv = extract_dc_ekv(self.techno, output_dir, self.length)
         for key in ekv.model:
             setattr(self, key, ekv.model[key])
         return self
@@ -108,7 +108,7 @@ class EKV:
 bench_ref = "ekv_bench.cir"
 
 
-def extract_ekv(
+def extract_dc_ekv(
     techno: Available_PDK, working_dir: Optional[Path] = None, l_min: float = 0.18
 ) -> EKV:
     if techno == "mock":
@@ -129,11 +129,14 @@ def extract_ekv(
             run_folder=working_dir / f"ekv_l_{length:0.3f}",
             timestamp=False,
         )
+        dim = Dim({"length": length, "width": 1, "n_finger": 80})
+        if length == l_min:
+            dim.dct["i_spec_square"] = param[LENGTH_RATIO * l_min]["i_spec_square"]
         param[length] = flow(
             layout=layout,
             techno=techno,
             benches=benches,
-            dimensions=Dim({"length": length, "width": 1, "n_finger": 80}),
+            dimensions=dim,
             evaluate=extract_big_l
             if length == LENGTH_RATIO * l_min
             else extract_small_l,
@@ -147,11 +150,10 @@ def extract_ekv(
 
 def extract_small_l(bench_data: SimRes, geo: Dim) -> Dim:
     ekv = EKV(length=geo["length"], width=geo["width"], n_finger=int(geo["n_finger"]))
-    json_ekv_big_l = f"../ekv_l_{LENGTH_RATIO * geo['length']:0.3f}/ekv_model.json"
     id = bench_data[0]["i(d)"]
     gm = np.gradient(id, bench_data[0]["v(g)"])
     Gm_IC = gm * ut / id
-    ekv.i_spec_square = EKV().load(json_ekv_big_l).i_spec_square
+    ekv.i_spec_square = geo["i_spec_square"]
     ekv.n = med_Xpercentile(1 / Gm_IC, "min")
     lc = ekv.length * ekv.i_spec_square / ekv.ratio / (gm * ekv.n * ut)
     ekv.l_c = med_Xpercentile(lc, "min")
@@ -171,7 +173,6 @@ def extract_small_l(bench_data: SimRes, geo: Dim) -> Dim:
     )
 
     ekv_dict = ekv.model
-    ekv.dump("ekv_model.json")
     ekv_dict.pop("techno")
     return Dim(dct=ekv_dict)
 
@@ -208,7 +209,6 @@ def extract_big_l(bench_data: SimRes, dimensions: Dim) -> Dim:
         "gm_ic.png",
     )
     ekv_dict = ekv.model
-    ekv.dump("ekv_model.json")
     ekv_dict.pop("techno")
     return Dim(dct=ekv_dict)
 

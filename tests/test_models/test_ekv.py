@@ -1,5 +1,5 @@
 import pytest
-from haadic.design.components.ekv import EKV, extract_ekv
+from haadic.design.components.ekv import EKV, extract_dc_ekv
 
 
 def test_ekv_model(tmp_path):
@@ -17,6 +17,6 @@ def test_ekv_model(tmp_path):
 
 def test_ekv_sky130(tmp_path):
     techno = "sky130"
-    ekv = extract_ekv(techno, working_dir=tmp_path)
+    ekv = extract_dc_ekv(techno, working_dir=tmp_path)
     assert ekv.length == 0.18
     assert pytest.approx(ekv.n, abs=1e-2) == 1.49
