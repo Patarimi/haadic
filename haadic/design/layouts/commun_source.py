@@ -14,18 +14,10 @@ def layout(
     """
     Layout of a MOS transistor with given dimensions. The gate and the drain are on the top and the source on the bottom, connected to ground.
 
-    Parameters
-    ----------
-    cell : db.Cell
-        The cell to draw the layout in.
-    layerstack : LayerStack
-        The layerstack to use for the layout.
-    shape : Dim
-        The dimensions of the transistor, with keys "width", "length" and "n_finger".
-    Returns
-    -------
-    db.Cell
-        The cell with the drawn layout.
+    :param cell: The cell to draw the layout in.
+    :param layerstack: The layerstack to use for the layout.
+    :param shape: The dimensions of the transistor, with keys "width", "length" and "n_finger".
+    :returns: The cell with the drawn layout.
     """
     width = shape["width"]
     length = shape["length"]

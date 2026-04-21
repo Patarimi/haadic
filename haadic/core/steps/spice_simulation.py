@@ -8,7 +8,7 @@ from haadic.core.techno import get_file, load_pdk
 def run_bench(bench_name: Path | str = "bench.cir", techno: str = "sky130"):
     """Run the given netlist using the requested technologie.
 
-    :param Path | str bench_name: spice netlist bench to be simulated, defaults to "bench.cir"
+    :param bench_name: spice netlist bench to be simulated, defaults to "bench.cir"
     :param str techno: technologie to use (for models loading), defaults to "sky130"
     """
     data_file = Path(bench_name).with_suffix(".raw")

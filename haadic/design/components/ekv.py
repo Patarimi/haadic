@@ -22,13 +22,24 @@ LENGTH_RATIO = 15
 
 @dataclass(slots=True)
 class EKV:
+    """EKV model class
+
+    :param Available_PDK techno: selected technologie
+    :param float length: minimal length in the technologie (in µm).
+    :param float width: finger width at which the parameter as been extracted (in µm).
+    :param int n_finger: number of finger of the transistor.
+    :param float n: slope ratio
+    :param float i_spec_square: specific current (in A)
+    :param float l_c: modulated channel length (in µm)
+    """
+
     techno: Available_PDK = "mock"  # ty: ignore invalid-assignment
     length: float = 0.18
     width: float = 0.18
     n_finger: int = 1
     n: float = 0
     i_spec_square: float = 0
-    l_c: float = 0  # modulated channel length
+    l_c: float = 0
     cgd: float = 0
     cbd: float = 0
     cgs_gb: float = 0
@@ -53,15 +64,9 @@ class EKV:
         return _gm(id * self.ratio, self.l_c / self.length, self.n, self.i_spec_square)
 
     def load(self, filename: Optional[str | Path] = None) -> Self:
-        """
-        Load the model parameters from a json file.
-        Parameters
-        ----------
-        filename : str | Path
-            The name of the file to load the model from. If None, it will look for the model in the pdk install directory.
-        Returns
-        -------
-        Self            The EKV model with the loaded parameters.
+        """Load the model parameters from a json file.
+        :param filename: The name of the file to load the model from. If None, it will look for the model in the pdk install directory., defaults to None
+        :return Self: The EKV model with the loaded parameters.
         """
         if filename is None:
             logging.debug(
@@ -79,12 +84,8 @@ class EKV:
         return self
 
     def dump(self, filename: str | Path) -> None:
-        """
-        Dump the model parameters to a json file.
-        Parameters
-        ----------
-        filename : str | Path
-            The name of the file to dump the model to.
+        """Dump the model parameters to a json file.
+        :param filename: The name of the file to dump the model to.
         """
         with open(filename, "w") as f:
             json.dump(self.model, f, indent=2)
@@ -96,14 +97,8 @@ class EKV:
     def extract_model(self, output_dir: Optional[Path] = None) -> Self:
         """
         Extract the EKV model parameters for a transistor.
-        Parameters
-        ----------
-        output_dir : Optional[Path], optional
-            The directory to save the extracted model, by default (pdk install directory).
-        Returns
-        -------
-        Self
-            The EKV model with the extracted parameters.
+        :param output_dir: The directory to save the extracted model, by default (pdk install directory).
+        :returns Self: The EKV model with the extracted parameters.
         """
         ekv = extract_ekv(self.techno, output_dir, self.length)
         for key in ekv.model:
