@@ -171,7 +171,14 @@ def extract_small_l(bench_data: SimRes, geo: Dim) -> Dim:
         ],
         "gm_ic.png",
     )
-
+    export_graph(
+        Data(ekv.ic(id), "IC", "-"),
+        [
+            Data(bench_data[0]["v(g)"], "V_g", "V"),
+        ],
+        "ic_vs_vg.png",
+        x_scale="lin",
+    )
     ekv_dict = ekv.model
     ekv_dict.pop("techno")
     return Dim(dct=ekv_dict)
