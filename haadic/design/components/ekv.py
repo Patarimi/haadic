@@ -212,8 +212,73 @@ def extract_big_l(bench_data: SimRes, dimensions: Dim) -> Dim:
     return Dim(dct=ekv_dict)
 
 
-def extract_rf():
-    pass
+def extract_rf(bench_data: SimRes, dimensions: Dim, dis_plot: bool = False):
+    ekv = EKV(
+        length=dimensions["length"],
+        width=dimensions["width"],
+        n_finger=int(dimensions["n_finger"]),
+    )
+    bench_data[0].to_csv("bench_ac_data.csv")
+    y = dict()
+    for i in (1, 2):
+        for j in (1, 2):
+            port = f"y_{i}_{j}"
+            y[f"{i}{j}"] = bench_data[0][port]
+    f = np.real(bench_data[0]["frequency"])
+    omega = 2 * np.pi * f
+    cg_simu = np.imag(y["11"]) / omega
+    cgd_simu = -np.imag(y["12"]) / omega
+    cm_simu = cgd_simu - np.imag(y["21"]) / omega
+    rg_simu = np.real(y["11"]) / (omega * cg_simu) ** 2
+    gm_simu = np.real(y["21"]) + omega**2 * rg_simu * cg_simu * (cgd_simu + cm_simu)
+    cbd_simu = np.imag(y["22"]) / omega - cgd_simu
+    cgs_gb_simu = cg_simu - cgd_simu
+    gds_simu = np.real(y["22"]) - omega**2 * rg_simu * (
+        cg_simu * cbd_simu + cg_simu * cgd_simu + cgd_simu * cm_simu
+    )
+    ekv.cgd = med_Xpercentile(cgd_simu, "max")
+    ekv.cbd = med_Xpercentile(cbd_simu, "min")
+    ekv.cgs_gb = med_Xpercentile(cgs_gb_simu, "min")
+    ekv.gds = med_Xpercentile(gds_simu, "min")
+    ekv.rg = med_Xpercentile(rg_simu, "min")
+    ekv.gm = med_Xpercentile(gm_simu, "max")
+    freq = Data(f, "Frequency", "GHz")
+    export_graph(
+        freq,
+        [
+            Data(cgd_simu * 1e15, r"$C_{GD}$", "sim. spice"),
+            Data(cbd_simu * 1e15, r"$C_{BD}$", "sim. spice"),
+            Data(cgs_gb_simu * 1e15, r"$C_{GS+GB}$", "sim. spice"),
+            Data(ekv.cbd * 1e15, r"$C_{BD}$", "model"),
+            Data(ekv.cgd * 1e15, r"$C_{GD}$", "model"),
+            Data(ekv.cgs_gb * 1e15, r"$C_{GS+GB}$", "model"),
+        ],
+        "rf_extract_capa.png",
+        dis_plot,
+        "lin"
+    )
+    export_graph(
+        freq,
+        [Data(rg_simu, "Rg", "sim. spice"), Data(ekv.rg, "Rg", "model")],
+        "rf_extract_rg.png",
+        dis_plot,
+        "lin"
+    )
+    export_graph(
+        freq,
+        [Data(gm_simu, "Rg", "sim. spice"), Data(ekv.gm, "Rg", "model")],
+        "rf_extract_gm.png",
+        dis_plot,
+        "lin"
+    )
+    export_graph(
+        freq,
+        [Data(gds_simu, "Rg", "sim. spice"), Data(ekv.gds, "Rg", "model")],
+        "rf_extract_gds.png",
+        dis_plot,
+        "lin"
+    )
+    return ekv.model
 
 
 def _gm(id: np.ndarray, l_c: float, n: float, i_ssq: float) -> np.ndarray:
