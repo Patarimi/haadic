@@ -5,6 +5,7 @@ from haadic.design.layouts.commun_source import layout as cs_layout
 from haadic.design.components.ekv import EKV
 from haadic.design.models.tools import med_Xpercentile
 from haadic.core.steps.step import Dim, SimRes
+from haadic.core.tools import export_graph, Data
 
 # configuration of the flow.
 options = {"extract": "RC"}
@@ -36,19 +37,17 @@ def evaluate(bench_data: SimRes, geo: Dim, dis_plot: bool = False) -> dict[str, 
     ekv = EKV(techno).load()
     for key in geo.dct:
         setattr(ekv, key, geo[key])
+
     bench_data[0].to_csv("bench_data.csv")
     id = bench_data[0]["i(d)"]
     bench_data[0]["IC"] = ekv.ic(id)
-    fig, ax = plt.subplots()
-    croped = bench_data[0].query("IC >= 0.01 and IC <= 30")
-    croped.plot.line(x="IC", y="v(g)", ax=ax, logx=True)
-    ax.set_xlabel("IC (-)")
-    ax.set_ylabel("Vg (V)")
-    ax.grid(True)
-    plt.savefig("ic_vs_vg.png")
-    if dis_plot:
-        plt.show()
-    plt.close(fig)
+    export_graph(
+        Data(bench_data[0]["v(g)"], r"$V_g$", "V"),
+        [
+            Data(bench_data[0]["IC"], "IC"),
+        ],
+        "ic_vs_vg.png",
+    )
 
     bench_data[1].to_csv("bench_ac_data.csv")
     y = dict()

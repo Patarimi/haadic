@@ -3,13 +3,12 @@ import json
 import logging
 from pathlib import Path
 import shutil
-from typing import get_args, Optional, Sequence
+from typing import get_args, Optional
 from typing_extensions import Self
 
 import numpy as np
-import matplotlib.pyplot as plt
 
-from haadic.core.tools import eng
+from haadic.core.tools import eng, export_graph, Data
 from haadic.core.flow import flow, setup
 from haadic.core.steps.step import SimRes, Dim
 from haadic.core.techno import Available_PDK, get_file
@@ -158,13 +157,14 @@ def extract_small_l(bench_data: SimRes, geo: Dim) -> Dim:
     ekv.l_c = med_Xpercentile(lc, "min")
 
     export_graph(
-        ekv.ic(id),
+        Data(ekv.ic(id)),
         [
-            (Gm_IC, "Gm/IC"),
-            (1 / ekv.n, f"1/n, n={ekv.n:.3g}"),
-            (
+            Data(Gm_IC, "Gm/IC"),
+            Data(1 / ekv.n, "1/n", f"n={ekv.n:.3g}"),
+            Data(
                 1 / (ekv.ic(id) * ekv.l_c / ekv.length),
-                f"l/(IC*λc), l_c={eng(ekv.l_c * 1e-6, 0)}m",
+                "l/(IC*λc)",
+                f"l_c={eng(ekv.l_c * 1e-6, 0)}m",
             ),
         ],
         "gm_ic.png",
@@ -195,13 +195,14 @@ def extract_big_l(bench_data: SimRes, dimensions: Dim) -> Dim:
     i_spec_square = (gm * ekv.n * ut) ** 2 / id * ekv.ratio
     ekv.i_spec_square = med_Xpercentile(i_spec_square, "max")
     export_graph(
-        ekv.ic(id),
+        Data(ekv.ic(id)),
         [
-            (Gm_IC, "Gm/IC"),
-            (1 / ekv.n, f"1/n, n={ekv.n:.3g}"),
-            (
+            Data(Gm_IC, "Gm/IC"),
+            Data(1 / ekv.n, "1/n", f"n={ekv.n:.3g}"),
+            Data(
                 1 / (np.sqrt(ekv.ic(id)) * ekv.n),
-                f"1/(sqrt(IC)*n), i_spec={eng(ekv.i_spec_square, 0)}A",
+                "1/(sqrt(IC)*n)",
+                "i_spec={eng(ekv.i_spec_square, 0)}A",
             ),
         ],
         "gm_ic.png",
@@ -212,26 +213,8 @@ def extract_big_l(bench_data: SimRes, dimensions: Dim) -> Dim:
     return Dim(dct=ekv_dict)
 
 
-def export_graph(
-    x_data: np.ndarray,
-    y_data: Sequence[tuple[np.ndarray | float, str]],
-    filename: str,
-    show_graph: bool = False,
-):
-    for y, label in y_data:
-        if isinstance(y, float):
-            plt.axhline(y, linestyle="--", label=label)
-        else:
-            plt.loglog(x_data, y, label=label)
-    plt.xlabel("IC (-)")
-    plt.legend()
-    plt.grid(True)
-    plt.ylim(top=2 * np.max(y_data[0][0]))
-    plt.savefig(filename)
-    if show_graph:
-        plt.show()
-    else:
-        plt.close()
+def extract_rf():
+    pass
 
 
 def _gm(id: np.ndarray, l_c: float, n: float, i_ssq: float) -> np.ndarray:
