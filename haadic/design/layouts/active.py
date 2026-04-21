@@ -149,7 +149,14 @@ def connect(
 def pattern_connect(
     cell: db.Cell, layers: LayerStack, device_name: str, pattern: Sequence[str]
 ) -> db.Cell:
-    """ """
+    """Connects the ports of a device to lines following the given pattern.
+    Pattern is replicated until all ports are connected.
+    :param cell: klayout cell in which the connection is inserted.
+    :param layers: layer stack to be used.
+    :param device_name: device to be connected.
+    :param pattern: labels of the connections lines.
+    :return: _cell_ with_ the added connections.
+    """
     layout = cell.layout()
     labels = get_dtext(layout, cell=device_name)
     for lbl, lyr in labels:

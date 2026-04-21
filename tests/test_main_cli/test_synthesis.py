@@ -26,6 +26,6 @@ def test_run_extract_ekv():
 def test_run(tmp_path):
     run_cli(design_py="./workdir/gen_active.py", sub_folder=tmp_path, timestamp=False)
     assert (tmp_path / "top.gds").is_file()
-    assert (tmp_path / "bench_data.csv").is_file()
+    assert (tmp_path / "bench_ac_data.csv").is_file()
     # Rerun to check reload_result
     run_cli(design_py="./workdir/gen_active.py", sub_folder=tmp_path, timestamp=False)

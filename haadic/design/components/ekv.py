@@ -3,35 +3,42 @@ import json
 import logging
 from pathlib import Path
 import shutil
-from typing import get_args, Optional, Sequence
+from typing import get_args, Optional
 from typing_extensions import Self
 
 import numpy as np
-from klayout import db
-import matplotlib.pyplot as plt
 
-from haadic.design.layouts.active import connect, line, mosfet
-from haadic.design.layouts.general import set_as_port
-from haadic.design.layouts.tools import LayerStack
-from haadic.core.tools import eng
+from haadic.core.tools import eng, export_graph, Data
 from haadic.core.flow import flow, setup
 from haadic.core.steps.step import SimRes, Dim
 from haadic.core.techno import Available_PDK, get_file
 from haadic.design.models.constants import ut
 from haadic.design.models.tools import med_Xpercentile
+from haadic.design.layouts.commun_source import layout
 
 LENGTH_RATIO = 15
 
 
 @dataclass(slots=True)
 class EKV:
+    """EKV model class
+
+    :param Available_PDK techno: selected technologie
+    :param float length: minimal length in the technologie (in µm).
+    :param float width: finger width at which the parameter as been extracted (in µm).
+    :param int n_finger: number of finger of the transistor.
+    :param float n: slope ratio
+    :param float i_spec_square: specific current (in A)
+    :param float l_c: modulated channel length (in µm)
+    """
+
     techno: Available_PDK = "mock"  # ty: ignore invalid-assignment
     length: float = 0.18
     width: float = 0.18
     n_finger: int = 1
     n: float = 0
     i_spec_square: float = 0
-    l_c: float = 0  # modulated channel length
+    l_c: float = 0
     cgd: float = 0
     cbd: float = 0
     cgs_gb: float = 0
@@ -56,15 +63,9 @@ class EKV:
         return _gm(id * self.ratio, self.l_c / self.length, self.n, self.i_spec_square)
 
     def load(self, filename: Optional[str | Path] = None) -> Self:
-        """
-        Load the model parameters from a json file.
-        Parameters
-        ----------
-        filename : str | Path
-            The name of the file to load the model from. If None, it will look for the model in the pdk install directory.
-        Returns
-        -------
-        Self            The EKV model with the loaded parameters.
+        """Load the model parameters from a json file.
+        :param filename: The name of the file to load the model from. If None, it will look for the model in the pdk install directory., defaults to None
+        :return Self: The EKV model with the loaded parameters.
         """
         if filename is None:
             logging.debug(
@@ -82,12 +83,8 @@ class EKV:
         return self
 
     def dump(self, filename: str | Path) -> None:
-        """
-        Dump the model parameters to a json file.
-        Parameters
-        ----------
-        filename : str | Path
-            The name of the file to dump the model to.
+        """Dump the model parameters to a json file.
+        :param filename: The name of the file to dump the model to.
         """
         with open(filename, "w") as f:
             json.dump(self.model, f, indent=2)
@@ -99,16 +96,10 @@ class EKV:
     def extract_model(self, output_dir: Optional[Path] = None) -> Self:
         """
         Extract the EKV model parameters for a transistor.
-        Parameters
-        ----------
-        output_dir : Optional[Path], optional
-            The directory to save the extracted model, by default (pdk install directory).
-        Returns
-        -------
-        Self
-            The EKV model with the extracted parameters.
+        :param output_dir: The directory to save the extracted model, by default (pdk install directory).
+        :returns Self: The EKV model with the extracted parameters.
         """
-        ekv = extract_ekv(self.techno, output_dir, self.length)
+        ekv = extract_dc_ekv(self.techno, output_dir, self.length)
         for key in ekv.model:
             setattr(self, key, ekv.model[key])
         return self
@@ -117,7 +108,7 @@ class EKV:
 bench_ref = "ekv_bench.cir"
 
 
-def extract_ekv(
+def extract_dc_ekv(
     techno: Available_PDK, working_dir: Optional[Path] = None, l_min: float = 0.18
 ) -> EKV:
     if techno == "mock":
@@ -138,11 +129,14 @@ def extract_ekv(
             run_folder=working_dir / f"ekv_l_{length:0.3f}",
             timestamp=False,
         )
+        dim = Dim({"length": length, "width": 1, "n_finger": 80})
+        if length == l_min:
+            dim.dct["i_spec_square"] = param[LENGTH_RATIO * l_min]["i_spec_square"]
         param[length] = flow(
             layout=layout,
             techno=techno,
             benches=benches,
-            dimensions=Dim({"length": length, "width": 1, "n_finger": 80}),
+            dimensions=dim,
             evaluate=extract_big_l
             if length == LENGTH_RATIO * l_min
             else extract_small_l,
@@ -156,30 +150,29 @@ def extract_ekv(
 
 def extract_small_l(bench_data: SimRes, geo: Dim) -> Dim:
     ekv = EKV(length=geo["length"], width=geo["width"], n_finger=int(geo["n_finger"]))
-    json_ekv_big_l = f"../ekv_l_{LENGTH_RATIO * geo['length']:0.3f}/ekv_model.json"
     id = bench_data[0]["i(d)"]
     gm = np.gradient(id, bench_data[0]["v(g)"])
     Gm_IC = gm * ut / id
-    ekv.i_spec_square = EKV().load(json_ekv_big_l).i_spec_square
+    ekv.i_spec_square = geo["i_spec_square"]
     ekv.n = med_Xpercentile(1 / Gm_IC, "min")
     lc = ekv.length * ekv.i_spec_square / ekv.ratio / (gm * ekv.n * ut)
     ekv.l_c = med_Xpercentile(lc, "min")
 
     export_graph(
-        ekv.ic(id),
+        Data(ekv.ic(id)),
         [
-            (Gm_IC, "Gm/IC"),
-            (1 / ekv.n, f"1/n, n={ekv.n:.3g}"),
-            (
+            Data(Gm_IC, "Gm/IC"),
+            Data(1 / ekv.n, "1/n", f"n={ekv.n:.3g}"),
+            Data(
                 1 / (ekv.ic(id) * ekv.l_c / ekv.length),
-                f"l/(IC*λc), l_c={eng(ekv.l_c * 1e-6, 0)}m",
+                "l/(IC*λc)",
+                f"l_c={eng(ekv.l_c * 1e-6, 0)}m",
             ),
         ],
         "gm_ic.png",
     )
 
     ekv_dict = ekv.model
-    ekv.dump("ekv_model.json")
     ekv_dict.pop("techno")
     return Dim(dct=ekv_dict)
 
@@ -189,7 +182,6 @@ def extract_big_l(bench_data: SimRes, dimensions: Dim) -> Dim:
     Extract the EKV model parameters from the bench data for a long channel transistor.
     The parameters extracted are n and i_spec. (lambda_c is assumed to be 0).
     """
-    bench_data[0].to_csv("bench_data_big_l.csv")
     ekv = EKV(
         length=dimensions["length"],
         width=dimensions["width"],
@@ -203,43 +195,90 @@ def extract_big_l(bench_data: SimRes, dimensions: Dim) -> Dim:
     i_spec_square = (gm * ekv.n * ut) ** 2 / id * ekv.ratio
     ekv.i_spec_square = med_Xpercentile(i_spec_square, "max")
     export_graph(
-        ekv.ic(id),
+        Data(ekv.ic(id)),
         [
-            (Gm_IC, "Gm/IC"),
-            (1 / ekv.n, f"1/n, n={ekv.n:.3g}"),
-            (
+            Data(Gm_IC, "Gm/IC"),
+            Data(1 / ekv.n, "1/n", f"n={ekv.n:.3g}"),
+            Data(
                 1 / (np.sqrt(ekv.ic(id)) * ekv.n),
-                f"1/(sqrt(IC)*n), i_spec={eng(ekv.i_spec_square, 0)}A",
+                "1/(sqrt(IC)*n)",
+                "i_spec={eng(ekv.i_spec_square, 0)}A",
             ),
         ],
         "gm_ic.png",
     )
     ekv_dict = ekv.model
-    ekv.dump("ekv_model.json")
     ekv_dict.pop("techno")
     return Dim(dct=ekv_dict)
 
 
-def export_graph(
-    x_data: np.ndarray,
-    y_data: Sequence[tuple[np.ndarray | float, str]],
-    filename: str,
-    show_graph: bool = False,
-):
-    for y, label in y_data:
-        if isinstance(y, float):
-            plt.axhline(y, linestyle="--", label=label)
-        else:
-            plt.loglog(x_data, y, label=label)
-    plt.xlabel("IC (-)")
-    plt.legend()
-    plt.grid(True)
-    plt.ylim(top=2 * np.max(y_data[0][0]))
-    plt.savefig(filename)
-    if show_graph:
-        plt.show()
-    else:
-        plt.close()
+def extract_rf(bench_data: SimRes, dimensions: Dim, dis_plot: bool = False):
+    ekv = EKV(
+        length=dimensions["length"],
+        width=dimensions["width"],
+        n_finger=int(dimensions["n_finger"]),
+    )
+    bench_data[0].to_csv("bench_ac_data.csv")
+    y = dict()
+    for i in (1, 2):
+        for j in (1, 2):
+            port = f"y_{i}_{j}"
+            y[f"{i}{j}"] = bench_data[0][port]
+    f = np.real(bench_data[0]["frequency"])
+    omega = 2 * np.pi * f
+    cg_simu = np.imag(y["11"]) / omega
+    cgd_simu = -np.imag(y["12"]) / omega
+    cm_simu = cgd_simu - np.imag(y["21"]) / omega
+    rg_simu = np.real(y["11"]) / (omega * cg_simu) ** 2
+    gm_simu = np.real(y["21"]) + omega**2 * rg_simu * cg_simu * (cgd_simu + cm_simu)
+    cbd_simu = np.imag(y["22"]) / omega - cgd_simu
+    cgs_gb_simu = cg_simu - cgd_simu
+    gds_simu = np.real(y["22"]) - omega**2 * rg_simu * (
+        cg_simu * cbd_simu + cg_simu * cgd_simu + cgd_simu * cm_simu
+    )
+    ekv.cgd = med_Xpercentile(cgd_simu, "max")
+    ekv.cbd = med_Xpercentile(cbd_simu, "min")
+    ekv.cgs_gb = med_Xpercentile(cgs_gb_simu, "min")
+    ekv.gds = med_Xpercentile(gds_simu, "min")
+    ekv.rg = med_Xpercentile(rg_simu, "min")
+    ekv.gm = med_Xpercentile(gm_simu, "max")
+    freq = Data(f, "Frequency", "GHz")
+    export_graph(
+        freq,
+        [
+            Data(cgd_simu * 1e15, r"$C_{GD}$", "sim. spice"),
+            Data(cbd_simu * 1e15, r"$C_{BD}$", "sim. spice"),
+            Data(cgs_gb_simu * 1e15, r"$C_{GS+GB}$", "sim. spice"),
+            Data(ekv.cbd * 1e15, r"$C_{BD}$", "model"),
+            Data(ekv.cgd * 1e15, r"$C_{GD}$", "model"),
+            Data(ekv.cgs_gb * 1e15, r"$C_{GS+GB}$", "model"),
+        ],
+        "rf_extract_capa.png",
+        dis_plot,
+        "lin",
+    )
+    export_graph(
+        freq,
+        [Data(rg_simu, "Rg", "sim. spice"), Data(ekv.rg, "Rg", "model")],
+        "rf_extract_rg.png",
+        dis_plot,
+        "lin",
+    )
+    export_graph(
+        freq,
+        [Data(gm_simu, "Rg", "sim. spice"), Data(ekv.gm, "Rg", "model")],
+        "rf_extract_gm.png",
+        dis_plot,
+        "lin",
+    )
+    export_graph(
+        freq,
+        [Data(gds_simu, "Rg", "sim. spice"), Data(ekv.gds, "Rg", "model")],
+        "rf_extract_gds.png",
+        dis_plot,
+        "lin",
+    )
+    return ekv.model
 
 
 def _gm(id: np.ndarray, l_c: float, n: float, i_ssq: float) -> np.ndarray:
@@ -264,42 +303,3 @@ def _gm(id: np.ndarray, l_c: float, n: float, i_ssq: float) -> np.ndarray:
     return (np.sqrt((l_c * IC + 1) ** 2 + 4 * IC) - 1) / (
         IC * (l_c * (l_c * IC + 1) + 2) * n
     )
-
-
-def layout(
-    cell: db.Cell,
-    layerstack: LayerStack,
-    shape: Dim,
-) -> db.Cell:
-    """
-    Layout of a MOS transistor with given dimensions. The gate and the drain are on the top and the source on the bottom, connected to ground.
-
-    Parameters
-    ----------
-    cell : db.Cell
-        The cell to draw the layout in.
-    layerstack : LayerStack
-        The layerstack to use for the layout.
-    shape : Dim
-        The dimensions of the transistor, with keys "width", "length" and "n_finger".
-    Returns
-    -------
-    db.Cell
-        The cell with the drawn layout.
-    """
-    width = shape["width"]
-    length = shape["length"]
-    n_finger = int(shape["n_finger"])
-    mosfet(cell, layerstack, width=width, length=length, nf=n_finger)
-    line(cell, "gate", layerstack.get_gate_layer())
-    line(cell, "drain", layerstack.get_metal_layer(1))
-    line(cell, "gnd", layerstack.get_metal_layer(1), below=True)
-    for i in range(n_finger + 1):
-        if i < n_finger:
-            connect(cell, layerstack, "gate", f"g{i}")
-        drain = "drain" if i % 2 == 0 else "gnd"
-        connect(cell, layerstack, drain, f"dr{i}")
-    set_as_port(cell, "gate")
-    set_as_port(cell, "drain")
-    set_as_port(cell, "gnd")
-    return cell

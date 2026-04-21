@@ -36,7 +36,7 @@ def flow(
     :param Sequence[Path] benches: benches netlist to be simulated on extracted schematic from layout.
     :param Callable evaluate: post-simulation computation, output obtained performances.
     :param Optional[step.Dim] target: target performances, will be compared to obtained performances, defaults to None
-    :param Optional[Callable[[step.Dim], step.Dim]] local_model: function that computes layout parameters from target, defaults to None
+    :param local_model: function that computes layout parameters from target, defaults to None
     :param Optional[step.Dim] dimensions: layout parameters (mandatory if no local_model is provided), defaults to None
     :param Config options: control flow options, defaults to {}
     :param Path run_folder: where flow is run, defaults to Path(".")
@@ -134,6 +134,7 @@ def setup(
     :param run_folder: path of the running folder to create in root_folder. If timestamp is True, the current date and time will be appended to the folder name.
     :param root_folder: folder where the running folder will be created. Default is current folder.
     :param timestamp: whether to append the current date and time to the running folder name. Default is True.
+    :returns Path: path to the configured folder.
     """
     expected_benches = list()
     for bench in benches:
