@@ -1,6 +1,6 @@
 from pathlib import Path
 from haadic.design.layouts.commun_source import layout as cs_layout
-from haadic.design.components.ekv import extract_rf
+from haadic.design.components.ekv import extract_rf, extract_small_l, extract_big_l
 from haadic.core.steps.step import Dim, SimRes
 
 # configuration of the flow.
@@ -26,8 +26,18 @@ def layout(cell, layerstack, shape: Dim):
 
 # List of test benches to run. The flow will look for these files in the current folder
 # and run them with the extracted spice netlist.
-benches = (Path("bench_ac.cir"),)
+benches = (
+    Path("bench.cir"),
+    Path("bench_ac.cir"),
+)
 
 
 def evaluate(bench_data: SimRes, geo: Dim, dis_plot: bool = True) -> dict[str, float]:
-    return extract_rf(bench_data, geo)
+    dim = extract_big_l(bench_data, geo)
+    dim2 = extract_small_l(bench_data, dim)
+    return extract_rf(
+        [
+            bench_data[1],
+        ],
+        dim2,
+    )

@@ -58,24 +58,25 @@ def export_graph(
     :param filename: exported file name.
     :param show_graph: if true, the graph is shown, defaults to False
     """
+    fig, ax = plt.subplots()
     for data in y_datas:
         if isinstance(data.values, float):
-            plt.axhline(data.values, linestyle="--", label=data.label)
+            ax.axhline(data.values, linestyle="--", label=data.label)
         else:
             if x_scale == "log":
-                plt.loglog(x_data.values, data.values, label=data.label)
+                ax.loglog(x_data.values, data.values, label=data.label)
             else:
-                plt.semilogx(x_data.values, data.values, label=data.label)
-    plt.xlabel(x_data.label)
-    plt.legend()
-    plt.grid(True)
+                ax.semilogx(x_data.values, data.values, label=data.label)
+    ax.set_xlabel(x_data.label)
+    ax.legend()
+    ax.grid(True)
     if x_scale == "lin":
         y_top = np.max([np.max(d.values) for d in y_datas])
         y_bot = np.min([np.min(d.values) for d in y_datas])
         plt.ylim(_zoom(y_bot, y_top))
-    plt.savefig(filename)
+    fig.savefig(filename)
     if show_graph:
-        plt.show()
+        fig.show()
     else:
         plt.close()
 

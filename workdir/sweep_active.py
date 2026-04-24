@@ -56,6 +56,7 @@ for key in sweep.keys():
                 [models_params, pd.DataFrame([params])], ignore_index=True
             )
         capacitances = ["cgd", "cbd", "cgs_gb"]
+        models_params["rho_d"] = models_params["gds"] / models_params["gm"]
         models_params.to_csv(f"modele_parameters_{key}_{extract}.csv")
         models_params.filter((key, *capacitances)).plot(x=key, ax=axs["A"], **style)
         axs["A"].set_ylabel("Capacitance (fF)")
@@ -63,11 +64,11 @@ for key in sweep.keys():
         axs["A"].yaxis.set_major_formatter(
             ticker.FuncFormatter(lambda x, pos: f"{x / 1e-15:g}")
         )
-        for param, ref in zip(("rg", "gds", "gm"), "BCD"):
+        for param, ref, unit in zip(("rg", "gds", "rho_d"), "BCD", "ΩS-"):
             models_params.filter((key, param)).plot(
                 x=key, subplots=True, ax=axs[ref], **style, label=extract
             )
-            axs[ref].set_ylabel(f"{param} (Ω)" if param == "rg" else f"{param} (S)")
+            axs[ref].set_ylabel(f"{param} ({unit})")
         axs["A"].set_prop_cycle(None)  # Reset the color cycle
     axs["D"].set_xlabel(key.capitalize() + " (µm)")
     axs["A"].legend([cap + " - " + ext for ext, cap in product(extracts, capacitances)])
