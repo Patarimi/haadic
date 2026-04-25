@@ -40,6 +40,7 @@ class Flow:
      They can be absolute or relative to the running folder.
     :param evaluate: function that evaluates the performances of the circuit. It takes as argument the simulation results of the benches and the dimensions of the layout.
      It should return a dictionary with the performance metrics to optimize as keys and their values as values.
+    :param options: flow options, such as the technology to use, whether to reload the layout if it already exists, and the folder to run the flow in.
     """
 
     layout: Callable[[Cell, LayerStack, step.Dim], Cell]
@@ -128,7 +129,7 @@ def setup(
     timestamp: bool = True,
 ) -> Path:
     """
-    Configure folder and return running folder.
+    Configure running folder and return it.
 
     :param benches: list of bench files to copy in the running folder. Can be absolute or relative to root_folder.
     :param run_folder: path of the running folder to create in root_folder. If timestamp is True, the current date and time will be appended to the folder name.
