@@ -1,11 +1,10 @@
-import pandas as pd
 from haadic.design.layouts.tools import LayerStack
 from haadic.core.steps.step import Dim, SimRes
 from haadic.core.flow import Config
 from klayout.db import Cell
 
 conf = Config()
-conf.flow.techno = "{{ cookiecutter.techno_name }}"
+conf.flow.techno = "{{ cookiecutter.techno_name }}"  # ty: ignore
 
 benches = ("bench.cir",)
 
