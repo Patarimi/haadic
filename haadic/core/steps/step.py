@@ -1,15 +1,12 @@
-from collections.abc import Callable
 import logging
 import os
 from pathlib import Path
 import shutil
-from typing import Optional, Self, Sequence
+from typing import Sequence
 
 import pandas as pd
-from klayout import db
 import pydantic
 from haadic.io.readers.raw import parse_out
-from haadic.design.layouts.tools import LayerStack
 
 default_dict = {"extract": None}
 
@@ -26,29 +23,6 @@ class Dim:
 
 
 SimRes = Sequence[pd.DataFrame]
-
-
-@pydantic.dataclasses.dataclass
-class FlowStep:
-    layout: (
-        Callable[[db.Cell, LayerStack, Dim], None]
-        | Callable[[db.Cell, LayerStack], None]
-    )
-    techno: str
-    benches: Sequence[Path]
-    evaluate: Optional[Callable] = None
-    target: Dim = pydantic.Field(default_factory=Dim)
-    local_model: Optional[Callable[[], Dim]] = None
-    dimensions: Optional[Dim] = None
-    options: dict = pydantic.Field(default_factory=lambda: default_dict)
-
-    @pydantic.model_validator(mode="after")
-    def check_model_or_dimensions(self) -> Self:
-        if self.local_model is None and self.dimensions is None:
-            raise RuntimeError(
-                "Please provide a local_model function or a dimensions dict."
-            )
-        return self
 
 
 def cleanup(folder: str = "", dry_run: bool = False):

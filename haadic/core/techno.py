@@ -158,7 +158,7 @@ def add_reference(
 def get_file(pdk_name: str, file_type: str) -> Path:
     """Utility function to get a configuration file for a given technologie.
 
-    :param str pdk_name: selected technologie (from AvailablePDK).
+    :param str pdk_name: selected technologie (from Available_PDK).
     :param str file_type: software configuration files.
     :return Path: path to the requested files.
     """

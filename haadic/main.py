@@ -13,7 +13,7 @@ from haadic.design.components.ekv import EKV
 log_path = os.path.join(os.path.curdir, "haadic.log")
 if not logging.getLogger().hasHandlers():
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.DEBUG,
         handlers=[
             logging.FileHandler(log_path),
             logging.StreamHandler(),
@@ -56,9 +56,11 @@ def run_cli(
     :param reload_result: If true, try to reload results. Else, run the full flow and recompute everything.
     :return: Nothing.
     """
-    from haadic.core.flow import flow, setup, import_or_default
+    from haadic.core.flow import setup, import_or_default, Flow
 
-    design = import_or_default(Path(design_py))
+    design = import_or_default(Path(design_py), Flow.__dataclass_fields__.keys())
+    design = Flow(**design)
+    input = import_or_default(Path(design_py), {"local_model", "target", "dimensions"})
     sub_folder_p = (
         Path(sub_folder)
         if sub_folder is not None
@@ -66,13 +68,20 @@ def run_cli(
     )
     run_dir = setup(design.benches, sub_folder_p, Path(design_py).parent, timestamp)
     logging.info(f"Running design {design_py} in {run_dir}")
+    design.options.flow.run_dir = run_dir
     if reload_result is not None:
-        design.options["flow"] = {"reload_result": reload_result}
+        design.options.flow.reload = reload_result
     logging.info(
         "design parameters:\n\t"
         + "\n\t".join([f"{k}: {v}" for k, v in design.__dict__.items()])
     )
-    flow(**(design.__dict__), run_folder=run_dir)
+    if "dimensions" in input and len(input["dimensions"].dct) > 0:
+        return design.run_from_dim(input["dimensions"])
+    if "local_model" in input and "target" in input:
+        return design.run_from_target(input["target"], input["local_model"])
+    raise ValueError(
+        "Please provides either a local_model and a target or a set of dimensions."
+    )
 
 
 @app.command(name="extract-ekv")

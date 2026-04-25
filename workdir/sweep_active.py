@@ -7,15 +7,13 @@ from matplotlib import ticker
 from pathlib import Path
 import numpy as np
 
-from haadic.core.flow import flow, Config, setup
-
+from haadic.core.flow import Config, setup, Flow
 from gen_active import layout, benches, evaluate, dimensions
 
-techno = "sky130"
-options: Config = {
-    "extract": "RC",
-    "flow": {"reload_result": True},
-}
+options = Config()
+options.flow.reload = True
+options.flow.techno = "sky130"
+options.extract.level = "RC"
 
 sweep = {
     "width": np.linspace(1, 8, 8),
@@ -25,9 +23,10 @@ for key in sweep.keys():
     fig = plt.figure()
     axs = fig.subplot_mosaic("AB;AC;AD", sharex=True)
     extracts = ["RC", "NoPar"]
+    flow = Flow(layout, benches, evaluate, options)
     for extract in extracts:
         models_params = pd.DataFrame()
-        options["extract"] = extract
+        options.extract.level = extract  # ty: ignore invalid-assignment
         style = {
             "linestyle": "--" if extract == "NoPar" else "-",
             "marker": "o" if extract != "NoPar" else None,
@@ -42,15 +41,8 @@ for key in sweep.keys():
                 Path(f"results/sweep_active/{key[0]}_{dim:.2f}um_{extract}"),
                 timestamp=False,
             )
-            params = flow(
-                techno,
-                layout,
-                benches,
-                evaluate,
-                dimensions=dimensions,
-                run_folder=run_folder,
-                options=options,
-            )
+            options.flow.run_dir = run_folder
+            params = flow.run_from_dim(dimensions)
             params[key] = dim
             models_params = pd.concat(
                 [models_params, pd.DataFrame([params])], ignore_index=True
