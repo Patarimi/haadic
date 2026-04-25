@@ -49,7 +49,7 @@ for key in sweep.keys():
             )
         models_params["rho_d"] = models_params["gds"] / models_params["gm"]
         models_params.to_csv(f"modele_parameters_{key}_{extract}.csv")
-        
+
         capacitances = ["cgd", "cbd", "cgs_gb"]
         models_params.filter((key, *capacitances)).plot(x=key, ax=axs["A"], **style)
         axs["A"].set_ylabel("Capacitance (fF)")

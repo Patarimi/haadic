@@ -151,10 +151,11 @@ def extract_dc_ekv(
 
 def extract_small_l(bench_data: SimRes, geo: Dim) -> Dim:
     ekv = EKV(length=geo["length"], width=geo["width"], n_finger=int(geo["n_finger"]))
+    ekv.i_spec_square = geo["i_spec_square"]
+
     id = bench_data[0]["i(d)"]
     gm = np.gradient(id, bench_data[0]["v(g)"])
     Gm_IC = gm * ut / id
-    ekv.i_spec_square = geo["i_spec_square"]
     ekv.n = med_Xpercentile(1 / Gm_IC, "min")
     lc = ekv.length * ekv.i_spec_square / ekv.ratio / (gm * ekv.n * ut)
     ekv.l_c = med_Xpercentile(lc, "min")
@@ -226,6 +227,10 @@ def extract_rf(bench_data: SimRes, dimensions: Dim, dis_plot: bool = False) -> D
         width=dimensions["width"],
         n_finger=int(dimensions["n_finger"]),
     )
+    for key in ("n", "i_spec_square", "l_c"):
+        if key in dimensions.dct:
+            setattr(ekv, key, dimensions.dct[key])
+
     bench_data[0].to_csv("bench_ac_data.csv")
     y = dict()
     for i in (1, 2):
