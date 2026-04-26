@@ -49,12 +49,10 @@ class Flow:
     options: Config = field(default_factory=Config)
 
     def run_from_dim(self, dimensions: step.Dim):
+        geo = dimensions
+        techno = self.options.flow.techno
+        logging.debug(f"Dimensions: {dimensions}")
         try:
-            geo = dimensions
-            techno = self.options.flow.techno
-            logging.info("No local model provided, using dimensions as geometry.")
-            logging.debug(f"Dimensions: {dimensions}")
-
             starting_dir = os.getcwd()
             os.chdir(self.options.flow.run_dir)
             logging.info("layout generation with geometry: " + str(geo))
