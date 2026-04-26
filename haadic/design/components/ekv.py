@@ -10,7 +10,8 @@ import numpy as np
 
 from haadic.core.tools import eng, export_graph, Data
 from haadic.core.flow import Flow, setup, Config
-from haadic.core.steps.step import SimRes, Dim
+from haadic.core.steps.step import Dim
+from haadic.core.steps.spice_simulation import SimRes
 from haadic.core.techno import Available_PDK, get_file
 from haadic.design.models.constants import ut
 from haadic.design.models.tools import med_Xpercentile

@@ -2,7 +2,6 @@ import logging
 import os
 from pathlib import Path
 import shutil
-from typing import Sequence
 
 import pandas as pd
 import pydantic
@@ -20,9 +19,6 @@ class Dim:
 
     def __setitem__(self, key: str, value: float) -> None:
         self.dct[key] = float(value)
-
-
-SimRes = Sequence[pd.DataFrame]
 
 
 def cleanup(folder: str = "", dry_run: bool = False):

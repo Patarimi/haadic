@@ -12,7 +12,7 @@ from tabulate import tabulate
 import haadic.core.steps.step as step
 from haadic.core.steps.extraction import extract_from_layout, ExtractOption
 from haadic.core.steps.layout_generation import layout_generation
-from haadic.core.steps.spice_simulation import run_bench
+from haadic.core.steps.spice_simulation import run_bench, SimRes
 from haadic.core.techno import Available_PDK
 from haadic.design.layouts.tools import check_diff, LayerStack
 
@@ -45,7 +45,7 @@ class Flow:
 
     layout: Callable[[Cell, LayerStack, step.Dim], Cell]
     benches: Iterable[Path]
-    evaluate: Callable[[step.SimRes, step.Dim], step.Dim]
+    evaluate: Callable[[SimRes, step.Dim], step.Dim]
     options: Config = field(default_factory=Config)
 
     def run_from_dim(self, dimensions: step.Dim):

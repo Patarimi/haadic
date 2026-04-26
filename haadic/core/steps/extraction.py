@@ -12,17 +12,19 @@ class ExtractOption:
 
 def extract_from_layout(
     techno: str, top_cell_name: str = "top", options: ExtractOption = ExtractOption()
-):
+) -> Path:
     """Extract a netlist from a given layout.
 
     :param str techno: _description_
     :param str top_cell_name: _description_, defaults to "top"
     :param ExtractOptions options: _description_, defaults to "RC"
     """
+    output_path = Path(f"{top_cell_name}.cir")
     extract_spice(
         Path(f"{top_cell_name}.gds"),
         get_file(techno, "magic_rc"),
         top_cell_name,
-        Path(f"{top_cell_name}.cir"),
+        output_path,
         options=options.level,
     )
+    return output_path
