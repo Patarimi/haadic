@@ -1,20 +1,19 @@
 from pathlib import Path
-from pydantic import ValidationError
 import pytest
 
 from haadic._config import REF_PATH
 import haadic.core.flow as flow
 
 ref_py = REF_PATH / "design.py"
+wrong_py = REF_PATH / "design wrong.py"
 
 
 def test_import():
     des = flow.import_or_default(Path(ref_py))
-    assert "layout" in des.__dict__
-    with pytest.raises(ValidationError):
-        flow.import_or_default(
-            Path(str(ref_py).replace("design.py", "design wrong.py"))
-        )
+    flow.Flow(**des)
+    wdes = flow.import_or_default(wrong_py)
+    with pytest.raises(TypeError):
+        flow.Flow(**wdes)
 
 
 def test_setup(tmp_path):

@@ -9,7 +9,7 @@ from typing_extensions import Self
 import numpy as np
 
 from haadic.core.tools import eng, export_graph, Data
-from haadic.core.flow import flow, setup
+from haadic.core.flow import Flow, setup, Config
 from haadic.core.steps.step import SimRes, Dim
 from haadic.core.techno import Available_PDK, get_file
 from haadic.design.models.constants import ut
@@ -129,19 +129,20 @@ def extract_dc_ekv(
             run_folder=working_dir / f"ekv_l_{length:0.3f}",
             timestamp=False,
         )
+        options = Config()
+        options.flow.run_dir = run_dir
         dim = Dim({"length": length, "width": 1, "n_finger": 80})
         if length == l_min:
             dim.dct["i_spec_square"] = param[LENGTH_RATIO * l_min]["i_spec_square"]
-        param[length] = flow(
+        flow = Flow(
             layout=layout,
-            techno=techno,
             benches=benches,
-            dimensions=dim,
             evaluate=extract_big_l
             if length == LENGTH_RATIO * l_min
             else extract_small_l,
-            run_folder=run_dir,
+            options=options,
         )
+        param[length] = flow.run_from_dim(dim)
     ekv = EKV(techno=techno, **param[LENGTH_RATIO * l_min].dct)
     ekv.l_c = param[l_min]["l_c"]
     ekv.length = l_min
@@ -150,10 +151,11 @@ def extract_dc_ekv(
 
 def extract_small_l(bench_data: SimRes, geo: Dim) -> Dim:
     ekv = EKV(length=geo["length"], width=geo["width"], n_finger=int(geo["n_finger"]))
+    ekv.i_spec_square = geo["i_spec_square"]
+
     id = bench_data[0]["i(d)"]
     gm = np.gradient(id, bench_data[0]["v(g)"])
     Gm_IC = gm * ut / id
-    ekv.i_spec_square = geo["i_spec_square"]
     ekv.n = med_Xpercentile(1 / Gm_IC, "min")
     lc = ekv.length * ekv.i_spec_square / ekv.ratio / (gm * ekv.n * ut)
     ekv.l_c = med_Xpercentile(lc, "min")
@@ -219,12 +221,16 @@ def extract_big_l(bench_data: SimRes, dimensions: Dim) -> Dim:
     return Dim(dct=ekv_dict)
 
 
-def extract_rf(bench_data: SimRes, dimensions: Dim, dis_plot: bool = False):
+def extract_rf(bench_data: SimRes, dimensions: Dim, dis_plot: bool = False) -> Dim:
     ekv = EKV(
         length=dimensions["length"],
         width=dimensions["width"],
         n_finger=int(dimensions["n_finger"]),
     )
+    for key in ("n", "i_spec_square", "l_c"):
+        if key in dimensions.dct:
+            setattr(ekv, key, dimensions.dct[key])
+
     bench_data[0].to_csv("bench_ac_data.csv")
     y = dict()
     for i in (1, 2):
@@ -285,7 +291,9 @@ def extract_rf(bench_data: SimRes, dimensions: Dim, dis_plot: bool = False):
         dis_plot,
         "lin",
     )
-    return ekv.model
+    ekv_rf = ekv.model
+    ekv_rf.pop("techno")
+    return Dim(dct=ekv_rf)
 
 
 def _gm(id: np.ndarray, l_c: float, n: float, i_ssq: float) -> np.ndarray:

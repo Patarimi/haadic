@@ -14,6 +14,10 @@ def layout(db_cell, layerstack, **geo):
     pass
 
 
+def evaluate(bench_data, **geo):
+    pass
+
+
 benches = [
     Path(dirname(dirname(__file__))) / "ref_files/ref_sky130_fd.cir",
 ]

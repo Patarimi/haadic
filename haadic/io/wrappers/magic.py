@@ -7,7 +7,7 @@ from subprocess import CalledProcessError
 from haadic.io.wrappers.tools import nix_run, to_wsl
 from haadic.core.techno import PDK_INSTALL_DIR
 
-ExtractOptions = Literal["NoPar", "Ronly", "COnly", "RC"]
+ExtractLevels = Literal["NoPar", "Ronly", "COnly", "RC"]
 
 
 def extract_spice(
@@ -15,7 +15,7 @@ def extract_spice(
     rc_file: Path,
     cell_name: str = "None",
     output_path: Path = Path(),
-    options: ExtractOptions = "RC",
+    options: ExtractLevels = "RC",
 ) -> Path:
     """
     Extract the equivalent spice schematic of a gdsii file using magic-vlsi.
