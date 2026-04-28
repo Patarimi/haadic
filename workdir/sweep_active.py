@@ -7,7 +7,8 @@ from matplotlib import ticker
 from pathlib import Path
 import numpy as np
 
-from haadic.core.flow import Config, setup, Flow
+from haadic.core.flow import Config, Flow
+from haadic.core.steps.setup import setup
 from gen_active import layout, benches, evaluate, dimensions
 
 options = Config()

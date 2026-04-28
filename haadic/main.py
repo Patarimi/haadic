@@ -5,7 +5,7 @@ from cyclopts import App
 from pathlib import Path
 
 from haadic._config import DATA_DIR
-from haadic.core.steps.step import cleanup
+from haadic.core.steps.step import cleanup, Dim
 from haadic.core import techno
 from haadic.design.components.ekv import EKV
 
@@ -43,7 +43,7 @@ def run_cli(
     sub_folder: Optional[str] = None,
     timestamp: bool = True,
     reload_result: Optional[bool] = None,
-) -> None:
+) -> Dim:
     """
     Run the full haadic flow :\n
         - Generate the layout using the specified technology.\n
@@ -56,7 +56,9 @@ def run_cli(
     :param reload_result: If true, try to reload results. Else, run the full flow and recompute everything.
     :return: Nothing.
     """
-    from haadic.core.flow import setup, import_or_default, Flow
+    from haadic.core.flow import Flow
+    from haadic.core.steps.setup import setup
+    from haadic.core.steps.step import import_or_default
 
     design = import_or_default(Path(design_py), Flow.__dataclass_fields__.keys())
     design = Flow(**design)
@@ -68,9 +70,9 @@ def run_cli(
     )
     run_dir = setup(design.benches, sub_folder_p, Path(design_py).parent, timestamp)
     logging.info(f"Running design {design_py} in {run_dir}")
-    design.options.flow.run_dir = run_dir
+    design.config.flow.run_dir = run_dir
     if reload_result is not None:
-        design.options.flow.reload = reload_result
+        design.config.flow.reload = reload_result
     logging.info(
         "design parameters:\n\t"
         + "\n\t".join([f"{k}: {v}" for k, v in design.__dict__.items()])

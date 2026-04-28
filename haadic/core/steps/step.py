@@ -1,13 +1,11 @@
+import sys
+from typing import Any, Protocol, Iterable
 import logging
 import os
 from pathlib import Path
 import shutil
 
-import pandas as pd
 import pydantic
-from haadic.io.readers.raw import parse_out
-
-default_dict = {"extract": None}
 
 
 @pydantic.dataclasses.dataclass
@@ -19,6 +17,28 @@ class Dim:
 
     def __setitem__(self, key: str, value: float) -> None:
         self.dct[key] = float(value)
+
+
+class Step(Protocol):
+    """
+    Abstract class for flow step.
+    """
+
+    config: dict[str, Any]
+
+    def run(self, input_file: Path) -> Path: ...
+
+
+def compose(*steps: Step) -> Step:
+    class Compose(Step):
+        config = {type(step): step.config for step in steps}
+
+        def run(self, input_file: Path) -> Path:
+            step = steps[-1]
+            output_file = step.run(input_file)
+            return output_file
+
+    return Compose  # ty : ignore
 
 
 def cleanup(folder: str = "", dry_run: bool = False):
@@ -50,10 +70,6 @@ def cleanup(folder: str = "", dry_run: bool = False):
                 shutil.rmtree(dir_path)
 
 
-def load_result(data_name: Path | str = "bench.raw") -> pd.DataFrame:
-    return parse_out(Path(data_name))
-
-
 def compare_to(perf: dict, target: dict):
     cost = 0
     for key in target:
@@ -64,3 +80,22 @@ def compare_to(perf: dict, target: dict):
             cost += (target[key] - perf[key]) ** 2
 
     return cost
+
+
+def import_or_default(
+    source: Path, to_be_loaded: Iterable[str] | str
+) -> dict[str, Any]:
+    if isinstance(to_be_loaded, str):
+        to_be_loaded = set(to_be_loaded)
+
+    imp_d = dict()
+    for name in to_be_loaded:
+        source = Path(source)
+        if str(source.parent.absolute()) not in sys.path:
+            sys.path.append(str(source.parent.absolute()))
+        src_name = str(source.stem)
+        imp = __import__(src_name, fromlist=name).__dict__
+        if imp.get(name, None) is not None:
+            imp_d[name] = imp[name]
+    logging.debug(f"Imported design from {source}: {imp_d.keys()}")
+    return imp_d

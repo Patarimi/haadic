@@ -9,9 +9,10 @@ from typing_extensions import Self
 import numpy as np
 
 from haadic.core.tools import eng, export_graph, Data
-from haadic.core.flow import Flow, setup, Config
+from haadic.core.flow import Flow, Config
+from haadic.core.steps.setup import setup
 from haadic.core.steps.step import Dim
-from haadic.core.steps.spice_simulation import SimRes
+from haadic.core.steps.post_process import SimRes
 from haadic.core.techno import Available_PDK, get_file
 from haadic.design.models.constants import ut
 from haadic.design.models.tools import med_Xpercentile
@@ -141,7 +142,7 @@ def extract_dc_ekv(
             evaluate=extract_big_l
             if length == LENGTH_RATIO * l_min
             else extract_small_l,
-            options=options,
+            config=options,
         )
         param[length] = flow.run_from_dim(dim)
     ekv = EKV(techno=techno, **param[LENGTH_RATIO * l_min].dct)

@@ -4,7 +4,7 @@ from klayout.db import Cell
 from haadic.design.layouts.commun_source import layout as cs_layout
 from haadic.design.components.ekv import extract_rf, extract_small_l, extract_big_l
 from haadic.core.steps.step import Dim
-from haadic.core.steps.spice_simulation import SimRes
+from haadic.core.steps.post_process import SimRes
 from haadic.core.flow import Config
 
 # configuration of the flow.
@@ -40,9 +40,4 @@ benches = (
 def evaluate(bench_data: SimRes, geo: Dim) -> Dim:
     dim = extract_big_l(bench_data, geo)
     dim2 = extract_small_l(bench_data, dim)
-    return extract_rf(
-        [
-            bench_data[1],
-        ],
-        dim2,
-    )
+    return extract_rf(bench_data, dim2)

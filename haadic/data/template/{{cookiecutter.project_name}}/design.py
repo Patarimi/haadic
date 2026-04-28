@@ -1,6 +1,6 @@
 from haadic.design.layouts.tools import LayerStack
 from haadic.core.steps.step import Dim
-from haadic.core.steps.spice_simulation import SimRes
+from haadic.core.steps.post_process import SimRes
 from haadic.core.flow import Config
 from klayout.db import Cell
 
