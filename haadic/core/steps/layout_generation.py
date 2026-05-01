@@ -1,8 +1,9 @@
 import logging
 from haadic.core.techno import Available_PDK
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Sequence
 from dataclasses import field, dataclass
+import json
 
 import klayout.db as db
 from haadic.design.layouts.tools import LayerStack
@@ -22,16 +23,19 @@ class ConfigLayout:
 @dataclass
 class Layout:
     config: ConfigLayout = field(default_factory=ConfigLayout)
+    input_suffixes: Sequence[str] = field(default_factory=lambda: [".json"])
+    output_suffix: str = ".gds"
 
-    def run(self, geo: Dim) -> Path:
+    def run(self, geo_file: Path) -> Path:
         """
         Generate a layout in the requested techologies with the given parametric layout and the given set of parameters.
 
         :param Dim geo: set of parameters for the layout.
         """
+        geo = json.load(geo_file.open())
         logging.info("layout generation with geometry: " + str(geo))
         top_cell_name = "top"
-        output_file = Path(f"{top_cell_name}.gds")
+        output_file = (geo_file.parent / top_cell_name).with_suffix(self.output_suffix)
         layerstack = LayerStack(self.config.techno)
 
         lib = db.Layout()

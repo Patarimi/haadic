@@ -10,11 +10,11 @@ from haadic.core.steps.step import Dim
 target = Dim({"length": 0.18, "width": 0.18, "n_finger": 1})
 
 
-def layout(db_cell, layerstack, **geo):
-    pass
+def layout(db_cell, layerstack, geo):
+    return db_cell
 
 
-def evaluate(bench_data, **geo):
+def evaluate(bench_data, geo):
     pass
 
 
@@ -23,5 +23,3 @@ benches = [
 ]
 
 techno = "nangate45"
-
-dimensions = Dim({"w_min": 0.12, "w_max": 10.0, "w_step": 0.12})

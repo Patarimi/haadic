@@ -41,7 +41,7 @@ def compose(*steps: Step) -> Step:
     class Compose:
         input_suffixes: Sequence[str]
         output_suffix: str
-        config: dict[str, Any]
+        config: Any
 
         def __init__(self, config: dict[str, Any]):
             self.input_suffixes = steps[0].input_suffixes
