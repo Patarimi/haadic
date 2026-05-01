@@ -1,0 +1,15 @@
+# DC extraction bench
+
+Vgate gate 0 1.8
+Vdrain drain 0 1.8
+Xdut gate drain 0 top
+
+.save i(vdrain) v(gate)
+
+.control
+dc Vgate 0 1.8 0.2
+let d = -i(vdrain)
+let g = v(gate)
+set filetype = ASCII
+write {bench_path} d g
+.endc
