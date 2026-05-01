@@ -1,90 +1,141 @@
-from typing import Literal, Sequence
+from itertools import product
+from pathlib import Path
+from typing import Sequence
 
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-def main(value: str, key: Literal["width", "length"], config: Literal["RC", "NoPar"]):
-    data = pd.read_csv(f"modele_parameters_{key}_{config}.csv")
-    y = data[value].to_numpy()
-    length = data["length"].to_numpy()
-    w = data["width"].to_numpy()
-    return y, w, length
+def load_data(files: Sequence[Path]) -> pd.DataFrame:
+    return pd.concat([pd.read_csv(f) for f in files], ignore_index=True)
 
 
-def evaluate(
-    widths: Sequence[float] | float, lengths: Sequence[float] | float, coeff: np.ndarray
-):
-    return (
-        coeff[0] * widths * lengths
-        + coeff[1] * widths
-        + coeff[2] * lengths
-        + coeff[3]
-        + coeff[4] / widths
-        + coeff[5] / lengths
-        + coeff[6] * widths / lengths
-    )
+def evaluate(y_vals: Sequence[np.ndarray], coeff: np.ndarray):
+    size = len(coeff)
+    return np.sum([coeff[k] * y_vals[k] for k in range(size)], axis=0)
 
 
 def std_dev(a: np.ndarray, b: np.ndarray):
-    return 2 * np.sqrt(np.sum((a - b) ** 2)) / np.mean(np.abs(a + b))
+    return np.sqrt(np.sum((a - b) ** 2)) / np.mean(np.abs(a + b))
 
 
-threshold = 1
+def load_dis() -> pd.DataFrame:
+    keys = {"length", "width"}
+    configs = {
+        "RC",
+    }
+    return load_data(
+        [
+            Path(f"modele_parameters_{key}_{config}.csv")
+            for key, config in product(keys, configs)
+        ]
+    )
+
 
 if __name__ == "__main__":
+    # chargement des données
+    data = load_dis()
+
+    W_f = data["width"]
+    L = data["length"]
+    N_f = data["n_finger"]
+    W = N_f * W_f
+    C = np.ones(len(L))
+    Ze = np.zeros(len(L))
+
+    # definition des équations :
+    mW_L = ([W / L], "y=f(W/L)")
+    mWf_nf = ([W_f / N_f, C], "y=f(Wf/Nf,1)")
+    mWf_Lnf = ([W_f / L * N_f], "y=f(Wf/Lnf)")
+    mWL_W = ([W * L, W], "y=f(WL, W)")
+    mW_L2 = ([W / L / L], "y=f(W/L^2)")
+    mW = ([W], "y=f(W)")
+    m_L = ([1 / L], "y=f(1/L)")
+    mC = ([C], "y=f(A)")
+
     parameters = [
-        "rg",
-        "gds",
-        "gm",
-    ]  # ["cgd", "cbd", "cgs_gb", "rg", "gds", "gm", "rho_d"]
-    for param in parameters:
-        y1, width1, length1 = main(param, "width", "RC")
-        y2, width2, length2 = main(param, "length", "RC")
-        Y = np.append(y1, y2)
-        W = np.append(width1, width2)
-        L = np.append(length1, length2)
-        C = np.ones(len(L))
-        Ze = np.zeros(len(L))
+        (
+            "gm",
+            [
+                mW_L,
+            ],
+        ),
+        ("rg", [mWf_Lnf, mWf_nf]),
+        (
+            "cgs_gb",
+            [
+                mWL_W,
+            ],
+        ),
+        (
+            "cgd",
+            [
+                mWL_W,
+            ],
+        ),
+        (
+            "cbd",
+            [
+                mW,
+            ],
+        ),
+        ("gds", [mW_L, mW_L2]),
+        ("rho_d", [mC, m_L]),
+    ]
+    l_filter = data["length"] == 0.18
+    w_filter = data["width"] == 8
+    for level in {"NoPar", "RC"}:
+        for param, eqs in parameters:
+            Y = data[param]
+            col_name = f"{param}_model"
 
-        mWL = [W * L, W, L, C, Ze, Ze, Ze]
-        mW = [Ze, W, Ze, C, Ze, Ze, Ze]
-        mL = [Ze, Ze, L, C, Ze, Ze, Ze]
-        mWinv = [Ze, Ze, Ze, C, 1 / W, Ze, Ze]
-        mWLinv = [Ze, W, Ze, C, Ze, 1 / L, W / L]
-        models = [mWL, mW, mL, mWinv, mWLinv]
-        labels = ["P(W,L)", "P(W)", "P(L)", "P(1/W)", "P(W, 1/L)"]
-        coeffs = list()
-        for eq in models:
-            X = np.vstack(eq).T
-            c, *_ = np.linalg.lstsq(X, Y)
-            coeffs.append(c)
+            fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
 
-        hyp_set = zip(coeffs, labels)
+            # affichage des résultats de simulation
+            data.loc[l_filter].plot(
+                "width", param, "scatter", label="simulation", ax=ax1, marker="x"
+            )
+            data.loc[w_filter].plot(
+                "length", param, "scatter", label="simulation", ax=ax2, marker="x"
+            )
 
-        fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
+            for model, label in eqs:
+                X = np.vstack(model).T
+                coeff, *_ = np.linalg.lstsq(X, Y)
 
-        # affichage des résultats de simulation
-        ax1.plot(width1, y1, "x", label="simulation")
-        ax2.plot(length2, y2, "x", label="simulation")
+                # affichage du modèle simpliflié
+                data[col_name] = evaluate(model, coeff)
+                P = data[col_name]
+                err = std_dev(P, Y)
+                vars = label.strip(")").split("(")[1].split(",")
+                members: list[str] = []
+                for k in range(len(coeff)):
+                    if vars[k] == "":
+                        mbr = ""
+                    elif vars[k].startswith("1"):
+                        mbr = vars[k].lstrip("1")
+                    else:
+                        mbr = "." + vars[k]
+                    members.append(f"{coeff[k]:.3g}{mbr}")
+                equation = " + ".join(members)
+                err_str = f" err: {100 * err:.1f}%"
+                data.loc[l_filter].plot(
+                    "width", col_name, ax=ax1, label=label + err_str
+                )
+                data.loc[w_filter].plot(
+                    "length", col_name, ax=ax2, label=label + err_str
+                )
+            extract = "schematic" if level == "NoPar" else "extract RC"
+            fig.suptitle(f"{param} = {equation}\n{extract}")
 
-        # affichage du modèle simpliflié
-        for coeff, eq in hyp_set:
-            p1 = evaluate(width1, length1[0], coeff)
-            p2 = evaluate(width2[0], length2, coeff)
-            err1 = std_dev(p1, y1)
-            err2 = std_dev(p2, y2)
-            if err1 > threshold or err2 > threshold:
-                continue
-            ax1.plot(width1, p1, label=f"{eq} err={100 * err1:.1f}%")
-            ax2.plot(length2, p2, label=f"{eq} err={100 * err2:.1f}%")
-
-        # mise en forme des graphs
-        ax1.set_xlabel("Width (µm)")
-        ax2.set_xlabel("Length (µm)")
-        for ax in {ax1, ax2}:
-            ax.legend()
-            ax.set_ylabel(param)
-        plt.tight_layout()
-        plt.show()
+            # mise en forme des graphs
+            ax1.set_xlabel("Width (µm)")
+            ax2.set_xlabel("Length (µm)")
+            for ax in {ax1, ax2}:
+                ax.legend()
+                ax.set_ylabel(param)
+            plt.tight_layout()
+            # plt.show()
+            plt.savefig(f"data_expl/{param}_{extract}.png")
+            plt.close()
