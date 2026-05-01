@@ -26,16 +26,18 @@ class Layout:
     input_suffixes: Sequence[str] = field(default_factory=lambda: [".json"])
     output_suffix: str = ".gds"
 
-    def run(self, geo_file: Path) -> Path:
+    def run(self, input_file: Path) -> Path:
         """
         Generate a layout in the requested techologies with the given parametric layout and the given set of parameters.
 
         :param Dim geo: set of parameters for the layout.
         """
-        geo = json.load(geo_file.open())
+        geo = json.load(input_file.open())
         logging.info("layout generation with geometry: " + str(geo))
         top_cell_name = "top"
-        output_file = (geo_file.parent / top_cell_name).with_suffix(self.output_suffix)
+        output_file = (input_file.parent / top_cell_name).with_suffix(
+            self.output_suffix
+        )
         layerstack = LayerStack(self.config.techno)
 
         lib = db.Layout()

@@ -15,6 +15,7 @@ def test_import(tmp_path):
     [shutil.copy(file, tmp_path) for file in ref_py.parent.glob("*.*")]
     des = import_or_default(Path(ref_py), flow.Flow.__dataclass_fields__.keys())
     fl = flow.Flow(**des)
+    fl.config.run_dir = tmp_path
     fl.run_from_dim(tmp_path / "dim.json")
     wdes = import_or_default(wrong_py, flow.Flow.__dataclass_fields__.keys())
     with pytest.raises(TypeError):

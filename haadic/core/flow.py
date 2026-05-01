@@ -1,7 +1,7 @@
+import shutil
 import logging
 import os
 from pathlib import Path
-import shutil
 from klayout.db import Cell
 from typing import Callable, Iterable
 from dataclasses import dataclass, field
@@ -12,23 +12,17 @@ from haadic.core.steps.extraction import Extract, ConfigExtract
 from haadic.core.steps.layout_generation import Layout, ConfigLayout
 from haadic.core.steps.spice_simulation import BenchSim, ConfigSim
 from haadic.core.steps.post_process import PostProcess, ConfigPostProc, SimRes
+from haadic.io.wrappers.magic import ExtractLevels
 from haadic.core.techno import Available_PDK
-from haadic.design.layouts.tools import check_diff, LayerStack
-
-
-@dataclass
-class FlowOption:
-    techno: Available_PDK = "sky130"
-    reload: bool = True
-    run_dir: Path = Path(".")
+from haadic.design.layouts.tools import LayerStack
 
 
 @dataclass
 class ConfigFlow:
-    flow: FlowOption = field(default_factory=FlowOption)
-    postproc: ConfigPostProc = field(default_factory=ConfigPostProc)
-    extract: ConfigExtract = field(default_factory=ConfigExtract)
-    spice_sim: ConfigSim = field(default_factory=ConfigSim)
+    techno: Available_PDK = "sky130"
+    reload: bool = True
+    run_dir: Path = Path(".")
+    extract_level: ExtractLevels = "RC"
 
 
 @dataclass
@@ -52,43 +46,22 @@ class Flow:
     def run_from_dim(self, dimensions: Path) -> step.Dim:
         try:
             starting_dir = os.getcwd()
-            os.chdir(self.config.flow.run_dir)
-            reload_result = self.config.flow.reload
-            flow = step.compose(
-                Layout(ConfigLayout(self.config.flow.techno, self.layout)),
-            )
-            if Path("top.gds").is_file() and reload_result:
-                logging.info("existing layout found, checking for changes...")
-                shutil.move("top.gds", "old_top.gds")
-                flow.run(dimensions)
-                if not check_diff(Path("old_top.gds"), Path("top.gds")):
-                    logging.info("Changes detected in layout, back to full flow.")
-                    reload_result = False
-                os.remove("old_top.gds")
-            else:
-                logging.info("Running full flow.")
-                if Path("top.gds").is_file():
-                    step.cleanup()
-                flow.run(dimensions)
-                reload_result = False
-            if not reload_result:
-                logging.info("extracting schematic...")
-                ext_step = Extract(self.config.extract)
-                ext_step.run(Path("top.gds"))
-                sim_step = BenchSim(self.config.spice_sim)
-                raw_files = list()
-                for bench in self.benches:
-                    raw_files.append(sim_step.run(bench))
-
-            logging.info("loading simulation results...")
-            data = dict()
-            post_proc = PostProcess(self.config.postproc)
-            for raw in raw_files:
-                for key, value in post_proc.run(raw, dimensions).dct.items():
-                    data[key] = value
-
-            logging.info("evaluate performances")
-            return step.Dim(data)
+            datas = step.Dim()
+            for bench in self.benches:
+                c_bench = shutil.copy(bench, self.config.run_dir / bench.name)
+                flow = step.compose(
+                    Layout(ConfigLayout(self.config.techno, self.layout)),
+                    Extract(
+                        ConfigExtract(self.config.techno, self.config.extract_level)
+                    ),
+                    BenchSim(ConfigSim(c_bench, self.config.techno)),
+                )
+                output_file = flow.run(dimensions)
+                pp = PostProcess(ConfigPostProc(self.evaluate))
+                data = pp.run(output_file)
+                for key in data.dct:
+                    datas[key] = data[key]
+            return datas
         finally:
             os.chdir(starting_dir)
 

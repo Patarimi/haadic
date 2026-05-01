@@ -1,9 +1,11 @@
-from dataclasses import field, dataclass
+from dataclasses import dataclass, field
+from typing import Sequence
 from haadic.io.wrappers.magic import ExtractLevels, extract_spice
 from pathlib import Path
 from haadic.core.techno import get_file, Available_PDK
 
 
+@dataclass
 class ConfigExtract:
     techno: Available_PDK = "sky130"
     level: ExtractLevels = "RC"
@@ -12,19 +14,21 @@ class ConfigExtract:
 @dataclass
 class Extract:
     config: ConfigExtract = field(default_factory=ConfigExtract)
+    input_suffixes: Sequence[str] = field(default_factory=lambda: [".gds"])
+    output_suffix: str = ".cir"
 
-    def run(self, gds_file: Path = Path("top.gds")) -> Path:
+    def run(self, input_file: Path = Path("top.gds")) -> Path:
         """Extract a netlist from a given layout.
 
         :param Path gds_file: input gds file.
         :return Path: extracted spice circuit.
         """
-        output_path = gds_file.with_suffix(".cir")
+        output_path = input_file.with_suffix(".cir")
         rc_file = get_file(self.config.techno, "magic_rc")
         return extract_spice(
-            gds_file,
+            input_file,
             rc_file,
-            gds_file.stem,
+            input_file.stem,
             output_path,
             options=self.config.level,
         )

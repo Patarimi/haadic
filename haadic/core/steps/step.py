@@ -27,7 +27,7 @@ class Step(Protocol):
 
     input_suffixes: Sequence[str]
     output_suffix: str
-    config: dict[str, Any]
+    config: Any
 
     def run(self, input_file: Path) -> Path: ...
 
