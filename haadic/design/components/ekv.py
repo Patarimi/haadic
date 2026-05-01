@@ -253,7 +253,7 @@ def extract_rf(bench_data: SimRes, dimensions: Dim, dis_plot: bool = False) -> D
     ekv.cbd = med_Xpercentile(cbd_simu, "min")
     ekv.cgs_gb = med_Xpercentile(cgs_gb_simu, "min")
     ekv.gds = med_Xpercentile(gds_simu, "min")
-    ekv.rg = 1/med_Xpercentile(rg_simu, "min")
+    ekv.rg = 1 / med_Xpercentile(rg_simu, "min")
     ekv.gm = med_Xpercentile(gm_simu, "max")
     freq = Data(f, "Frequency", "GHz")
     export_graph(
