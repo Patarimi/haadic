@@ -20,7 +20,7 @@ class Extract:
     def run(self, input_file: Path = Path("top.gds")) -> Path:
         """Extract a netlist from a given layout.
 
-        :param Path gds_file: input gds file.
+        :param Path input_file: input gds file.
         :return Path: extracted spice circuit.
         """
         output_path = input_file.with_suffix(".cir")

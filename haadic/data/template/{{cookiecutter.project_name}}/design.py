@@ -1,11 +1,11 @@
 from haadic.design.layouts.tools import LayerStack
 from haadic.core.steps.step import Dim
 from haadic.core.steps.post_process import SimRes
-from haadic.core.flow import Config
+from haadic.core.flow import ConfigFlow
 from klayout.db import Cell
 
-conf = Config()
-conf.flow.techno = "{{ cookiecutter.techno_name }}"  # ty: ignore
+conf = ConfigFlow()
+conf.techno = "{{ cookiecutter.techno_name }}"  # ty:ignore[invalid-assignment]
 
 benches = ("bench.cir",)
 

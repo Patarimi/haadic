@@ -14,7 +14,7 @@ def layout(db_cell, layerstack, geo):
 
 
 def evaluate(bench_data, geo):
-    pass
+    return geo
 
 
 benches = [

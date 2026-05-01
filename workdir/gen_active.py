@@ -26,7 +26,7 @@ dimensions = Dim(
 
 
 def layout(cell: Cell, layerstack: LayerStack, shape: Dim):
-    cs_layout(cell, layerstack, shape)
+    return cs_layout(cell, layerstack, shape)
 
 
 # List of test benches to run. The flow will look for these files in the current folder

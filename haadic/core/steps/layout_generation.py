@@ -30,7 +30,7 @@ class Layout:
         """
         Generate a layout in the requested techologies with the given parametric layout and the given set of parameters.
 
-        :param Dim geo: set of parameters for the layout.
+        :param input_file: set of parameters for the layout.
         """
         geo = json.load(input_file.open())
         logging.info("layout generation with geometry: " + str(geo))
