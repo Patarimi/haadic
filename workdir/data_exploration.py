@@ -55,31 +55,11 @@ if __name__ == "__main__":
     mC = ([C], "y=f(A)")
 
     parameters = [
-        (
-            "gm",
-            [
-                mW_L,
-            ],
-        ),
+        ("gm", [mW_L]),
         ("rg", [mWf_Lnf, mWf_nf]),
-        (
-            "cgs_gb",
-            [
-                mWL_W,
-            ],
-        ),
-        (
-            "cgd",
-            [
-                mWL_W,
-            ],
-        ),
-        (
-            "cbd",
-            [
-                mW,
-            ],
-        ),
+        ("cgs_gb", [mWL_W]),
+        ("cgd", [mWL_W]),
+        ("cbd", [mW]),
         ("gds", [mW_L, mW_L2]),
         ("rho_d", [mC, m_L]),
     ]
