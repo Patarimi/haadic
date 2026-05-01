@@ -10,7 +10,7 @@ from tabulate import tabulate
 import haadic.core.steps.step as step
 from haadic.core.steps.extraction import Extract, ConfigExtract
 from haadic.core.steps.layout_generation import Layout, ConfigLayout
-from haadic.core.steps.spice_simulation import Bench, ConfigSim
+from haadic.core.steps.spice_simulation import BenchSim, ConfigSim
 from haadic.core.steps.post_process import PostProcess, ConfigPostProc, SimRes
 from haadic.core.techno import Available_PDK
 from haadic.design.layouts.tools import check_diff, LayerStack
@@ -24,12 +24,11 @@ class FlowOption:
 
 
 @dataclass
-class Config:
+class ConfigFlow:
     flow: FlowOption = field(default_factory=FlowOption)
-    extract: ConfigExtract = field(default_factory=ConfigExtract)
-    layout: ConfigLayout = field(default_factory=ConfigLayout)
-    spice_sim: ConfigSim = field(default_factory=ConfigSim)
     postproc: ConfigPostProc = field(default_factory=ConfigPostProc)
+    extract: ConfigExtract = field(default_factory=ConfigExtract)
+    spice_sim: ConfigSim = field(default_factory=ConfigSim)
 
 
 @dataclass
@@ -48,18 +47,20 @@ class Flow:
     layout: Callable[[Cell, LayerStack, step.Dim], Cell]
     benches: Iterable[Path]
     evaluate: Callable[[SimRes, step.Dim], step.Dim]
-    config: Config = field(default_factory=Config)
+    config: ConfigFlow = field(default_factory=ConfigFlow)
 
-    def run_from_dim(self, dimensions: step.Dim) -> step.Dim:
+    def run_from_dim(self, dimensions: Path) -> step.Dim:
         try:
             starting_dir = os.getcwd()
             os.chdir(self.config.flow.run_dir)
             reload_result = self.config.flow.reload
-            lay_step = Layout(self.config.layout)
+            flow = step.compose(
+                Layout(ConfigLayout(self.config.flow.techno, self.layout)),
+            )
             if Path("top.gds").is_file() and reload_result:
                 logging.info("existing layout found, checking for changes...")
                 shutil.move("top.gds", "old_top.gds")
-                lay_step.run(dimensions)
+                flow.run(dimensions)
                 if not check_diff(Path("old_top.gds"), Path("top.gds")):
                     logging.info("Changes detected in layout, back to full flow.")
                     reload_result = False
@@ -68,13 +69,13 @@ class Flow:
                 logging.info("Running full flow.")
                 if Path("top.gds").is_file():
                     step.cleanup()
-                lay_step.run(dimensions)
+                flow.run(dimensions)
                 reload_result = False
             if not reload_result:
                 logging.info("extracting schematic...")
                 ext_step = Extract(self.config.extract)
                 ext_step.run(Path("top.gds"))
-                sim_step = Bench(self.config.spice_sim)
+                sim_step = BenchSim(self.config.spice_sim)
                 raw_files = list()
                 for bench in self.benches:
                     raw_files.append(sim_step.run(bench))
