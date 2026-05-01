@@ -1,5 +1,6 @@
+from functools import reduce
 import sys
-from typing import Any, Protocol, Iterable
+from typing import Any, Iterable, Protocol, Sequence
 import logging
 import os
 from pathlib import Path
@@ -21,24 +22,40 @@ class Dim:
 
 class Step(Protocol):
     """
-    Abstract class for flow step.
+    Class storing information for a step.
     """
 
+    input_suffixes: Sequence[str]
+    output_suffix: str
     config: dict[str, Any]
 
     def run(self, input_file: Path) -> Path: ...
 
 
+def validate_input(input_file: Path, valid_suffixes: Sequence[str]) -> None:
+    if input_file.suffix not in valid_suffixes:
+        raise ValueError(f"{input_file} suffix is not in {valid_suffixes}")
+
+
 def compose(*steps: Step) -> Step:
-    class Compose(Step):
-        config = {type(step): step.config for step in steps}
+    class Compose:
+        input_suffixes: Sequence[str]
+        output_suffix: str
+        config: dict[str, Any]
+
+        def __init__(self, config: dict[str, Any]):
+            self.input_suffixes = steps[0].input_suffixes
+            self.output_suffix = steps[-1].output_suffix
+            self.config = config
 
         def run(self, input_file: Path) -> Path:
-            step = steps[-1]
-            output_file = step.run(input_file)
-            return output_file
+            def fun(path: Path, step: Step) -> Path:
+                validate_input(path, step.input_suffixes)
+                return step.run(path)
 
-    return Compose  # ty : ignore
+            return reduce(fun, steps, input_file)
+
+    return Compose({})
 
 
 def cleanup(folder: str = "", dry_run: bool = False):
