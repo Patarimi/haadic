@@ -8,7 +8,7 @@ from haadic.core.techno import get_file, load_pdk, Available_PDK
 
 
 @dataclass
-class Config:
+class ConfigSim:
     bench: Path | str = Path("bench.cir")
     techno: Available_PDK = "sky130"
 
@@ -20,7 +20,7 @@ class Config:
 
 @dataclass
 class BenchSim:
-    config: Config = field(default_factory=Config)
+    config: ConfigSim = field(default_factory=ConfigSim)
 
     def run(self, circuit: Path = Path("top.cir")) -> Path:
         """

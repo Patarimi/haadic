@@ -8,6 +8,6 @@ def test_spice_step(tmp_path):
     bench = shutil.copy(REF_PATH / "bench.cir", tmp_path / "bench.cir")
     top = shutil.copy(REF_PATH / "top.cir", tmp_path / "top.cir")
 
-    sp = spsim.BenchSim(spsim.Config(bench=bench))
+    sp = spsim.BenchSim(spsim.ConfigSim(bench=bench))
     outputfile = sp.run(Path(top))
     assert outputfile.is_file()
