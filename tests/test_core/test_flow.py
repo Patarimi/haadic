@@ -1,11 +1,9 @@
 import shutil
-from pathlib import Path
 import pytest
 
 from haadic._config import REF_PATH
 import haadic.core.flow as flow
 from haadic.core.steps.step import import_or_default
-from haadic.core.steps.setup import setup
 
 ref_py = REF_PATH / "flow" / "design.py"
 wrong_py = REF_PATH / "flow" / "design wrong.py"
@@ -21,10 +19,3 @@ def test_import(tmp_path):
     wdes = import_or_default(wrong_py, flow.Flow.__dataclass_fields__.keys())
     with pytest.raises(TypeError):
         flow.Flow(**wdes)
-
-
-def test_setup(tmp_path):
-    benches = (REF_PATH / "ref_sky130_fd.cir",)
-    run_dir = setup(benches, run_folder=tmp_path, timestamp=False)
-    assert Path(run_dir).is_dir()
-    assert (Path(run_dir) / "ref_sky130_fd.cir").is_file()

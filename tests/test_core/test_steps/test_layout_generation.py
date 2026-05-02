@@ -6,7 +6,7 @@ import haadic.core.steps.layout_generation as lay_gen
 
 
 def test_layout_step(tmp_path):
-    geo_file = shutil.copy(REF_PATH / "flow" / "dim.json", tmp_path / "dim.json")
+    geo_file = shutil.copy(REF_PATH / "dim.json", tmp_path / "dim.json")
     conf = import_or_default(REF_PATH / "flow" / "design.py", ("layout"))
 
     lg = lay_gen.Layout(**conf)

@@ -40,7 +40,7 @@ def smoke_test_cli():
 @app.command(name="run")
 def run_cli(
     design_py: str = "design.py",
-    sub_folder: Optional[str] = None,
+    sub_folder: Path = Path("./results"),
     timestamp: bool = True,
     reload_result: Optional[bool] = None,
 ) -> Dim:
@@ -62,17 +62,13 @@ def run_cli(
 
     design = import_or_default(Path(design_py), Flow.__dataclass_fields__.keys())
     design = Flow(**design)
-    input = import_or_default(Path(design_py), {"local_model", "target", "dimensions"})
-    sub_folder_p = (
-        Path(sub_folder)
-        if sub_folder is not None
-        else Path(design_py).parent / "results" / Path(design_py).stem
-    )
-    run_dir = setup(design.benches, sub_folder_p, Path(design_py).parent, timestamp)
-    logging.info(f"Running design {design_py} in {run_dir}")
-    design.config.run_dir = run_dir
+    logging.info(f"Running design {design_py} in {sub_folder}")
+    design.config.run_dir = sub_folder
+    design.benches = setup(design.benches, Path(design_py).parent)
     if reload_result is not None:
         design.config.reload = reload_result
+
+    input = import_or_default(Path(design_py), {"local_model", "target", "dimensions"})
     logging.info(
         "design parameters:\n\t"
         + "\n\t".join([f"{k}: {v}" for k, v in design.__dict__.items()])

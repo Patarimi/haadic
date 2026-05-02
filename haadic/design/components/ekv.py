@@ -126,19 +126,14 @@ def extract_dc_ekv(
 
     param = dict()
     for length in (LENGTH_RATIO * l_min, l_min):
-        run_dir = setup(
-            benches=benches,
-            run_folder=working_dir / f"ekv_l_{length:0.3f}",
-            timestamp=False,
-        )
         options = ConfigFlow()
-        options.run_dir = run_dir
+        options.run_dir = working_dir / f"ekv_l_{length:0.3f}"
         dim = Dim({"length": length, "width": 1, "n_finger": 80})
         if length == l_min:
             dim.dct["i_spec_square"] = param[LENGTH_RATIO * l_min]["i_spec_square"]
         flow = Flow(
             layout=layout,
-            benches=benches,
+            benches=setup(benches=benches),
             postprocess=(extract_big_l,)
             if length == LENGTH_RATIO * l_min
             else (extract_small_l,),

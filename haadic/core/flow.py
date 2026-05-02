@@ -1,3 +1,4 @@
+import os
 import shutil
 import logging
 from pathlib import Path
@@ -45,6 +46,8 @@ class Flow:
     def run_from_dim(self, dimensions: step.Dim) -> step.Dim:
         datas = step.Dim()
         for bench, eval in zip(self.benches, self.postprocess):
+            if not self.config.run_dir.is_dir():
+                os.makedirs(self.config.run_dir)
             c_bench = shutil.copy(bench, self.config.run_dir / bench.name)
             start = step.init_step(dimensions, self.config.run_dir)
             flow = step.compose(

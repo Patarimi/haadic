@@ -1,7 +1,6 @@
 from itertools import product
 
 from rich import print
-import json
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import ticker
@@ -10,7 +9,7 @@ import numpy as np
 
 from haadic.core.flow import ConfigFlow, Flow
 from haadic.core.steps.setup import setup
-from gen_active import layout, benches, evaluate, dimensions
+from gen_active import layout, benches, postprocess, dimensions
 
 options = ConfigFlow()
 options.reload = True
@@ -24,7 +23,7 @@ for key in sweep.keys():
     fig = plt.figure()
     axs = fig.subplot_mosaic("AB;AC;AD", sharex=True)
     extracts = ["RC", "NoPar"]
-    flow = Flow(layout, benches, evaluate, options)
+    flow = Flow(layout, benches, postprocess, options)
     for extract in extracts:
         models_params = pd.DataFrame()
         options.extract_level = extract  # ty:ignore[invalid-assignment]
@@ -37,14 +36,10 @@ for key in sweep.keys():
                 f"Sweeping {key}={dim:.2f} µm with extract option: [blue]{extract}[/]"
             )
             dimensions[key] = dim
-            run_folder = setup(
-                benches,
-                Path(f"results/sweep_active/{key[0]}_{dim:.2f}um_{extract}"),
-                timestamp=False,
-            )
+            run_folder = Path(f"results/sweep_active/{key[0]}_{dim:.2f}um_{extract}")
+            flow.benches = setup(benches)
             options.run_dir = run_folder
-            json.dump(dimensions.dct, (run_folder / "dim.json").open("w"))
-            params = flow.run_from_dim(run_folder / "dim.json").dct
+            params = flow.run_from_dim(dimensions).dct
             params[key] = dim
             models_params = pd.concat(
                 [models_params, pd.DataFrame([params])], ignore_index=True

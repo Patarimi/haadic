@@ -36,7 +36,7 @@ def extract_dc(bench_data: SimRes, geo: Dim, base_dir: Path) -> Dim:
 
 # List of test benches to run. The flow will look for these files in the current folder
 # and run them with the extracted spice netlist.
-benches = (Path("bench.cir"), Path("bench_ac.cir"))
+benches = (Path("./bench.cir"), Path("./bench_ac.cir"))
 
 
 postprocess = (extract_dc, extract_rf)
