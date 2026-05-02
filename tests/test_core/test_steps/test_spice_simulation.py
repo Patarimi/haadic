@@ -5,7 +5,7 @@ import haadic.core.steps.spice_simulation as spsim
 
 
 def test_spice_step(tmp_path):
-    bench = shutil.copy(REF_PATH / "bench.cir", tmp_path / "bench.cir")
+    bench = Path(shutil.copy(REF_PATH / "bench.cir", tmp_path / "bench.cir"))
     top = shutil.copy(REF_PATH / "top.cir", tmp_path / "top.cir")
 
     sp = spsim.BenchSim(spsim.ConfigSim(bench=bench))

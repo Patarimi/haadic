@@ -48,8 +48,9 @@ class Flow:
         for bench, eval in zip(self.benches, self.postprocess):
             if not self.config.run_dir.is_dir():
                 os.makedirs(self.config.run_dir)
-            if not bench.is_file():
-                c_bench = Path(shutil.copy(bench, self.config.run_dir / bench.name))
+            c_bench = self.config.run_dir / bench.name
+            if not c_bench.is_file():
+                c_bench = Path(shutil.copy(bench, c_bench))
             start = step.init_step(dimensions, self.config.run_dir)
             flow = step.compose(
                 Layout(ConfigLayout(self.config.techno, self.layout)),
