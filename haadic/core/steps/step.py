@@ -1,3 +1,4 @@
+import json
 from functools import reduce
 import sys
 from typing import Any, Iterable, Protocol, Sequence
@@ -32,12 +33,35 @@ class Step(Protocol):
     def run(self, input_file: Path) -> Path: ...
 
 
+def init_step(dimensions: Dim, base_dir: Path) -> Path:
+    output_file = base_dir / "top.json"
+    if output_file.is_file():
+        ref = json.load(output_file.open())
+        if ref == dimensions:
+            return output_file
+    json.dump(dimensions.dct, output_file.open("w"))
+    return output_file
+
+
 def validate_input(input_file: Path, valid_suffixes: Sequence[str]) -> None:
     if input_file.suffix not in valid_suffixes:
         raise ValueError(f"{input_file} suffix is not in {valid_suffixes}")
 
 
-def compose(*steps: Step) -> Step:
+def can_skip(file_a: Path, file_b: Path):
+    if not file_b.is_file():
+        logging.info(f"Output file ({file_b.name}) not found. Running full flow.")
+        return False
+    if file_a.stat().st_mtime >= file_b.stat().st_mtime:
+        logging.info(
+            f"{file_a.name} is newer than {file_b.name}. Update needed, running full flow."
+        )
+        return False
+    logging.info("All right, skip it !")
+    return True
+
+
+def compose(*steps: Step, reload: bool = True) -> Step:
     class Compose:
         input_suffixes: Sequence[str]
         output_suffix: str
@@ -51,6 +75,9 @@ def compose(*steps: Step) -> Step:
         def run(self, input_file: Path) -> Path:
             def fun(path: Path, step: Step) -> Path:
                 validate_input(path, step.input_suffixes)
+                excepted_output = path.with_suffix(step.output_suffix)
+                if reload and can_skip(path, excepted_output):
+                    return excepted_output
                 return step.run(path)
 
             return reduce(fun, steps, input_file)

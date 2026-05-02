@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Literal, Sequence
 from dataclasses import dataclass
 import numpy as np
@@ -46,7 +47,7 @@ class Data:
 def export_graph(
     x_data: Data,
     y_datas: Sequence[Data],
-    filename: str,
+    filename: Path,
     show_graph: bool = False,
     x_scale: Literal["lin", "log"] = "log",
 ):

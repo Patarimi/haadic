@@ -1,20 +1,20 @@
 from itertools import product
 
 from rich import print
+import json
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import ticker
 from pathlib import Path
 import numpy as np
 
-from haadic.core.flow import Config, Flow
+from haadic.core.flow import ConfigFlow, Flow
 from haadic.core.steps.setup import setup
 from gen_active import layout, benches, evaluate, dimensions
 
-options = Config()
-options.flow.reload = True
-options.flow.techno = "sky130"
-options.extract.level = "RC"
+options = ConfigFlow()
+options.reload = True
+options.techno = "sky130"
 
 sweep = {
     "width": np.linspace(1, 8, 8),
@@ -27,7 +27,7 @@ for key in sweep.keys():
     flow = Flow(layout, benches, evaluate, options)
     for extract in extracts:
         models_params = pd.DataFrame()
-        options.extract.level = extract  # ty: ignore invalid-assignment
+        options.extract_level = extract  # ty:ignore[invalid-assignment]
         style = {
             "linestyle": "--" if extract == "NoPar" else "-",
             "marker": "o" if extract != "NoPar" else None,
@@ -42,8 +42,9 @@ for key in sweep.keys():
                 Path(f"results/sweep_active/{key[0]}_{dim:.2f}um_{extract}"),
                 timestamp=False,
             )
-            options.flow.run_dir = run_folder
-            params = flow.run_from_dim(dimensions).dct
+            options.run_dir = run_folder
+            json.dump(dimensions.dct, (run_folder / "dim.json").open("w"))
+            params = flow.run_from_dim(run_folder / "dim.json").dct
             params[key] = dim
             models_params = pd.concat(
                 [models_params, pd.DataFrame([params])], ignore_index=True

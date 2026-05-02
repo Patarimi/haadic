@@ -1,5 +1,4 @@
 # DC extraction bench
-.include ./top.cir
 
 Vgate gate 0 1.8
 Vdrain drain 0 1.8

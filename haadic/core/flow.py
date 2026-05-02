@@ -1,6 +1,5 @@
 import shutil
 import logging
-import os
 from pathlib import Path
 from klayout.db import Cell
 from typing import Callable, Iterable
@@ -11,7 +10,7 @@ import haadic.core.steps.step as step
 from haadic.core.steps.extraction import Extract, ConfigExtract
 from haadic.core.steps.layout_generation import Layout, ConfigLayout
 from haadic.core.steps.spice_simulation import BenchSim, ConfigSim
-from haadic.core.steps.post_process import PostProcess, ConfigPostProc, SimRes
+from haadic.core.steps.post_process import PostProcess, ConfigPostProc, PostProcessFunc
 from haadic.io.wrappers.magic import ExtractLevels
 from haadic.core.techno import Available_PDK
 from haadic.design.layouts.tools import LayerStack
@@ -33,44 +32,38 @@ class Flow:
      It should return a klayout Cell with the generated layout.
     :param benches: list of bench files to run. The flow will look for these files in the current folder and run them with the extracted spice netlist.
      They can be absolute or relative to the running folder.
-    :param evaluate: function that evaluates the performances of the circuit. It takes as argument the simulation results of the benches and the dimensions of the layout.
+    :param postprocess: function that evaluates the performances of the circuit. It takes as argument the simulation results of the benches and the dimensions of the layout.
      It should return a dictionary with the performance metrics to optimize as keys and their values as values.
     :param config: flow options, such as the technology to use, whether to reload the layout if it already exists, and the folder to run the flow in.
     """
 
     layout: Callable[[Cell, LayerStack, step.Dim], Cell]
     benches: Iterable[Path]
-    evaluate: Callable[[SimRes, step.Dim], step.Dim]
+    postprocess: Iterable[PostProcessFunc]
     config: ConfigFlow = field(default_factory=ConfigFlow)
 
-    def run_from_dim(self, dimensions: Path) -> step.Dim:
-        try:
-            starting_dir = os.getcwd()
-            datas = step.Dim()
-            for bench in self.benches:
-                c_bench = shutil.copy(bench, self.config.run_dir / bench.name)
-                flow = step.compose(
-                    Layout(ConfigLayout(self.config.techno, self.layout)),
-                    Extract(
-                        ConfigExtract(self.config.techno, self.config.extract_level)
-                    ),
-                    BenchSim(ConfigSim(c_bench, self.config.techno)),
-                )
-                output_file = flow.run(dimensions)
-                pp = PostProcess(ConfigPostProc(self.evaluate))
-                data = pp.run(output_file)
-                for key in data.dct:
-                    datas[key] = data[key]
-            return datas
-        finally:
-            os.chdir(starting_dir)
+    def run_from_dim(self, dimensions: step.Dim) -> step.Dim:
+        datas = step.Dim()
+        for bench, eval in zip(self.benches, self.postprocess):
+            c_bench = shutil.copy(bench, self.config.run_dir / bench.name)
+            start = step.init_step(dimensions, self.config.run_dir)
+            flow = step.compose(
+                Layout(ConfigLayout(self.config.techno, self.layout)),
+                Extract(ConfigExtract(self.config.techno, self.config.extract_level)),
+                BenchSim(ConfigSim(c_bench, self.config.techno)),
+            )
+            output_file = flow.run(start)
+            pp = PostProcess(ConfigPostProc(eval))
+            data = pp.run(output_file, dimensions)
+            for key in data.dct:
+                datas[key] = data[key]
+        return datas
 
     def run_from_target(
         self,
         target: step.Dim,
         local_model: Callable[[step.Dim], step.Dim],
     ):
-
         perf = self.run_from_dim(local_model(target))
         res = [(key, perf.dct[key], target.dct.get(key, "N/A")) for key in perf.dct]
         logging.info(

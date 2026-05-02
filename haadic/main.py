@@ -70,9 +70,9 @@ def run_cli(
     )
     run_dir = setup(design.benches, sub_folder_p, Path(design_py).parent, timestamp)
     logging.info(f"Running design {design_py} in {run_dir}")
-    design.config.flow.run_dir = run_dir
+    design.config.run_dir = run_dir
     if reload_result is not None:
-        design.config.flow.reload = reload_result
+        design.config.reload = reload_result
     logging.info(
         "design parameters:\n\t"
         + "\n\t".join([f"{k}: {v}" for k, v in design.__dict__.items()])

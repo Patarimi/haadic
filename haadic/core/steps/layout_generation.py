@@ -32,16 +32,14 @@ class Layout:
 
         :param input_file: set of parameters for the layout.
         """
-        geo = json.load(input_file.open())
-        logging.info("layout generation with geometry: " + str(geo))
-        top_cell_name = "top"
-        output_file = (input_file.parent / top_cell_name).with_suffix(
-            self.output_suffix
-        )
+        dimensions = json.load(input_file.open())
+        top_cell_name = input_file.stem
         layerstack = LayerStack(self.config.techno)
+        output_file = input_file.with_suffix(self.output_suffix)
+        logging.info("layout generation with geometry: " + str(dimensions))
 
         lib = db.Layout()
         lib.dbu = layerstack.grid * 1e6
-        self.config.layout(lib.create_cell(top_cell_name), layerstack, geo)
+        self.config.layout(lib.create_cell(top_cell_name), layerstack, dimensions)
         lib.write(str(output_file))
         return output_file
