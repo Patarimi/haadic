@@ -5,6 +5,7 @@ from haadic.io.writers.netlist import Netlist
 from haadic.io.wrappers.ngspice import compute
 from haadic.io.wrappers.tools import to_wsl
 from haadic.core.techno import get_file, load_pdk, Available_PDK
+from haadic.core.steps.step import can_skip
 
 
 @dataclass
@@ -33,6 +34,8 @@ class BenchSim:
         """
         bench_name = self.config.bench
         data_file = Path(bench_name).with_suffix(self.output_suffix)
+        if can_skip(data_file, Path(self.config.bench)):
+            return data_file
         techno = self.config.techno
 
         spice = Netlist().load(bench_name)
