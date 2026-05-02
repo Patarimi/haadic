@@ -54,7 +54,7 @@ class Flow:
                 Layout(ConfigLayout(self.config.techno, self.layout)),
                 Extract(ConfigExtract(self.config.techno, self.config.extract_level)),
                 BenchSim(ConfigSim(c_bench, self.config.techno)),
-                reload=self.config.reload
+                reload=self.config.reload,
             )
             output_file = flow.run(start)
             pp = PostProcess(ConfigPostProc(eval))
