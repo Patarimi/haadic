@@ -1,14 +1,13 @@
+import json
+from functools import reduce
+import sys
+from typing import Any, Iterable, Protocol, Sequence
 import logging
 import os
 from pathlib import Path
 import shutil
-from typing import Sequence
 
-import pandas as pd
 import pydantic
-from haadic.io.readers.raw import parse_out
-
-default_dict = {"extract": None}
 
 
 @pydantic.dataclasses.dataclass
@@ -22,7 +21,68 @@ class Dim:
         self.dct[key] = float(value)
 
 
-SimRes = Sequence[pd.DataFrame]
+class Step(Protocol):
+    """
+    Class storing information for a step.
+    """
+
+    input_suffixes: Sequence[str]
+    output_suffix: str
+    config: Any
+
+    def run(self, input_file: Path) -> Path: ...
+
+
+def init_step(dimensions: Dim, base_dir: Path) -> Path:
+    output_file = base_dir / "top.json"
+    if output_file.is_file():
+        with output_file.open("r") as f:
+            ref = json.load(f)
+        if ref == dimensions.dct:
+            return output_file
+    with output_file.open("w") as f:
+        json.dump(dimensions.dct, f)
+    return output_file
+
+
+def validate_input(input_file: Path, valid_suffixes: Sequence[str]) -> None:
+    if input_file.suffix not in valid_suffixes:
+        raise ValueError(f"{input_file} suffix is not in {valid_suffixes}")
+
+
+def can_skip(input_file: Path, output_file: Path):
+    if not output_file.is_file():
+        return False
+    if input_file.stat().st_mtime >= output_file.stat().st_mtime:
+        logging.info(
+            f"{input_file.name} is newer than {output_file.name}. Update needed, running full flow."
+        )
+        return False
+    return True
+
+
+def compose(*steps: Step, reload: bool = True) -> Step:
+    class Compose:
+        input_suffixes: Sequence[str]
+        output_suffix: str
+        config: Any
+
+        def __init__(self, config: dict[str, Any]):
+            self.input_suffixes = steps[0].input_suffixes
+            self.output_suffix = steps[-1].output_suffix
+            self.config = config
+
+        def run(self, input_file: Path) -> Path:
+            def fun(path: Path, step: Step) -> Path:
+                validate_input(path, step.input_suffixes)
+                excepted_output = path.with_suffix(step.output_suffix)
+                if self.config["reload"] and can_skip(path, excepted_output):
+                    return excepted_output
+                return step.run(path)
+
+            return reduce(fun, steps, input_file)
+
+    return Compose({"reload": reload})
 
 
 def cleanup(folder: str = "", dry_run: bool = False):
@@ -54,10 +114,6 @@ def cleanup(folder: str = "", dry_run: bool = False):
                 shutil.rmtree(dir_path)
 
 
-def load_result(data_name: Path | str = "bench.raw") -> pd.DataFrame:
-    return parse_out(Path(data_name))
-
-
 def compare_to(perf: dict, target: dict):
     cost = 0
     for key in target:
@@ -68,3 +124,22 @@ def compare_to(perf: dict, target: dict):
             cost += (target[key] - perf[key]) ** 2
 
     return cost
+
+
+def import_or_default(
+    source: Path, to_be_loaded: Iterable[str] | str
+) -> dict[str, Any]:
+    if isinstance(to_be_loaded, str):
+        to_be_loaded = set(to_be_loaded)
+
+    imp_d = dict()
+    for name in to_be_loaded:
+        source = Path(source)
+        if str(source.parent.absolute()) not in sys.path:
+            sys.path.append(str(source.parent.absolute()))
+        src_name = str(source.stem)
+        imp = __import__(src_name, fromlist=name).__dict__
+        if imp.get(name, None) is not None:
+            imp_d[name] = imp[name]
+    logging.debug(f"Imported design from {source}: {imp_d.keys()}")
+    return imp_d

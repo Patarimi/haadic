@@ -1,3 +1,4 @@
+from haadic.io.wrappers.tools import to_wsl
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal, Optional, Self
@@ -83,10 +84,23 @@ class Netlist:
         """
         Add a library definition in the netlist.
         """
-        item = [".lib", "'" + str(lib_path) + "'"]
+        if self.is_in_other(".lib", Path(lib_path)):
+            return None
+        item = [".lib", "'" + to_wsl(lib_path) + "'"]
         if section is not None:
             item.append(section)
         self.add_other(" ".join(item))
+
+    def add_include(self, include_path: Path | str) -> None:
+        if self.is_in_other(".include", Path(include_path)):
+            return None
+        self.add_other(".include " + to_wsl(include_path))
+
+    def is_in_other(self, key: str, file: Path) -> bool:
+        for oth in self.others:
+            if oth.startswith(key) and str(Path(file).stem) in oth:
+                return True
+        return False
 
     def spice(self):
         """

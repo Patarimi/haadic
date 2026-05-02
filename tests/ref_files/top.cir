@@ -1,0 +1,13 @@
+* NGSPICE file created from top.ext - technology: sky130A
+
+.subckt nmos_4 g0 g1 g2 g3 dr0 dr1 dr2 dr3 dr4 0
+X0 dr4 g3 dr3 0 sky130_fd_pr__nfet_01v8 ad=3.4 pd=16.85 as=1.7 ps=8.425 w=8 l=0.18
+X1 dr3 g2 dr2 0 sky130_fd_pr__nfet_01v8 ad=1.7 pd=8.425 as=1.7 ps=8.425 w=8 l=0.18
+X2 dr2 g1 dr1 0 sky130_fd_pr__nfet_01v8 ad=1.7 pd=8.425 as=1.7 ps=8.425 w=8 l=0.18
+X3 dr1 g0 dr0 0 sky130_fd_pr__nfet_01v8 ad=1.7 pd=8.425 as=3.4 ps=16.85 w=8 l=0.18
+.ends
+
+.subckt top gate drain gnd
+Xnmos_4_0 gate gate gate gate drain gnd drain gnd drain 0 nmos_4
+.ends
+

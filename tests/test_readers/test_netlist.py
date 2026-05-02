@@ -1,3 +1,4 @@
+from haadic.io.wrappers.tools import to_wsl
 import filecmp
 
 from haadic._config import REF_PATH
@@ -18,10 +19,10 @@ def test_netlist(tmp_path):
     assert net.spice() == "* test\nC5 gnd 5 5.000 pF\n"
     net.add_control("run")
     net.add_lib("test.lib")
-    expected_spice = """* test
+    expected_spice = f"""* test
 C5 gnd 5 5.000 pF
 
-.lib 'test.lib'
+.lib '{to_wsl("test.lib")}'
 
 .control
 run

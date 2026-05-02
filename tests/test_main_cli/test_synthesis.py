@@ -1,3 +1,4 @@
+from pathlib import Path
 from matplotlib import use
 
 from haadic.main import run_cli, smoke_test_cli, extract_ekv_cli
@@ -24,8 +25,12 @@ def test_run_extract_ekv():
 
 
 def test_run(tmp_path):
-    run_cli(design_py="./workdir/gen_active.py", sub_folder=tmp_path, timestamp=False)
+    run_cli(
+        design_py=Path("./workdir/gen_active.py"), sub_folder=tmp_path, timestamp=False
+    )
     assert (tmp_path / "top.gds").is_file()
     assert (tmp_path / "bench_ac_data.csv").is_file()
     # Rerun to check reload_result
-    run_cli(design_py="./workdir/gen_active.py", sub_folder=tmp_path, timestamp=False)
+    run_cli(
+        design_py=Path("./workdir/gen_active.py"), sub_folder=tmp_path, timestamp=False
+    )

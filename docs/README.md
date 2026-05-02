@@ -19,26 +19,30 @@ uvx --with="git+https://github.com/Patarimi/haadic.git" haadic smoke-test
 
 ## Design flow
 
-Starting from the specifications written in a python file, the following flow is run [see](#setup-a-new-project).
+The following flow is run using the informations given in a _design_ python file (See [setup-a-new-project](#setup-a-new-project)).
 
 ```mermaid
 flowchart TD
-    start1 -- "specifications" --> app["Physical Model
-(device.models)"]
-    start2 -- "dimensions" --> pl
-    app --dimensions --> pl["Parametric Layout
-(klayout + device.layouts)"]
-    pl --"geometries (.gdsII)" --> be_ext["RC extraction up to Mx
-(Magic-VLSI)"]
-    pl -."geometries (.gdsII)" .-> fe_ext["3D simulation from Mx
-(OpenEMS)"]
-    fe_ext -. "touchstone (.sNp)" .-> sim["Spice simulation
-(NGSpice)"]
-    be_ext --"netlist (.cir)" --> sim
-    sim --"raw simulation (dataframe)" --> spec["Performances Evaluation
-    (device.evaluate)"]
-    spec --"performances (.csv)" --> stop
+    s1{Start #2}
+    s2{Start #1}
+    app["Physical Model
+(design:local_model)"]
+    pl["Parametric Layout
+(klayout + design:layout)"]
+    be_ext["RC extraction
+(steps.extraction + Magic-VLSI)"]
+    sim["Spice simulation
+(steps.spice_sim + NGSpice)"]
+    spec["Performances Evaluation
+(design:evaluate)"]
 
+    s1 -- "design:specifications" --> app
+    s2 -- "design:dimensions" --> pl
+    app --"dimensions (step.Dim)" --> pl
+    pl --"geometries (.gds)" --> be_ext
+    be_ext --"netlist (.cir)" --> sim
+    sim --"raw simulation (step.SimRes)" --> spec
+    spec --"performances (.csv)" --> st{stop}
 ```
 
 When finished, a _.gds_ file is available for further design and a _.csv_ file with the performances of the design.
@@ -50,9 +54,11 @@ A techno.yml file can be created in the working dir or the haadic root with the 
 ```yaml
 techno_name:
   base_dir: path to the pdk directory root
-  layer_map: path to the layermap (relative to the base_dir)
+  layermap: path to the layermap (relative to the base_dir)
   techlef: path to the tlef file
   magic_rc: path to the configuration file of magic
+  lib_spice: path to the spice model library
+  section: name of the section to import in the spice library typical
   source_url: url to be use for download (set to "ciel" for ciel installation)
   version: version id (only required if source_url is set to "ciel")
 ```
@@ -61,7 +67,7 @@ A techno.yml file with three open source PDK and a mock PDK are already supplied
 
 ## Setup a new Project :
 
-A directory with required files can be generated using :
+A directory with the required files can be generated using :
 
 ```shell
 haadic new

@@ -5,7 +5,7 @@ from cyclopts import App
 from pathlib import Path
 
 from haadic._config import DATA_DIR
-from haadic.core.steps.step import cleanup
+from haadic.core.steps.step import cleanup, Dim
 from haadic.core import techno
 from haadic.design.components.ekv import EKV
 
@@ -39,11 +39,11 @@ def smoke_test_cli():
 
 @app.command(name="run")
 def run_cli(
-    design_py: str = "design.py",
-    sub_folder: Optional[str] = None,
+    design_py: Path = Path("design.py"),
+    sub_folder: Optional[Path] = None,
     timestamp: bool = True,
     reload_result: Optional[bool] = None,
-) -> None:
+) -> Dim:
     """
     Run the full haadic flow :\n
         - Generate the layout using the specified technology.\n
@@ -56,21 +56,21 @@ def run_cli(
     :param reload_result: If true, try to reload results. Else, run the full flow and recompute everything.
     :return: Nothing.
     """
-    from haadic.core.flow import setup, import_or_default, Flow
+    from haadic.core.flow import Flow
+    from haadic.core.steps.setup import setup
+    from haadic.core.steps.step import import_or_default
 
-    design = import_or_default(Path(design_py), Flow.__dataclass_fields__.keys())
+    design = import_or_default(design_py, Flow.__dataclass_fields__.keys())
     design = Flow(**design)
-    input = import_or_default(Path(design_py), {"local_model", "target", "dimensions"})
-    sub_folder_p = (
-        Path(sub_folder)
-        if sub_folder is not None
-        else Path(design_py).parent / "results" / Path(design_py).stem
+    design.config.run_dir = (
+        sub_folder if sub_folder is not None else Path("./results") / design_py.stem
     )
-    run_dir = setup(design.benches, sub_folder_p, Path(design_py).parent, timestamp)
-    logging.info(f"Running design {design_py} in {run_dir}")
-    design.options.flow.run_dir = run_dir
+    logging.info(f"Running design {design_py} in {design.config.run_dir}")
+    design.benches = setup(design.benches, Path(design_py).parent)
     if reload_result is not None:
-        design.options.flow.reload = reload_result
+        design.config.reload = reload_result
+
+    input = import_or_default(Path(design_py), {"local_model", "target", "dimensions"})
     logging.info(
         "design parameters:\n\t"
         + "\n\t".join([f"{k}: {v}" for k, v in design.__dict__.items()])

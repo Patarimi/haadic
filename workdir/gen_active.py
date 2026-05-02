@@ -3,14 +3,15 @@ from pathlib import Path
 from klayout.db import Cell
 from haadic.design.layouts.commun_source import layout as cs_layout
 from haadic.design.components.ekv import extract_rf, extract_small_l, extract_big_l
-from haadic.core.steps.step import Dim, SimRes
-from haadic.core.flow import Config
+from haadic.core.steps.step import Dim
+from haadic.core.steps.post_process import SimRes
+from haadic.core.flow import ConfigFlow
 
 # configuration of the flow.
-options = Config()
-options.extract.level = "RC"
+options = ConfigFlow()
+options.extract_level = "RC"
 # Technology selection and model initialization
-options.flow.techno = "sky130"
+options.techno = "sky130"
 
 
 # Dimension of the layout to be generated. The layout function will be called with these dimensions as argument.
@@ -25,23 +26,17 @@ dimensions = Dim(
 
 
 def layout(cell: Cell, layerstack: LayerStack, shape: Dim):
-    cs_layout(cell, layerstack, shape)
+    return cs_layout(cell, layerstack, shape)
+
+
+def extract_dc(bench_data: SimRes, geo: Dim, base_dir: Path) -> Dim:
+    dim = extract_big_l(bench_data, geo, base_dir)
+    return extract_small_l(bench_data, dim, base_dir)
 
 
 # List of test benches to run. The flow will look for these files in the current folder
 # and run them with the extracted spice netlist.
-benches = (
-    Path("bench.cir"),
-    Path("bench_ac.cir"),
-)
+benches = (Path("./bench.cir"), Path("./bench_ac.cir"))
 
 
-def evaluate(bench_data: SimRes, geo: Dim) -> Dim:
-    dim = extract_big_l(bench_data, geo)
-    dim2 = extract_small_l(bench_data, dim)
-    return extract_rf(
-        [
-            bench_data[1],
-        ],
-        dim2,
-    )
+postprocess = (extract_dc, extract_rf)

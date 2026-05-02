@@ -9,8 +9,10 @@ from typing_extensions import Self
 import numpy as np
 
 from haadic.core.tools import eng, export_graph, Data
-from haadic.core.flow import Flow, setup, Config
-from haadic.core.steps.step import SimRes, Dim
+from haadic.core.flow import Flow, ConfigFlow
+from haadic.core.steps.setup import setup
+from haadic.core.steps.step import Dim
+from haadic.core.steps.post_process import SimRes
 from haadic.core.techno import Available_PDK, get_file
 from haadic.design.models.constants import ut
 from haadic.design.models.tools import med_Xpercentile
@@ -124,23 +126,18 @@ def extract_dc_ekv(
 
     param = dict()
     for length in (LENGTH_RATIO * l_min, l_min):
-        run_dir = setup(
-            benches=benches,
-            run_folder=working_dir / f"ekv_l_{length:0.3f}",
-            timestamp=False,
-        )
-        options = Config()
-        options.flow.run_dir = run_dir
+        options = ConfigFlow()
+        options.run_dir = working_dir / f"ekv_l_{length:0.3f}"
         dim = Dim({"length": length, "width": 1, "n_finger": 80})
         if length == l_min:
             dim.dct["i_spec_square"] = param[LENGTH_RATIO * l_min]["i_spec_square"]
         flow = Flow(
             layout=layout,
-            benches=benches,
-            evaluate=extract_big_l
+            benches=setup(benches=benches),
+            postprocess=(extract_big_l,)
             if length == LENGTH_RATIO * l_min
-            else extract_small_l,
-            options=options,
+            else (extract_small_l,),
+            config=options,
         )
         param[length] = flow.run_from_dim(dim)
     ekv = EKV(techno=techno, **param[LENGTH_RATIO * l_min].dct)
@@ -149,12 +146,12 @@ def extract_dc_ekv(
     return ekv
 
 
-def extract_small_l(bench_data: SimRes, geo: Dim) -> Dim:
+def extract_small_l(bench_data: SimRes, geo: Dim, base_dir: Path) -> Dim:
     ekv = EKV(length=geo["length"], width=geo["width"], n_finger=int(geo["n_finger"]))
     ekv.i_spec_square = geo["i_spec_square"]
 
-    id = bench_data[0]["i(d)"]
-    gm = np.gradient(id, bench_data[0]["v(g)"])
+    id = bench_data["i(d)"]
+    gm = np.gradient(id, bench_data["v(g)"])
     Gm_IC = gm * ut / id
     ekv.n = med_Xpercentile(1 / Gm_IC, "min")
     lc = ekv.length * ekv.i_spec_square / ekv.ratio / (gm * ekv.n * ut)
@@ -171,14 +168,14 @@ def extract_small_l(bench_data: SimRes, geo: Dim) -> Dim:
                 f"l_c={eng(ekv.l_c * 1e-6, 0)}m",
             ),
         ],
-        "gm_ic.png",
+        base_dir / "gm_ic.png",
     )
     export_graph(
         Data(ekv.ic(id), "IC", "-"),
         [
-            Data(bench_data[0]["v(g)"], "V_g", "V"),
+            Data(bench_data["v(g)"], "V_g", "V"),
         ],
-        "ic_vs_vg.png",
+        base_dir / "ic_vs_vg.png",
         x_scale="lin",
     )
     ekv_dict = ekv.model
@@ -186,7 +183,7 @@ def extract_small_l(bench_data: SimRes, geo: Dim) -> Dim:
     return Dim(dct=ekv_dict)
 
 
-def extract_big_l(bench_data: SimRes, dimensions: Dim) -> Dim:
+def extract_big_l(bench_data: SimRes, dimensions: Dim, base_dir: Path) -> Dim:
     """
     Extract the EKV model parameters from the bench data for a long channel transistor.
     The parameters extracted are n and i_spec. (lambda_c is assumed to be 0).
@@ -196,9 +193,9 @@ def extract_big_l(bench_data: SimRes, dimensions: Dim) -> Dim:
         width=dimensions["width"],
         n_finger=int(dimensions["n_finger"]),
     )
-    logging.info(bench_data[0].head())
-    id = bench_data[0]["i(d)"]
-    gm = np.gradient(id, bench_data[0]["v(g)"])
+    logging.info(bench_data.head())
+    id = bench_data["i(d)"]
+    gm = np.gradient(id, bench_data["v(g)"])
     Gm_IC = gm * ut / id
     ekv.n = med_Xpercentile(1 / Gm_IC, "min")
     i_spec_square = (gm * ekv.n * ut) ** 2 / id * ekv.ratio
@@ -214,14 +211,19 @@ def extract_big_l(bench_data: SimRes, dimensions: Dim) -> Dim:
                 "i_spec={eng(ekv.i_spec_square, 0)}A",
             ),
         ],
-        "gm_ic.png",
+        base_dir / "gm_ic.png",
     )
     ekv_dict = ekv.model
     ekv_dict.pop("techno")
     return Dim(dct=ekv_dict)
 
 
-def extract_rf(bench_data: SimRes, dimensions: Dim, dis_plot: bool = False) -> Dim:
+def extract_rf(
+    bench_data: SimRes,
+    dimensions: Dim,
+    base_dir: Path = Path("."),
+    dis_plot: bool = False,
+) -> Dim:
     ekv = EKV(
         length=dimensions["length"],
         width=dimensions["width"],
@@ -231,13 +233,13 @@ def extract_rf(bench_data: SimRes, dimensions: Dim, dis_plot: bool = False) -> D
         if key in dimensions.dct:
             setattr(ekv, key, dimensions.dct[key])
 
-    bench_data[0].to_csv("bench_ac_data.csv")
+    bench_data.to_csv(base_dir / "bench_ac_data.csv")
     y = dict()
     for i in (1, 2):
         for j in (1, 2):
             port = f"y_{i}_{j}"
-            y[f"{i}{j}"] = bench_data[0][port]
-    f = np.real(bench_data[0]["frequency"])
+            y[f"{i}{j}"] = bench_data[port]
+    f = np.real(bench_data["frequency"])
     omega = 2 * np.pi * f
     cg_simu = np.imag(y["11"]) / omega
     cgd_simu = -np.imag(y["12"]) / omega
@@ -266,28 +268,28 @@ def extract_rf(bench_data: SimRes, dimensions: Dim, dis_plot: bool = False) -> D
             Data(ekv.cgd * 1e15, r"$C_{GD}$", "model"),
             Data(ekv.cgs_gb * 1e15, r"$C_{GS+GB}$", "model"),
         ],
-        "rf_extract_capa.png",
+        base_dir / "rf_extract_capa.png",
         dis_plot,
         "lin",
     )
     export_graph(
         freq,
         [Data(rg_simu, "Rg", "sim. spice"), Data(ekv.rg, "Rg", "model")],
-        "rf_extract_rg.png",
+        base_dir / "rf_extract_rg.png",
         dis_plot,
         "lin",
     )
     export_graph(
         freq,
         [Data(gm_simu, "Rg", "sim. spice"), Data(ekv.gm, "Rg", "model")],
-        "rf_extract_gm.png",
+        base_dir / "rf_extract_gm.png",
         dis_plot,
         "lin",
     )
     export_graph(
         freq,
         [Data(gds_simu, "Rg", "sim. spice"), Data(ekv.gds, "Rg", "model")],
-        "rf_extract_gds.png",
+        base_dir / "rf_extract_gds.png",
         dis_plot,
         "lin",
     )
