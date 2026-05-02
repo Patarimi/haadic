@@ -32,7 +32,8 @@ class Layout:
 
         :param input_file: set of parameters for the layout.
         """
-        dimensions = json.load(input_file.open())
+        with input_file.open() as f:
+            dimensions = json.load(f)
         top_cell_name = input_file.stem
         layerstack = LayerStack(self.config.techno)
         output_file = input_file.with_suffix(self.output_suffix)

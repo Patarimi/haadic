@@ -1,3 +1,4 @@
+from haadic._config import REF_PATH
 import pytest
 from typing import Sequence, Any
 import dataclasses
@@ -41,3 +42,16 @@ def test_compose(tmp_path):
     with pytest.raises(ValueError):
         MockWrong = step.compose(M2, M1)
         MockWrong.run(tmp_path / "test.csv")
+
+
+def test_can_skip():
+    step.can_skip(Path(".gitignore"), Path("pyproject.toml"))
+
+
+def test_init_step(tmp_path):
+    dim = step.Dim({"width": 4, "length": 0.5, "n_finger": 8})
+    step.init_step(dim, tmp_path)
+    input_file = REF_PATH / "top.json"
+    mod_time = input_file.stat().st_mtime
+    step.init_step(dim, input_file.parent)
+    assert mod_time == input_file.stat().st_mtime

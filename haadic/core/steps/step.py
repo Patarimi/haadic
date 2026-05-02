@@ -36,10 +36,12 @@ class Step(Protocol):
 def init_step(dimensions: Dim, base_dir: Path) -> Path:
     output_file = base_dir / "top.json"
     if output_file.is_file():
-        ref = json.load(output_file.open())
-        if ref == dimensions:
+        with output_file.open("r") as f:
+            ref = json.load(f)
+        if ref == dimensions.dct:
             return output_file
-    json.dump(dimensions.dct, output_file.open("w"))
+    with output_file.open("w") as f:
+        json.dump(dimensions.dct, f)
     return output_file
 
 
