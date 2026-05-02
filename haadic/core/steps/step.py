@@ -50,16 +50,14 @@ def validate_input(input_file: Path, valid_suffixes: Sequence[str]) -> None:
         raise ValueError(f"{input_file} suffix is not in {valid_suffixes}")
 
 
-def can_skip(file_a: Path, file_b: Path):
-    if not file_b.is_file():
-        logging.info(f"Output file ({file_b.name}) not found. Running full flow.")
+def can_skip(input_file: Path, output_file: Path):
+    if not output_file.is_file():
         return False
-    if file_a.stat().st_mtime >= file_b.stat().st_mtime:
+    if input_file.stat().st_mtime >= output_file.stat().st_mtime:
         logging.info(
-            f"{file_a.name} is newer than {file_b.name}. Update needed, running full flow."
+            f"{input_file.name} is newer than {output_file.name}. Update needed, running full flow."
         )
         return False
-    logging.info("All right, skip it !")
     return True
 
 

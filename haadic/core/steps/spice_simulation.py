@@ -10,7 +10,7 @@ from haadic.core.steps.step import can_skip
 
 @dataclass
 class ConfigSim:
-    bench: Path | str = Path("bench.cir")
+    bench: Path = Path("bench.cir")
     techno: Available_PDK = "sky130"
 
     def __post_init__(self) -> Self:
@@ -34,7 +34,7 @@ class BenchSim:
         """
         bench_name = self.config.bench
         data_file = Path(bench_name).with_suffix(self.output_suffix)
-        if can_skip(data_file, Path(self.config.bench)):
+        if can_skip(self.config.bench, data_file):
             return data_file
         techno = self.config.techno
 
