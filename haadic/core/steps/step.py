@@ -78,13 +78,13 @@ def compose(*steps: Step, reload: bool = True) -> Step:
             def fun(path: Path, step: Step) -> Path:
                 validate_input(path, step.input_suffixes)
                 excepted_output = path.with_suffix(step.output_suffix)
-                if reload and can_skip(path, excepted_output):
+                if self.config["reload"] and can_skip(path, excepted_output):
                     return excepted_output
                 return step.run(path)
 
             return reduce(fun, steps, input_file)
 
-    return Compose({})
+    return Compose({"reload": reload})
 
 
 def cleanup(folder: str = "", dry_run: bool = False):
