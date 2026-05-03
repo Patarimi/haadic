@@ -1,22 +1,19 @@
+from functools import partial
+import shutil
 from dataclasses import dataclass, asdict
 import json
 import logging
 from pathlib import Path
-import shutil
-from typing import get_args, Optional
-from typing_extensions import Self
+from typing import Optional, Self, get_args
 
 import numpy as np
 
-from haadic.core.tools import eng, export_graph, Data
 from haadic.core.flow import Flow, ConfigFlow
 from haadic.core.steps.setup import setup
 from haadic.core.steps.step import Dim
-from haadic.core.steps.post_process import SimRes
 from haadic.core.techno import Available_PDK, get_file
-from haadic.design.models.constants import ut
-from haadic.design.models.tools import med_Xpercentile
 from haadic.design.layouts.commun_source import layout
+from haadic.design.post_processors.ekv import extract_small_l, extract_big_l, _gm, _IC
 
 LENGTH_RATIO = 15
 
@@ -49,7 +46,7 @@ class EKV:
     gds: float = 0
 
     def ic(self, id: np.ndarray) -> np.ndarray:
-        return id / self.i_spec_square * self.ratio
+        return _IC(id, self.i_spec_square, self.ratio)
 
     @property
     def shape(self) -> Dim:
@@ -102,8 +99,8 @@ class EKV:
         :returns Self: The EKV model with the extracted parameters.
         """
         ekv = extract_dc_ekv(self.techno, output_dir, self.length)
-        for key in ekv.model:
-            setattr(self, key, ekv.model[key])
+        for key in ekv.dct:
+            setattr(self, key, ekv.dct[key])
         return self
 
 
@@ -112,7 +109,7 @@ bench_ref = "ekv_bench.cir"
 
 def extract_dc_ekv(
     techno: Available_PDK, working_dir: Optional[Path] = None, l_min: float = 0.18
-) -> EKV:
+) -> Dim:
     if techno == "mock":
         logging.warning("Using EKV model with mock techno for testing purposes only.")
         return EKV(techno=techno)
@@ -121,7 +118,10 @@ def extract_dc_ekv(
 
     if working_dir is None:
         working_dir = get_file(techno, "base_dir") / "haadic"
-    shutil.copy(Path(__file__).parent / bench_ref, working_dir / bench_ref)
+    if not working_dir.is_dir():
+        working_dir.mkdir(parents=True)
+    if not (working_dir / bench_ref).is_file():
+        shutil.copy(Path(__file__).parent / bench_ref, working_dir / bench_ref)
     benches = (working_dir / bench_ref,)
 
     param = dict()
@@ -131,192 +131,17 @@ def extract_dc_ekv(
         dim = Dim({"length": length, "width": 1, "n_finger": 80})
         if length == l_min:
             dim.dct["i_spec_square"] = param[LENGTH_RATIO * l_min]["i_spec_square"]
+        post_process = (
+            extract_big_l if length == LENGTH_RATIO * l_min else extract_small_l
+        )
         flow = Flow(
             layout=layout,
             benches=setup(benches=benches),
-            postprocess=(extract_big_l,)
-            if length == LENGTH_RATIO * l_min
-            else (extract_small_l,),
+            postprocess=(partial(post_process, show_graph=False),),
             config=options,
         )
         param[length] = flow.run_from_dim(dim)
-    ekv = EKV(techno=techno, **param[LENGTH_RATIO * l_min].dct)
-    ekv.l_c = param[l_min]["l_c"]
-    ekv.length = l_min
+    ekv = param[LENGTH_RATIO * l_min]
+    ekv["l_c"] = param[l_min]["l_c"]
+    ekv["length"] = l_min
     return ekv
-
-
-def extract_small_l(bench_data: SimRes, geo: Dim, base_dir: Path) -> Dim:
-    ekv = EKV(length=geo["length"], width=geo["width"], n_finger=int(geo["n_finger"]))
-    ekv.i_spec_square = geo["i_spec_square"]
-
-    id = bench_data["i(d)"]
-    gm = np.gradient(id, bench_data["v(g)"])
-    Gm_IC = gm * ut / id
-    ekv.n = med_Xpercentile(1 / Gm_IC, "min")
-    lc = ekv.length * ekv.i_spec_square / ekv.ratio / (gm * ekv.n * ut)
-    ekv.l_c = med_Xpercentile(lc, "min")
-
-    export_graph(
-        Data(ekv.ic(id)),
-        [
-            Data(Gm_IC, "Gm/IC"),
-            Data(1 / ekv.n, "1/n", f"n={ekv.n:.3g}"),
-            Data(
-                1 / (ekv.ic(id) * ekv.l_c / ekv.length),
-                "l/(IC*λc)",
-                f"l_c={eng(ekv.l_c * 1e-6, 0)}m",
-            ),
-        ],
-        base_dir / "gm_ic.png",
-    )
-    export_graph(
-        Data(ekv.ic(id), "IC", "-"),
-        [
-            Data(bench_data["v(g)"], "V_g", "V"),
-        ],
-        base_dir / "ic_vs_vg.png",
-        x_scale="lin",
-    )
-    ekv_dict = ekv.model
-    ekv_dict.pop("techno")
-    return Dim(dct=ekv_dict)
-
-
-def extract_big_l(bench_data: SimRes, dimensions: Dim, base_dir: Path) -> Dim:
-    """
-    Extract the EKV model parameters from the bench data for a long channel transistor.
-    The parameters extracted are n and i_spec. (lambda_c is assumed to be 0).
-    """
-    ekv = EKV(
-        length=dimensions["length"],
-        width=dimensions["width"],
-        n_finger=int(dimensions["n_finger"]),
-    )
-    logging.info(bench_data.head())
-    id = bench_data["i(d)"]
-    gm = np.gradient(id, bench_data["v(g)"])
-    Gm_IC = gm * ut / id
-    ekv.n = med_Xpercentile(1 / Gm_IC, "min")
-    i_spec_square = (gm * ekv.n * ut) ** 2 / id * ekv.ratio
-    ekv.i_spec_square = med_Xpercentile(i_spec_square, "max")
-    export_graph(
-        Data(ekv.ic(id)),
-        [
-            Data(Gm_IC, "Gm/IC"),
-            Data(1 / ekv.n, "1/n", f"n={ekv.n:.3g}"),
-            Data(
-                1 / (np.sqrt(ekv.ic(id)) * ekv.n),
-                "1/(sqrt(IC)*n)",
-                "i_spec={eng(ekv.i_spec_square, 0)}A",
-            ),
-        ],
-        base_dir / "gm_ic.png",
-    )
-    ekv_dict = ekv.model
-    ekv_dict.pop("techno")
-    return Dim(dct=ekv_dict)
-
-
-def extract_rf(
-    bench_data: SimRes,
-    dimensions: Dim,
-    base_dir: Path = Path("."),
-    dis_plot: bool = False,
-) -> Dim:
-    ekv = EKV(
-        length=dimensions["length"],
-        width=dimensions["width"],
-        n_finger=int(dimensions["n_finger"]),
-    )
-    for key in ("n", "i_spec_square", "l_c"):
-        if key in dimensions.dct:
-            setattr(ekv, key, dimensions.dct[key])
-
-    bench_data.to_csv(base_dir / "bench_ac_data.csv")
-    y = dict()
-    for i in (1, 2):
-        for j in (1, 2):
-            port = f"y_{i}_{j}"
-            y[f"{i}{j}"] = bench_data[port]
-    f = np.real(bench_data["frequency"])
-    omega = 2 * np.pi * f
-    cg_simu = np.imag(y["11"]) / omega
-    cgd_simu = -np.imag(y["12"]) / omega
-    cm_simu = cgd_simu - np.imag(y["21"]) / omega
-    rg_simu = np.real(y["11"]) / (omega * cg_simu) ** 2
-    gm_simu = np.real(y["21"]) + omega**2 * rg_simu * cg_simu * (cgd_simu + cm_simu)
-    cbd_simu = np.imag(y["22"]) / omega - cgd_simu
-    cgs_gb_simu = cg_simu - cgd_simu
-    gds_simu = np.real(y["22"]) - omega**2 * rg_simu * (
-        cg_simu * cbd_simu + cg_simu * cgd_simu + cgd_simu * cm_simu
-    )
-    ekv.cgd = med_Xpercentile(cgd_simu, "max")
-    ekv.cbd = med_Xpercentile(cbd_simu, "min")
-    ekv.cgs_gb = med_Xpercentile(cgs_gb_simu, "min")
-    ekv.gds = med_Xpercentile(gds_simu, "min")
-    ekv.rg = 1 / med_Xpercentile(rg_simu, "min")
-    ekv.gm = med_Xpercentile(gm_simu, "max")
-    freq = Data(f, "Frequency", "GHz")
-    export_graph(
-        freq,
-        [
-            Data(cgd_simu * 1e15, r"$C_{GD}$", "sim. spice"),
-            Data(cbd_simu * 1e15, r"$C_{BD}$", "sim. spice"),
-            Data(cgs_gb_simu * 1e15, r"$C_{GS+GB}$", "sim. spice"),
-            Data(ekv.cbd * 1e15, r"$C_{BD}$", "model"),
-            Data(ekv.cgd * 1e15, r"$C_{GD}$", "model"),
-            Data(ekv.cgs_gb * 1e15, r"$C_{GS+GB}$", "model"),
-        ],
-        base_dir / "rf_extract_capa.png",
-        dis_plot,
-        "lin",
-    )
-    export_graph(
-        freq,
-        [Data(rg_simu, "Rg", "sim. spice"), Data(ekv.rg, "Rg", "model")],
-        base_dir / "rf_extract_rg.png",
-        dis_plot,
-        "lin",
-    )
-    export_graph(
-        freq,
-        [Data(gm_simu, "Rg", "sim. spice"), Data(ekv.gm, "Rg", "model")],
-        base_dir / "rf_extract_gm.png",
-        dis_plot,
-        "lin",
-    )
-    export_graph(
-        freq,
-        [Data(gds_simu, "Rg", "sim. spice"), Data(ekv.gds, "Rg", "model")],
-        base_dir / "rf_extract_gds.png",
-        dis_plot,
-        "lin",
-    )
-    ekv_rf = ekv.model
-    ekv_rf.pop("techno")
-    return Dim(dct=ekv_rf)
-
-
-def _gm(id: np.ndarray, l_c: float, n: float, i_ssq: float) -> np.ndarray:
-    """
-    Compute the transconductance of a MOS transistor in the EKV model.
-    Parameters
-    ----------
-    id : np.ndarray
-        The drain current of the transistor (in A).
-    l_c : float
-        The channel length modulation parameter (no units).
-    n : float
-        The subthreshold slope factor (no units).
-    i_ssq : float
-        The subthreshold square current factor (in A).
-    Returns
-    -------
-    np.ndarray
-        The transconductance of the transistor.
-    """
-    IC = id / i_ssq
-    return (np.sqrt((l_c * IC + 1) ** 2 + 4 * IC) - 1) / (
-        IC * (l_c * (l_c * IC + 1) + 2) * n
-    )

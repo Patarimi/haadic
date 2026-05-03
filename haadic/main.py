@@ -94,14 +94,14 @@ def extract_ekv_cli(
     :param output: path of the json file to save the extracted model. If None, the model is saved in the pdk install directory with the name ekv_model_<techno_name>.json.
     :return: The extracted EKV model.
     """
-    from haadic.design.components.ekv import extract_dc_ekv
 
     if output is None:
         haadic_dir = techno.get_file(techno_name, "base_dir") / "libs.tech/haadic"
         if not haadic_dir.is_dir():
             haadic_dir.mkdir()
         output = haadic_dir / f"ekv_model_{techno_name}.json"
-    ekv = extract_dc_ekv(techno_name, working_dir=Path(output).parent)
+    ekv = EKV(techno=techno_name)
+    ekv.extract_model()
     ekv.dump(output)
     logging.info(f"EKV model parameters saved in {output}")
     return ekv
