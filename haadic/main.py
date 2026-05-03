@@ -57,7 +57,6 @@ def run_cli(
     :return: Nothing.
     """
     from haadic.core.flow import Flow
-    from haadic.core.steps.setup import setup
     from haadic.core.steps.step import import_or_default
 
     design = import_or_default(design_py, Flow.__dataclass_fields__.keys())
@@ -66,7 +65,10 @@ def run_cli(
         sub_folder if sub_folder is not None else Path("./results") / design_py.stem
     )
     logging.info(f"Running design {design_py} in {design.config.run_dir}")
-    design.benches = setup(design.benches, Path(design_py).parent)
+    design.benches = [
+        bench if bench.is_absolute() else Path(design_py).parent / bench
+        for bench in design.benches
+    ]
     if reload_result is not None:
         design.config.reload = reload_result
 
@@ -94,14 +96,14 @@ def extract_ekv_cli(
     :param output: path of the json file to save the extracted model. If None, the model is saved in the pdk install directory with the name ekv_model_<techno_name>.json.
     :return: The extracted EKV model.
     """
-    from haadic.design.components.ekv import extract_dc_ekv
 
     if output is None:
         haadic_dir = techno.get_file(techno_name, "base_dir") / "libs.tech/haadic"
         if not haadic_dir.is_dir():
             haadic_dir.mkdir()
         output = haadic_dir / f"ekv_model_{techno_name}.json"
-    ekv = extract_dc_ekv(techno_name, working_dir=Path(output).parent)
+    ekv = EKV(techno=techno_name)
+    ekv.extract_model()
     ekv.dump(output)
     logging.info(f"EKV model parameters saved in {output}")
     return ekv

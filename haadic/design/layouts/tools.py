@@ -34,6 +34,10 @@ class Layer:
     def pin(self) -> kdb.LayerInfo:
         return kdb.LayerInfo(self.layer, self._pin)
 
+    @property
+    def pitch(self) -> float:
+        return self.width + self.spacing
+
 
 @dataclass
 class ViaLayer(Layer):

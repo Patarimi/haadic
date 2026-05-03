@@ -34,7 +34,7 @@ flowchart TD
     sim["Spice simulation
 (steps.spice_sim + NGSpice)"]
     spec["Performances Evaluation
-(design:evaluate)"]
+(design:post_processors)"]
 
     s1 -- "design:specifications" --> app
     s2 -- "design:dimensions" --> pl
