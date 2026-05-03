@@ -1,5 +1,3 @@
-import os
-import shutil
 import logging
 from pathlib import Path
 from klayout.db import Cell
@@ -45,17 +43,13 @@ class Flow:
 
     def run_from_dim(self, dimensions: step.Dim) -> step.Dim:
         datas = step.Dim()
-        for bench, eval in zip(self.benches, self.postprocess):
-            if not self.config.run_dir.is_dir():
-                os.makedirs(self.config.run_dir)
-            c_bench = self.config.run_dir / bench.name
-            if not c_bench.is_file():
-                c_bench = Path(shutil.copy(bench, c_bench))
+        d_benches = step.copy_file(self.benches, self.config.run_dir)
+        for bench, eval in zip(d_benches, self.postprocess):
             start = step.init_step(dimensions, self.config.run_dir)
             flow = step.compose(
                 Layout(ConfigLayout(self.config.techno, self.layout)),
                 Extract(ConfigExtract(self.config.techno, self.config.extract_level)),
-                BenchSim(ConfigSim(c_bench, self.config.techno)),
+                BenchSim(ConfigSim(bench, self.config.techno)),
                 reload=self.config.reload,
             )
             output_file = flow.run(start)

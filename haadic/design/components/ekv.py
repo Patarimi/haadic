@@ -1,5 +1,4 @@
 from functools import partial
-import shutil
 from dataclasses import dataclass, asdict
 import json
 import logging
@@ -9,8 +8,7 @@ from typing import Optional, Self, get_args
 import numpy as np
 
 from haadic.core.flow import Flow, ConfigFlow
-from haadic.core.steps.setup import setup
-from haadic.core.steps.step import Dim
+from haadic.core.steps.step import Dim, copy_file
 from haadic.core.techno import Available_PDK, get_file
 from haadic.design.layouts.commun_source import layout
 from haadic.design.post_processors.ekv import extract_small_l, extract_big_l, _gm, _IC
@@ -104,7 +102,7 @@ class EKV:
         return self
 
 
-bench_ref = "ekv_bench.cir"
+bench_ref = (Path(__file__).parent / "ekv_bench.cir",)
 
 
 def extract_dc_ekv(
@@ -118,16 +116,12 @@ def extract_dc_ekv(
 
     if working_dir is None:
         working_dir = get_file(techno, "base_dir") / "haadic"
-    if not working_dir.is_dir():
-        working_dir.mkdir(parents=True)
-    if not (working_dir / bench_ref).is_file():
-        shutil.copy(Path(__file__).parent / bench_ref, working_dir / bench_ref)
-    benches = (working_dir / bench_ref,)
 
     param = dict()
     for length in (LENGTH_RATIO * l_min, l_min):
         options = ConfigFlow()
         options.run_dir = working_dir / f"ekv_l_{length:0.3f}"
+        benches = copy_file(bench_ref, options.run_dir)
         dim = Dim({"length": length, "width": 1, "n_finger": 80})
         if length == l_min:
             dim.dct["i_spec_square"] = param[LENGTH_RATIO * l_min]["i_spec_square"]
@@ -136,7 +130,7 @@ def extract_dc_ekv(
         )
         flow = Flow(
             layout=layout,
-            benches=setup(benches=benches),
+            benches=benches,
             postprocess=(partial(post_process, show_graph=False),),
             config=options,
         )
