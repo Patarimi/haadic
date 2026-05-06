@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 import os
 from typing import Optional
@@ -64,6 +65,10 @@ def run_cli(
     design.config.run_dir = (
         sub_folder if sub_folder is not None else Path("./results") / design_py.stem
     )
+    if timestamp:
+        design.config.run_dir = Path(
+            f"{design.config.run_dir.name}_{datetime.now().strftime('%Y-%m-%d_%H_%M_%S')}"
+        )
     logging.info(f"Running design {design_py} in {design.config.run_dir}")
     design.benches = [
         bench if bench.is_absolute() else Path(design_py).parent / bench
