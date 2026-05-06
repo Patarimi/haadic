@@ -8,7 +8,7 @@ from typing import Optional, Self, get_args
 import numpy as np
 
 from haadic.core.flow import Flow, ConfigFlow
-from haadic.core.steps.step import Dim, copy_file
+from haadic.core.steps.step import Dim
 from haadic.core.techno import Available_PDK, get_file
 from haadic.design.layouts.commun_source import layout
 from haadic.design.post_processors.ekv import extract_small_l, extract_big_l, _gm, _IC
@@ -96,13 +96,13 @@ class EKV:
         :param output_dir: The directory to save the extracted model, by default (pdk install directory).
         :returns Self: The EKV model with the extracted parameters.
         """
-        ekv = extract_dc_ekv(self.techno, output_dir, self.length)
-        for key in ekv.dct:
-            setattr(self, key, ekv.dct[key])
+        ekv_dc = extract_dc_ekv(self.techno, output_dir, self.length)
+        for key in ekv_dc.dct:
+            setattr(self, key, ekv_dc.dct[key])
         return self
 
 
-bench_ref = (Path(__file__).parent / "ekv_bench.cir",)
+bench_ref = Path(__file__).parent / "ekv_bench.cir"
 
 
 def extract_dc_ekv(
@@ -117,25 +117,26 @@ def extract_dc_ekv(
     if working_dir is None:
         working_dir = get_file(techno, "base_dir") / "haadic"
 
+    post_process = [
+        partial(f, show_graph=False) for f in (extract_big_l, extract_small_l)
+    ]
+    lengths = [LENGTH_RATIO, 1]
+    options = ConfigFlow()
+
     param = dict()
-    for length in (LENGTH_RATIO * l_min, l_min):
-        options = ConfigFlow()
-        options.run_dir = working_dir / f"ekv_l_{length:0.3f}"
-        benches = copy_file(bench_ref, options.run_dir)
-        dim = Dim({"length": length, "width": 1, "n_finger": 80})
-        if length == l_min:
-            dim.dct["i_spec_square"] = param[LENGTH_RATIO * l_min]["i_spec_square"]
-        post_process = (
-            extract_big_l if length == LENGTH_RATIO * l_min else extract_small_l
-        )
+    for length, pp in zip(lengths, post_process):
+        options.run_dir = working_dir / f"ekv_l_{length:.2f}um"
+        dim = Dim({"length": length * l_min, "width": 1, "n_finger": 80})
+        if length == 1:
+            dim.dct["i_spec_square"] = param[LENGTH_RATIO]["i_spec_square"]
         flow = Flow(
             layout=layout,
-            benches=benches,
-            postprocess=(partial(post_process, show_graph=False),),
+            benches={bench_ref},
+            postprocess={pp},
             config=options,
         )
         param[length] = flow.run_from_dim(dim)
-    ekv = param[LENGTH_RATIO * l_min]
-    ekv["l_c"] = param[l_min]["l_c"]
+    ekv = param[LENGTH_RATIO]
+    ekv["l_c"] = param[1]["l_c"]
     ekv["length"] = l_min
     return ekv

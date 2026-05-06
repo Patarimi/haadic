@@ -1,4 +1,3 @@
-import logging
 from pathlib import Path
 
 import numpy as np
@@ -72,7 +71,6 @@ def extract_big_l(
             "n_finger": int(dimensions["n_finger"]),
         }
     )
-    logging.info(bench_data.head())
     id = bench_data["i(d)"]
     gm = np.gradient(id, bench_data["v(g)"])
     Gm_IC = gm * ut / id
