@@ -8,7 +8,6 @@ from pathlib import Path
 import numpy as np
 
 from haadic.core.flow import ConfigFlow, Flow
-from haadic.core.steps.step import copy_file
 from gen_active import layout, benches, postprocess, dimensions
 
 options = ConfigFlow()
@@ -37,7 +36,6 @@ for key in sweep.keys():
             )
             dimensions[key] = dim
             run_folder = Path(f"results/sweep_active/{key[0]}_{dim:.2f}um_{extract}")
-            flow.benches = copy_file(benches, options.run_dir)
             options.run_dir = run_folder
             params = flow.run_from_dim(dimensions).dct
             params[key] = dim
