@@ -67,7 +67,7 @@ log_file = "./pytest.log"
 
 [dependency-groups]
 dev = [
-    "poethepoet>=0.36.0",
+    "poethepoet>=0.46.0",
     "pytest>=8.4.1",
     "pytest-cov>=7.1.0",
 ]
