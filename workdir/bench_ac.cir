@@ -1,5 +1,4 @@
 # SP extraction bench
-.include ./top.cir
 
 Vgate gate 0 dc 0.75 ac 1 portnum 1 z0 50
 Vdrain drain 0 dc 1.8 ac 1 portnum 2 Z0 50

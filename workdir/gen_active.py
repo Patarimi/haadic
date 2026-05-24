@@ -5,13 +5,15 @@ from haadic.design.layouts.commun_source import layout as cs_layout
 from haadic.design.post_processors.ekv import extract_rf, extract_small_l, extract_big_l
 from haadic.core.steps.step import Dim
 from haadic.core.steps.post_process import SimRes
-from haadic.core.flow import ConfigFlow
+from haadic.core.flow import Flow, ConfigFlow
+
 
 # configuration of the flow.
 options = ConfigFlow()
 options.extract_level = "RC"
 # Technology selection and model initialization
 options.techno = "sky130"
+options.run_dir = Path("./results/gen_active")
 
 
 # Dimension of the layout to be generated. The layout function will be called with these dimensions as argument.
@@ -19,11 +21,10 @@ options.techno = "sky130"
 dimensions = Dim(
     {
         "n_finger": 4,
-        "width": 1,
+        "width": 5,
         "length": 0.18,
     }
 )
-
 
 def layout(cell: Cell, layerstack: LayerStack, shape: Dim):
     return cs_layout(cell, layerstack, shape)
@@ -40,3 +41,10 @@ benches = (Path("./bench.cir"), Path("./bench_ac.cir"))
 
 
 postprocess = (extract_dc, extract_rf)
+
+if __name__ == "__main__":
+    from rich import print
+    flow = Flow(layout, benches, postprocess, options)
+    dim = flow.run_from_dim(dimensions)
+    print(f"Model parameters: {dim.dct}")
+
