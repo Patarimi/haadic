@@ -78,6 +78,7 @@ def run_cli(
     ]
     if reload_result is not None:
         design.config.reload = reload_result
+    design.config.sweep_folder = sweep_folder
 
     input = import_or_default(Path(design_py), {"local_model", "target", "dimensions"})
     logging.info(
