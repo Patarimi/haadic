@@ -80,7 +80,7 @@ def extract_spice(
     ]
     logging.info("Extraction with command: " + " ".join(cmd))
     proc = nix_run(cmd)
-    logging.info(proc.stdout)
+    logging.debug(proc.stdout)
     try:
         proc.check_returncode()
     except CalledProcessError as e:

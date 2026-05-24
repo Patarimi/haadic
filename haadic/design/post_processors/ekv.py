@@ -11,7 +11,7 @@ from haadic.design.post_processors.graphs import export_graph, Data
 
 
 def extract_small_l(
-    bench_data: SimRes, geo: Dim, base_dir: Path, show_graph: bool
+    bench_data: SimRes, geo: Dim, base_dir: Path, show_graph: bool, i_spec_square: float
 ) -> Dim:
     ekv = Dim(
         dct={
@@ -20,15 +20,14 @@ def extract_small_l(
             "n_finger": int(geo["n_finger"]),
         }
     )
-    ekv["i_spec_square"] = geo["i_spec_square"]
     ratio = ekv["length"] / (ekv["width"] * ekv["n_finger"])
 
     id = bench_data["i(d)"]
-    IC = _IC(id, ekv["i_spec_square"], ratio)
+    IC = _IC(id, i_spec_square, ratio)
     gm = np.gradient(id, bench_data["v(g)"])
     Gm_IC = gm * ut / id
     ekv["n"] = med_Xpercentile(1 / Gm_IC, "min")
-    lc = ekv["length"] * ekv["i_spec_square"] / ratio / (gm * ekv["n"] * ut)
+    lc = ekv["length"] * i_spec_square / ratio / (gm * ekv["n"] * ut)
     ekv["l_c"] = med_Xpercentile(lc, "min")
 
     export_graph(

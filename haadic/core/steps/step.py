@@ -63,12 +63,8 @@ def validate_input(input_file: Path, valid_suffixes: Sequence[str]) -> None:
 
 def can_skip(input_file: Path, output_file: Path):
     if not output_file.is_file():
-        logging.info(f"{output_file.name} not found. Update needed, running full flow.")
         return False
     if input_file.stat().st_mtime >= output_file.stat().st_mtime:
-        logging.info(
-            f"{input_file.name} is newer than {output_file.name}. Update needed, running full flow."
-        )
         return False
     return True
 
@@ -89,7 +85,13 @@ def compose(*steps: Step, reload: bool = True) -> Step:
                 validate_input(path, step.input_suffixes)
                 excepted_output = step.output_file(path)
                 if self.config["reload"] and can_skip(path, excepted_output):
+                    logging.info(
+                        f"Skipping step {step.__class__.__name__} as {excepted_output.name} is up to date with {path.name}"
+                    )
                     return excepted_output
+                logging.info(
+                    f"Running step {step.__class__.__name__} with input {path.name}"
+                )
                 return step.run(path)
 
             return reduce(fun, steps, input_file)
