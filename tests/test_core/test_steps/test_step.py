@@ -7,7 +7,7 @@ from haadic.core.steps import step
 
 
 @dataclasses.dataclass
-class MockStep:
+class MockStep(step.Step):
     input_suffixes: Sequence[str]
     output_suffix: str = ".csv"
     config: dict[str, Any] = dataclasses.field(default_factory=dict)
