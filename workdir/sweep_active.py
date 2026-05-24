@@ -35,7 +35,7 @@ for key in sweep.keys():
                 f"Sweeping {key}={dim:.2f} µm with extract option: [blue]{extract}[/]"
             )
             dimensions[key] = dim
-            run_folder = Path(f"results/sweep_active/{key[0]}_{dim:.2f}um_{extract}")
+            run_folder = Path(f"results/sweep_active/{extract}")
             options.run_dir = run_folder
             params = flow.run_from_dim(dimensions).dct
             params[key] = dim

@@ -1,3 +1,4 @@
+from haadic.core.steps.step import Step
 from dataclasses import dataclass, field
 from typing import Sequence
 from haadic.io.wrappers.magic import ExtractLevels, extract_spice
@@ -12,7 +13,7 @@ class ConfigExtract:
 
 
 @dataclass
-class Extract:
+class Extract(Step):
     config: ConfigExtract = field(default_factory=ConfigExtract)
     input_suffixes: Sequence[str] = field(default_factory=lambda: [".gds"])
     output_suffix: str = ".cir"
@@ -23,7 +24,7 @@ class Extract:
         :param Path input_file: input gds file.
         :return Path: extracted spice circuit.
         """
-        output_path = input_file.with_suffix(".cir")
+        output_path = self.output_file(input_file)
         rc_file = get_file(self.config.techno, "magic_rc")
         return extract_spice(
             input_file,
