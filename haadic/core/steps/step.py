@@ -1,7 +1,7 @@
 import json
 from functools import reduce
 import sys
-from typing import Any, Iterable, Protocol, Sequence, Generator
+from typing import Any, Iterable, Protocol, Sequence
 import logging
 import os
 from pathlib import Path
@@ -39,8 +39,11 @@ class Step(Protocol):
     def run(self, input_file: Path) -> Path: ...
 
 
-def init_step(dimensions: Dim, base_dir: Path) -> Path:
-    output_file = base_dir / dimensions.__str__() / "top.json"
+def init_step(dimensions: Dim, base_dir: Path, sweep_folder: bool = False) -> Path:
+    if sweep_folder:
+        output_file = base_dir / dimensions.__str__() / "top.json"
+    else:
+        output_file = base_dir / "top.json"
     if output_file.is_file():
         with output_file.open("r") as f:
             ref = json.load(f)

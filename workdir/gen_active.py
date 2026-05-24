@@ -26,6 +26,7 @@ dimensions = Dim(
     }
 )
 
+
 def layout(cell: Cell, layerstack: LayerStack, shape: Dim):
     return cs_layout(cell, layerstack, shape)
 
@@ -44,7 +45,7 @@ postprocess = (extract_dc, extract_rf)
 
 if __name__ == "__main__":
     from rich import print
+
     flow = Flow(layout, benches, postprocess, options)
     dim = flow.run_from_dim(dimensions)
     print(f"Model parameters: {dim.dct}")
-
