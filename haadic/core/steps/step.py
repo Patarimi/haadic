@@ -1,7 +1,7 @@
 import json
 from functools import reduce
 import sys
-from typing import Any, Iterable, Protocol, Sequence, Generator
+from typing import Any, Iterable, Protocol, Sequence
 import logging
 import os
 from pathlib import Path
@@ -20,6 +20,9 @@ class Dim:
     def __setitem__(self, key: str, value: float) -> None:
         self.dct[key] = float(value)
 
+    def __str__(self) -> str:
+        return "__".join([f"{key}_{value:g}" for key, value in self.dct.items()])
+
 
 class Step(Protocol):
     """
@@ -30,29 +33,24 @@ class Step(Protocol):
     output_suffix: str
     config: Any
 
+    def output_file(self, input_file: Path) -> Path:
+        return input_file.with_suffix(self.output_suffix)
+
     def run(self, input_file: Path) -> Path: ...
 
 
-def copy_file(
-    input_files: Iterable[Path], dest_folder: Path
-) -> Generator[Path, None, None]:
-    for input_file in input_files:
-        if not input_file.is_file():
-            raise FileNotFoundError(f"Input file {input_file} not found.")
-        dest_folder.mkdir(parents=True, exist_ok=True)
-        dst = dest_folder / input_file.name
-        if not dst.is_file():
-            shutil.copy(input_file, dst)
-        yield dst
-
-
-def init_step(dimensions: Dim, base_dir: Path) -> Path:
-    output_file = base_dir / "top.json"
+def init_step(dimensions: Dim, base_dir: Path, sweep_folder: bool = False) -> Path:
+    if sweep_folder:
+        output_file = base_dir / dimensions.__str__() / "top.json"
+    else:
+        output_file = base_dir / "top.json"
     if output_file.is_file():
         with output_file.open("r") as f:
             ref = json.load(f)
         if ref == dimensions.dct:
             return output_file
+    if not output_file.parent.is_dir():
+        output_file.parent.mkdir(parents=True, exist_ok=True)
     with output_file.open("w") as f:
         json.dump(dimensions.dct, f)
     return output_file
@@ -65,6 +63,7 @@ def validate_input(input_file: Path, valid_suffixes: Sequence[str]) -> None:
 
 def can_skip(input_file: Path, output_file: Path):
     if not output_file.is_file():
+        logging.info(f"{output_file.name} not found. Update needed, running full flow.")
         return False
     if input_file.stat().st_mtime >= output_file.stat().st_mtime:
         logging.info(
@@ -75,10 +74,10 @@ def can_skip(input_file: Path, output_file: Path):
 
 
 def compose(*steps: Step, reload: bool = True) -> Step:
-    class Compose:
+    class Compose(Step):
         input_suffixes: Sequence[str]
         output_suffix: str
-        config: Any
+        config: dict[str, Any]
 
         def __init__(self, config: dict[str, Any]):
             self.input_suffixes = steps[0].input_suffixes
@@ -88,7 +87,7 @@ def compose(*steps: Step, reload: bool = True) -> Step:
         def run(self, input_file: Path) -> Path:
             def fun(path: Path, step: Step) -> Path:
                 validate_input(path, step.input_suffixes)
-                excepted_output = path.with_suffix(step.output_suffix)
+                excepted_output = step.output_file(path)
                 if self.config["reload"] and can_skip(path, excepted_output):
                     return excepted_output
                 return step.run(path)

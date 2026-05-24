@@ -20,52 +20,49 @@ def std_dev(a: np.ndarray, b: np.ndarray):
     return np.sqrt(np.sum((a - b) ** 2)) / np.mean(np.abs(a + b))
 
 
-def load_dis() -> pd.DataFrame:
+def load_dis(config: str) -> pd.DataFrame:
     keys = {"length", "width"}
-    configs = {
-        "RC",
-    }
     return load_data(
         [
             Path(f"modele_parameters_{key}_{config}.csv")
-            for key, config in product(keys, configs)
+            for key, config in product(keys, [config])
         ]
     )
 
 
 if __name__ == "__main__":
     # chargement des données
-    data = load_dis()
-
-    W_f = data["width"]
-    L = data["length"]
-    N_f = data["n_finger"]
-    W = N_f * W_f
-    C = np.ones(len(L))
-    Ze = np.zeros(len(L))
-
-    # definition des équations :
-    mW_L = ([W / L], "y=f(W/L)")
-    mWf_nf = ([W_f / N_f, C], "y=f(Wf/Nf,1)")
-    mWf_Lnf = ([W_f / L * N_f], "y=f(Wf/Lnf)")
-    mWL_W = ([W * L, W], "y=f(WL, W)")
-    mW_L2 = ([W / L / L], "y=f(W/L^2)")
-    mW = ([W], "y=f(W)")
-    m_L = ([1 / L], "y=f(1/L)")
-    mC = ([C], "y=f(A)")
-
-    parameters = [
-        ("gm", [mW_L]),
-        ("rg", [mWf_Lnf, mWf_nf]),
-        ("cgs_gb", [mWL_W]),
-        ("cgd", [mWL_W]),
-        ("cbd", [mW]),
-        ("gds", [mW_L, mW_L2]),
-        ("rho_d", [mC, m_L]),
-    ]
-    l_filter = data["length"] == 0.18
-    w_filter = data["width"] == 8
     for level in {"NoPar", "RC"}:
+        data = load_dis(level)
+
+        W_f = data["width"]
+        L = data["length"]
+        N_f = data["n_finger"]
+        W = N_f * W_f
+        C = np.ones(len(L))
+        Ze = np.zeros(len(L))
+
+        # definition des équations :
+        mW_L = ([W / L], "y=f(W/L)")
+        mWf_nf = ([W_f / N_f, C], "y=f(Wf/Nf,1)")
+        mWf_Lnf = ([W_f / L * N_f], "y=f(Wf/Lnf)")
+        mWL_W = ([W * L, W], "y=f(WL, W)")
+        mW_L2 = ([W / L / L], "y=f(W/L^2)")
+        mW = ([W], "y=f(W)")
+        m_L = ([1 / L], "y=f(1/L)")
+        mC = ([C], "y=f(A)")
+
+        parameters = [
+            ("gm", [mW_L]),
+            ("rg", [mWf_Lnf, mWf_nf]),
+            ("cgs_gb", [mWL_W]),
+            ("cgd", [mWL_W]),
+            ("cbd", [mW]),
+            ("gds", [mW_L, mW_L2]),
+            ("rho_d", [mC, m_L]),
+        ]
+        l_filter = data["length"] == 0.18
+        w_filter = data["width"] == 8
         for param, eqs in parameters:
             Y = data[param]
             col_name = f"{param}_model"

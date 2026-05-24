@@ -7,7 +7,7 @@ import json
 
 import klayout.db as db
 from haadic.design.layouts.tools import LayerStack
-from haadic.core.steps.step import Dim
+from haadic.core.steps.step import Dim, Step
 
 
 def layout(cell: db.Cell, layerstack: LayerStack, dim: Dim) -> db.Cell:
@@ -21,7 +21,7 @@ class ConfigLayout:
 
 
 @dataclass
-class Layout:
+class Layout(Step):
     config: ConfigLayout = field(default_factory=ConfigLayout)
     input_suffixes: Sequence[str] = field(default_factory=lambda: [".json"])
     output_suffix: str = ".gds"
@@ -36,7 +36,7 @@ class Layout:
             dimensions = json.load(f)
         top_cell_name = input_file.stem
         layerstack = LayerStack(self.config.techno)
-        output_file = input_file.with_suffix(self.output_suffix)
+        output_file = self.output_file(input_file)
         logging.info("layout generation with geometry: " + str(dimensions))
 
         lib = db.Layout()
