@@ -43,7 +43,7 @@ class Flow:
 
     def run_from_dim(self, dimensions: step.Dim) -> step.Dim:
         datas = step.Dim()
-        d_benches = step.copy_file(self.benches, self.config.run_dir)
+        d_benches = [f.resolve() for f in self.benches]
         for bench, eval in zip(d_benches, self.postprocess):
             start = step.init_step(dimensions, self.config.run_dir)
             flow = step.compose(

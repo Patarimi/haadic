@@ -39,19 +39,6 @@ class Step(Protocol):
     def run(self, input_file: Path) -> Path: ...
 
 
-def copy_file(
-    input_files: Iterable[Path], dest_folder: Path
-) -> Generator[Path, None, None]:
-    for input_file in input_files:
-        if not input_file.is_file():
-            raise FileNotFoundError(f"Input file {input_file} not found.")
-        dest_folder.mkdir(parents=True, exist_ok=True)
-        dst = dest_folder / input_file.name
-        if not dst.is_file():
-            shutil.copy(input_file, dst)
-        yield dst
-
-
 def init_step(dimensions: Dim, base_dir: Path) -> Path:
     output_file = base_dir / dimensions.__str__() / "top.json"
     if output_file.is_file():
