@@ -12,7 +12,13 @@ from haadic.core.flow import Flow, ConfigFlow
 from haadic.core.steps.step import Dim
 from haadic.core.techno import Available_PDK, get_file
 from haadic.design.layouts.commun_source import layout
-from haadic.design.post_processors.ekv import extract_small_l, extract_big_l, _gm, _IC, extract_rf
+from haadic.design.post_processors.ekv import (
+    extract_small_l,
+    extract_big_l,
+    _gm,
+    _IC,
+    extract_rf,
+)
 
 LENGTH_RATIO = 15
 
@@ -74,22 +80,28 @@ class EKV:
         """
         Return the gate-drain capacitance (in F).
         """
-        return self.cgd_wl * self.width * self.n_finger * self.length + self.cgd_w * self.width * self.n_finger
-    
+        return (
+            self.cgd_wl * self.width * self.n_finger * self.length
+            + self.cgd_w * self.width * self.n_finger
+        )
+
     @property
     def cbd(self) -> float:
         """
         Return the bulk-drain capacitance (in F).
         """
         return self.cbd_w * self.width * self.n_finger
-    
+
     @property
     def cgs_gb(self) -> float:
         """
         Return the gate-source and gate-bulk capacitance (in F).
         """
-        return self.cgs_gb_wl * self.width * self.n_finger * self.length + self.cgs_gb_w * self.width * self.n_finger
-    
+        return (
+            self.cgs_gb_wl * self.width * self.n_finger * self.length
+            + self.cgs_gb_w * self.width * self.n_finger
+        )
+
     def gm_IC(self, id: np.ndarray) -> np.ndarray:
         return _gm(id * self.ratio, self.l_c / self.length, self.n, self.i_spec_square)
 
@@ -162,7 +174,11 @@ def extract_dc_ekv(
     for length in lengths:
         dim = Dim({"length": length * l_min, "width": 1, "n_finger": 80})
         if length == 1:
-            pp = partial(extract_small_l, i_spec_square=param[LENGTH_RATIO]["i_spec_square"], show_graph=False)
+            pp = partial(
+                extract_small_l,
+                i_spec_square=param[LENGTH_RATIO]["i_spec_square"],
+                show_graph=False,
+            )
         else:
             pp = partial(extract_big_l, show_graph=False)
         flow = Flow(
@@ -179,6 +195,7 @@ def extract_dc_ekv(
 
 
 bench_ac_ref = Path(__file__).parent / "ekv_bench_ac.cir"
+
 
 def extract_rf_ekv(
     techno: Available_PDK, working_dir: Optional[Path] = None, l_min: float = 0.18
@@ -212,7 +229,7 @@ def extract_rf_ekv(
                 [models_params, pd.DataFrame([params])], ignore_index=True
             )
         models_params["rho_d"] = models_params["gds"] / models_params["gm"]
-    
+
     data = models_params
     W_f = data["width"]
     L = data["length"]
@@ -237,7 +254,7 @@ def extract_rf_ekv(
     ]
     dim = Dim()
     for param, eqs in parameters:
-        raw_param = param[0].rstrip('_rwl')
+        raw_param = param[0].rstrip("_rwl")
         logging.info(f"Fitting parameter {raw_param} with equations {eqs[1]}")
         Y = data[raw_param]
 

@@ -85,9 +85,13 @@ def compose(*steps: Step, reload: bool = True) -> Step:
                 validate_input(path, step.input_suffixes)
                 excepted_output = step.output_file(path)
                 if self.config["reload"] and can_skip(path, excepted_output):
-                    logging.info(f"Skipping step {step.__class__.__name__} as {excepted_output.name} is up to date with {path.name}")
+                    logging.info(
+                        f"Skipping step {step.__class__.__name__} as {excepted_output.name} is up to date with {path.name}"
+                    )
                     return excepted_output
-                logging.info(f"Running step {step.__class__.__name__} with input {path.name}")
+                logging.info(
+                    f"Running step {step.__class__.__name__} with input {path.name}"
+                )
                 return step.run(path)
 
             return reduce(fun, steps, input_file)
