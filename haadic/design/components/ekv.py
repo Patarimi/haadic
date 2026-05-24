@@ -117,18 +117,17 @@ def extract_dc_ekv(
     if working_dir is None:
         working_dir = get_file(techno, "base_dir") / "haadic"
 
-    post_process = [
-        partial(f, show_graph=False) for f in (extract_big_l, extract_small_l)
-    ]
     lengths = [LENGTH_RATIO, 1]
     options = ConfigFlow()
+    options.run_dir = working_dir
 
     param = dict()
-    for length, pp in zip(lengths, post_process):
-        options.run_dir = working_dir / f"ekv_l_{length:.2f}um"
+    for length in lengths:
         dim = Dim({"length": length * l_min, "width": 1, "n_finger": 80})
         if length == 1:
-            dim.dct["i_spec_square"] = param[LENGTH_RATIO]["i_spec_square"]
+            pp = partial(extract_small_l, i_spec_square=param[LENGTH_RATIO]["i_spec_square"], show_graph=False)
+        else:
+            pp = partial(extract_big_l, show_graph=False)
         flow = Flow(
             layout=layout,
             benches={bench_ref},

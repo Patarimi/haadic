@@ -33,7 +33,7 @@ def layout(cell: Cell, layerstack: LayerStack, shape: Dim):
 
 def extract_dc(bench_data: SimRes, geo: Dim, base_dir: Path) -> Dim:
     dim = extract_big_l(bench_data, geo, base_dir, show_graph=False)
-    return extract_small_l(bench_data, dim, base_dir, show_graph=False)
+    return extract_small_l(bench_data, dim, base_dir, show_graph=False, i_spec_square=dim["i_spec_square"])
 
 
 # List of test benches to run. The flow will look for these files in the current folder
