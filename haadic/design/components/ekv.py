@@ -52,6 +52,12 @@ class EKV:
     gm_r: float = 0
     gds_r: float = 0
 
+    def __post_init__(self):
+        if self.techno != "mock":
+            model_file = get_file(self.techno, "ekv_model")
+            if model_file.is_file():
+                self.load(model_file)
+
     def ic(self, id: np.ndarray) -> np.ndarray:
         return _IC(id, self.i_spec_square, self.ratio)
 
@@ -121,8 +127,14 @@ class EKV:
             )
         with open(filename, "r") as f:
             model = json.load(f)
-        for key in model:
-            setattr(self, key, model[key])
+        self.update(model)
+        return self
+
+    def update(self, other: dict[str, float] | Dim) -> Self:
+        if isinstance(other, Dim):
+            other = other.dct
+        for key in other:
+            setattr(self, key, other[key])
         return self
 
     def dump(self, filename: str | Path) -> None:
@@ -136,18 +148,18 @@ class EKV:
     def model(self) -> dict:
         return asdict(self)
 
-    def extract_model(self, output_dir: Optional[Path] = None) -> Self:
+    def extract_model(self, output_dir: Optional[Path] = None, rf: bool = True) -> Self:
         """
         Extract the EKV model parameters for a transistor.
         :param output_dir: The directory to save the extracted model, by default (pdk install directory).
+        :param rf: If true, extract the RF parameters of the EKV model. Else, only extract the DC parameters.
         :returns Self: The EKV model with the extracted parameters.
         """
         ekv_dc = extract_dc_ekv(self.techno, output_dir, self.length)
-        for key in ekv_dc.dct:
-            setattr(self, key, ekv_dc.dct[key])
-        ekv_rf = extract_rf_ekv(self.techno, output_dir, self.length)
-        for key in ekv_rf.dct:
-            setattr(self, key, ekv_rf.dct[key])
+        self.update(ekv_dc)
+        if rf:
+            ekv_rf = extract_rf_ekv(self.techno, output_dir, self.length)
+            self.update(ekv_rf)
         return self
 
 
@@ -200,9 +212,6 @@ bench_ac_ref = Path(__file__).parent / "ekv_bench_ac.cir"
 def extract_rf_ekv(
     techno: Available_PDK, working_dir: Optional[Path] = None, l_min: float = 0.18
 ) -> Dim:
-    if techno == "mock":
-        logging.warning("Using EKV model with mock techno for testing purposes only.")
-        return EKV(techno=techno)
     if techno not in get_args(Available_PDK):
         raise ValueError(f"Techno {techno} not supported in EKV model.")
 
