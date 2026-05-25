@@ -1,5 +1,6 @@
 """
-This module contains function to generate general purpose cells.
+Contains function to generate general purpose cells.
+
 (Via, via stack, ground plane, etc.)
 """
 
@@ -13,7 +14,8 @@ from .tools import LayerStack, ViaLayer, Layer
 
 def via(layout: db.Layout, layer: ViaLayer, size: tuple[float, float]) -> db.Cell:
     """
-    This function generates a via cell.
+    Generate a via cell.
+
     :param layout: The layout to use.
     :param layer: The Layers to use.
     :param size: tuple of the size (length and width) of the via array to be made.
@@ -61,7 +63,8 @@ def via_stack(
     size: tuple[float, float],
 ) -> db.Cell:
     """
-    This function generates a via stack cell.
+    Generate a via stack cell.
+
     :param layout: The layout to use.
     :param layers: The stack of layers to use.
     :param id_top: id of the top metal layer.
@@ -94,7 +97,8 @@ def get_dtext(
     layout: db.Layout, label: Optional[str] = None, cell: Optional[str] = None
 ) -> list[Label]:
     """
-    This function  return the dtext with the associated label in the layout.
+    Return the dtext with the associated label in the layout.
+
     :param layout: Layout to be explored.
     :param label: label (string) to be found, if None, return all label.
     :param cell: if cell is not None, only look inside this cell.
@@ -124,6 +128,14 @@ def get_dtext(
 
 
 def get_shape(layout: db.Layout, point: db.DPoint, layer: int) -> tuple[db.DBox, int]:
+    """
+    Return the shape at the given point and layer.
+
+    :param layout: Layout to be explored.
+    :param point: point to be found.
+    :param layer: layer to explore.
+    :return: the shape at the given point and layer.
+    """
     for cell in layout.each_cell():
         for lyr in layout.layer_indexes():
             for shape in cell.shapes(lyr):
@@ -139,6 +151,7 @@ def get_shape(layout: db.Layout, point: db.DPoint, layer: int) -> tuple[db.DBox,
 def set_as_port(cell: db.Cell, label: str):
     """
     Retrieve label in subcells and copy to cell.
+
     :param cell:
     :param label:
     :return:
@@ -157,7 +170,8 @@ def ground_plane(
     layout: db.Layout, layers: LayerStack, size: tuple[float, float], id_gnd: int = 1
 ) -> db.Cell:
     """
-    This function generates a ground plane cell.
+    Generate a ground plane cell.
+
     :param layout: The layout to use.
     :param layers: The stack of layers to use.
     :param size: size (length and width) of the ground plane.
@@ -183,6 +197,7 @@ def enclose(
 ) -> db.DBox:
     """
     Enclose the cell with a box on the given layer.
+
     :param cell: The cell to enclose.
     :param layer: The layer to use for the enclosure.
     :param extension: The amount of extension around the cell.

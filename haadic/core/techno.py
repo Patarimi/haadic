@@ -1,3 +1,5 @@
+"""Module for managing technology files and PDK installations in the haadic design flow."""
+
 import functools
 import logging
 import os
@@ -29,7 +31,8 @@ PDK_INSTALL_DIR = Path(
 
 @pkd_app.command(name="install")
 def install(pdk_name: Available_PDK):
-    """Install the _pdk_name_ technology in its default location.
+    """
+    Install the _pdk_name_ technology in its default location.
 
     :param Available_PDK pdk_name: name of the PDK to be installed.
     """
@@ -106,6 +109,11 @@ def print_pdk() -> None:
 
 
 def list_pdk():
+    """
+    Return a list of PDK names discovered in configured PATHS.
+
+    Scans `PATHS` for YAML entries and aggregates available PDK keys.
+    """
     process_l = list()
     for path in PATHS:
         if os.path.isfile(path):
@@ -120,7 +128,21 @@ def is_installed(pdk_name: str) -> bool:
 
 
 @functools.cache
-def load_pdk(pdk_name: str, path: Optional[str] = None) -> dict:
+def load_pdk(pdk_name: str, path: Optional[str] = None) -> dict[str, str]:
+    """
+    Load the metadata dictionary for a PDK by name.
+
+    Args:
+        pdk_name: the PDK name to load (one of `Available_PDK`).
+        path: optional path to a YAML file or directory to prioritize when searching.
+
+    Returns:
+        A dict containing the PDK metadata as parsed from techno.yml / design.yml.
+
+    Raises:
+        KeyError: if the PDK name cannot be found.
+
+    """
     if path is not None:
         PATHS.insert(0, Path(path))
         logging.info(f"Paths list updated: {PATHS}")
@@ -138,12 +160,14 @@ def add_reference(
 ) -> None:
     """
     Add a reference file to the techno.yml file.
+
     The reference file can be a LEF, a SPICE model or a HAADIC json file.
 
-    Args:
-        pdk_name: Name of the PDK to which the reference file is added.
-        ref_name: Name of the reference file (e.g., 'techlef', 'haadic', 'spice').
-        path_file: Path to the reference file.
+
+    :param pdk_name: Name of the PDK to which the reference file is added.
+    :param ref_name: Name of the reference file (e.g., 'techlef', 'haadic', 'spice').
+    :param path_file: Path to the reference file.
+    :param path_tech: Optional path to the techno.yml file to update. If None, it will look for techno.yml in the current directory and then in the data directory.
     """
     if path_tech is None:
         path_tech = DATA_DIR / "techno.yml"
@@ -156,7 +180,8 @@ def add_reference(
 
 
 def get_file(pdk_name: str, file_type: str) -> Path:
-    """Utility function to get a configuration file for a given technologie.
+    """
+    Get a configuration file for a given technologie.
 
     :param str pdk_name: selected technologie (from Available_PDK).
     :param str file_type: software configuration files.
@@ -170,7 +195,17 @@ def get_file(pdk_name: str, file_type: str) -> Path:
     return get_file(pdk_name, "base_dir") / Path(pdk[file_type])
 
 
-def _read_tech(tech_file: str | Path) -> dict:
+def _read_tech(tech_file: str | Path) -> dict[str, dict[str, str]]:
+    """
+    Read a YAML technology description file and return it as a dict.
+
+    Args:
+        tech_file: path to a YAML file describing one or more PDKs.
+
+    Returns:
+        Parsed YAML content as a Python dict.
+
+    """
     with open(tech_file, "r") as f:
         process_d = yaml.load(f, Loader=yaml.Loader)
     return process_d

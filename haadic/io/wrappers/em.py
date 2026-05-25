@@ -1,3 +1,5 @@
+"""EMX wrapper for haadic."""
+
 from dataclasses import dataclass
 import logging
 from pathlib import Path
@@ -7,9 +9,8 @@ import numpy as np
 import skrf as rf
 from haadic.design.layouts.tools import Port
 from subprocess import run
-from os.path import join
 from dotenv import load_dotenv
-from haadic.core.techno import load_pdk
+from haadic.core.techno import get_file
 import glob
 from typing import Optional
 
@@ -18,6 +19,7 @@ from typing import Optional
 class Emx:
     """
     Base class for emx simulation.
+
     :param proc: path to the process file.
     """
 
@@ -26,12 +28,12 @@ class Emx:
     def prepare(self, techno: str):
         """
         Automatically set the process file for the given technology.
+
         :param techno: name of technology to be used in the simulation.
         :return: None
         """
         load_dotenv()
-        tech = load_pdk(techno)
-        self.proc = join(tech["base_dir"], tech["process"])
+        self.proc = get_file(techno, "process")
 
     def compute(
         self,
@@ -42,7 +44,8 @@ class Emx:
         **options,
     ):
         """
-        Run the simulation
+        Run the simulation.
+
         :param ports: list of ports to be used in simulation. Ports name and ref must be labels in the layout.
             If ports are not given, all the ports in the layout will be used.
             If ports are given, the simulation will be done only on the given ports. Remaining ports will be grounded.
@@ -109,12 +112,14 @@ class Emx:
 
 
 def command(key: str, value: str) -> str:
+    """Convert a key-value pair to a command line argument."""
     if len(key) > 1:
         return f"--{key}={value}"
     return f"-{key} {value}"
 
 
 def parse(stream: str) -> rf.Network:
+    """Parse the output of EMX and return a scikit RF network."""
     f = list()
     ports = list()
     y = list()

@@ -1,3 +1,5 @@
+"""Script to explore the data from the simulations and find simplified models for the parameters."""
+
 from itertools import product
 from pathlib import Path
 from typing import Sequence
@@ -8,19 +10,23 @@ import matplotlib.pyplot as plt
 
 
 def load_data(files: Sequence[Path]) -> pd.DataFrame:
+    """Load and concatenate multiple CSV files into a single DataFrame."""
     return pd.concat([pd.read_csv(f) for f in files], ignore_index=True)
 
 
 def evaluate(y_vals: Sequence[np.ndarray], coeff: np.ndarray):
+    """Evaluate a linear combination of the given y values with the provided coefficients."""
     size = len(coeff)
     return np.sum([coeff[k] * y_vals[k] for k in range(size)], axis=0)
 
 
 def std_dev(a: np.ndarray, b: np.ndarray):
+    """Calculate the standard deviation of the difference between two arrays."""
     return np.sqrt(np.sum((a - b) ** 2)) / np.mean(np.abs(a + b))
 
 
 def load_dis(config: str) -> pd.DataFrame:
+    """Load the model parameters from CSV files corresponding to the given configuration."""
     keys = {"length", "width"}
     return load_data(
         [

@@ -5,7 +5,7 @@ from haadic.design.layouts.active import mosfet, line, connect
 from haadic.design.layouts.tools import check_diff, LayerStack, Layer
 
 
-stack = LayerStack("mock")
+stack = LayerStack("mock")  # ty:ignore[invalid-argument-type]
 stack._nplus = Layer(1, 0, "Nwell")
 stack._gate = Layer(2, 0, spacing=0.5)
 stack._active = Layer(22, 0, "active", spacing=0.5)

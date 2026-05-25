@@ -1,5 +1,6 @@
-"""
-This module implements function to ease the design of passive filter using the insertion loss method.
+r"""
+Functions to ease the design of passive filter using the insertion loss method.
+
 ```mermaid
 flowchart LR
 S[Filter Specifications] --> L[Low-Pass Prototype] --> C["Conversion\nScaling"] --> I[Implementation]
@@ -12,7 +13,10 @@ import numpy as np
 
 def prototype(order: int, style: str, ripple: float = 0.2):
     """
-    Compute a low pass filter prototype. The equations are from [source](https://ia803103.us.archive.org/15/items/MicrowaveFiltersImpedanceMatchingNetworksAndCouplingStructures/Microwave%20Filters%2C%20Impedance-Matching%20Networks%2C%20and%20Coupling%20Structures.pdf).
+    Compute a low pass filter prototype.
+
+    The equations are from [source](https://ia803103.us.archive.org/15/items/MicrowaveFiltersImpedanceMatchingNetworksAndCouplingStructures/Microwave%20Filters%2C%20Impedance-Matching%20Networks%2C%20and%20Coupling%20Structures.pdf).
+
     :param order: order of the filter
     :param style: either "flat" for maximally flat filter or ripple for equal ripple (Chebyshev) filter
     :param ripple: in-band ripple in dB
@@ -40,7 +44,8 @@ def prototype(order: int, style: str, ripple: float = 0.2):
 
 def scaling(proto: np.ndarray, f: float, r_0: float):
     """
-    properly scale a low-pass filter prototype.
+    Properly scale a low-pass filter prototype.
+
     :param proto: list of coefficient of the prototype (see [prototype](filter.md#haadic.models.filter.prototype))
     :param f:
     :param r_0:
@@ -58,8 +63,10 @@ def to_stepped_impedance(
     proto: np.ndarray, z_high: float, z_low: float, r_0: float = 50
 ):
     """
-    Convert a low-pass prototype to a stepped_impedance line filter. The exact function is implemented instead of the
-     approximation presented in Pozar 2012 chapter. 8.6.
+    Convert a low-pass prototype to a stepped_impedance line filter.
+
+    The exact function is implemented instead of the approximation presented in Pozar 2012 chapter. 8.6.
+
     :param proto: prototype of the filter
     :param z_high: impedance of the high impedance section
     :param z_low: impedance of the low impedance section

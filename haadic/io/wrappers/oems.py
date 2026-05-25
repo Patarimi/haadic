@@ -1,3 +1,5 @@
+"""OpenEMS wrapper for haadic."""
+
 # -*- coding: utf-8 -*-
 ### Import Libraries
 import logging
@@ -40,6 +42,8 @@ oems_app = App("oems", help="Run OpenEMS simulations")
 
 
 class Frequency(BaseModel):
+    """Frequency range for the simulation."""
+
     start: confloat(ge=0) = 0
     stop: confloat(gt=0)
 
@@ -55,8 +59,9 @@ def compute(
     show_model: bool = False,
     skip_run: bool = False,
 ):
-    """Run the simulation using openEMS"""
     """
+    Run the simulation using openEMS.
+
     :param input_file: gds file to be simulated.
     :param cell_name: name of the cell to simulate (default value: top cell of the layout)
     :param freq: frequency of the simulation.
@@ -177,6 +182,7 @@ def make_geometry(
 ):
     """
     Create a geometry in OpenEMS from a gds and a technology.
+
     :param cell_name: Name of the cell to simulate (default value: top cell of the layout).
     :param gds_file: The input gds file (the top cell is used by default).
     :param tech: Name of the technology (*haadic pdk list* for a list of available techno).

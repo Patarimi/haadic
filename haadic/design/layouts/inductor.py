@@ -1,3 +1,5 @@
+"""Functions to generate inductors. These functions can be used to create cells that can be exported as gds files."""
+
 from numpy import tan, pi
 from typing import Optional, Self, Any
 import logging
@@ -8,8 +10,16 @@ from .tools import LayerStack
 from .general import via
 
 
+# TODO: Refactor using dataclass.
 class Path(list):
+    """
+    Class representing a path for the inductor.
+
+    It is a list of tuples of (x, y) coordinates in nm.
+    """
+
     def __new__(cls, value: Any) -> Self:
+        """Create a new Path instance from a list of tuples or a list of lists."""
         return super().__new__(cls, list([(int(x), int(y)) for x, y in value]))  # ty: ignore too-many-positional-arguments
 
 
@@ -27,7 +37,8 @@ def octagonal_inductor(
     bridge_nb: Optional[int] = None,
 ) -> db.Cell:
     """
-    generate a multi-turn octagonal inductor.
+    Generate a multi-turn octagonal inductor.
+
     :param layout: layout where the inductor will be drawn
     :param d_i: inner diameter in micron
     :param n_turn: number of turn

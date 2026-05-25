@@ -1,6 +1,4 @@
-"""
-File for steps testing.
-"""
+"""File for steps testing."""
 
 
 def layout():

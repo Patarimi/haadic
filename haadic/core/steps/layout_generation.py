@@ -1,3 +1,5 @@
+"""Module defining the Layout step for generating layouts from parametric descriptions."""
+
 import logging
 from haadic.core.techno import Available_PDK
 from pathlib import Path
@@ -10,19 +12,30 @@ from haadic.design.layouts.tools import LayerStack
 from haadic.core.steps.step import Dim, Step
 
 
-def layout(cell: db.Cell, layerstack: LayerStack, dim: Dim) -> db.Cell:
-    return cell
-
-
 @dataclass
 class ConfigLayout:
+    """
+    Configuration for the Layout step.
+
+    :param layout: function that generates the layout.
+    :param techno: technology to be used.
+    """
+
+    layout: Callable[[db.Cell, LayerStack, Dim], db.Cell]
     techno: Available_PDK = "sky130"
-    layout: Callable[[db.Cell, LayerStack, Dim], db.Cell] = layout
 
 
 @dataclass
 class Layout(Step):
-    config: ConfigLayout = field(default_factory=ConfigLayout)
+    """
+    Step to generate a layout from a parametric description.
+
+    :param config: configuration for the layout generation step, including the layout function and the technology to use.
+    :param input_suffixes: list of expected suffixes for the input files. By default, it is set to [".json"].
+    :param output_suffix: suffix for the output file. By default, it is set to ".gds".
+    """
+
+    config: ConfigLayout
     input_suffixes: Sequence[str] = field(default_factory=lambda: [".json"])
     output_suffix: str = ".gds"
 

@@ -1,3 +1,5 @@
+"""Models for inductors."""
+
 from numpy import pi
 from typing import Optional
 
@@ -9,7 +11,8 @@ def wheeler(
     n: int, d_avg: float, rho: float, shape: str = "custom", k: Optional[tuple] = None
 ):
     """
-    Estimates the inductance value with the given geometrical parameters.
+    Estimate the inductance value with the given geometrical parameters.
+
     :param n: number of turns.
     :param d_avg: average diameter.
     :param rho: copper area to total area ratio.

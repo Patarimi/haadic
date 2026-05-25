@@ -1,3 +1,5 @@
+"""Functions to generate micro-strip lines and couplers. These functions can be used to create cells that can be exported as gds files."""
+
 from typing import Sequence
 import klayout.db as db
 
@@ -15,6 +17,7 @@ def straight_line(
 ) -> db.Cell:
     """
     Generate a micro-strip straight line cell. Can be exported as a gds files.
+
     :param layout: layout where the cell will be drawn.
     :param name: name of the cell generated
     :param width: Width of the signal line (Reference line is three time wider).
@@ -67,6 +70,7 @@ def coupled_lines(
 ) -> db.Cell:
     """
     Generate a cell with two micro-strip lines coupled by a gap. Can be exported as a gds files.
+
     :param width1: width of the first line.
     :param length: length of the two lines.
     :param gap: gap between the two lines.
@@ -105,7 +109,8 @@ def marchand_balun(
     name: str = "marchand",
 ) -> db.Cell:
     """
-    Implements a marchand balun, for a 50Ω balun, 2 -4.8 dB 90° coupler are required.
+    Implement a marchand balun, for a 50Ω balun, 2 -4.8 dB 90° coupler are required.
+
     :param width: width of the signal lines.
     :param length: length of the signal line (the coupler length is twice this value).
     :param gap: gap between the two lines.
@@ -172,6 +177,7 @@ def lange_coupler(
 ) -> db.Cell:
     """
     Generate a flat symmetrical lange coupler with two strips per track.
+
     :param layout: Layout object.
     :param width: track width (in µm)
     :param length: total length of the lines.

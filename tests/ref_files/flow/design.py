@@ -1,6 +1,4 @@
-"""
-File for steps testing.
-"""
+"""File for steps testing."""
 
 from haadic._config import REF_PATH
 from haadic.core.steps.step import Dim

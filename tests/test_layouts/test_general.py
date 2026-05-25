@@ -10,7 +10,7 @@ from haadic.design.layouts.general import (
 from haadic.design.layouts.tools import LayerStack, check_diff
 from haadic._config import REF_PATH
 
-stack = LayerStack("mock")
+stack = LayerStack("mock")  # ty:ignore[invalid-argument-type]
 
 
 def test_via(tmp_path):

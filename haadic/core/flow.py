@@ -1,3 +1,5 @@
+"""Module defining the Flow class, which composes multiple steps (layout generation, extraction, simulation, post-processing) into a complete design flow."""
+
 import logging
 from pathlib import Path
 from klayout.db import Cell
@@ -17,6 +19,16 @@ from haadic.design.layouts.tools import LayerStack
 
 @dataclass
 class ConfigFlow:
+    """
+    Configuration for a Flow execution.
+
+    :param techno: Selected PDK name.
+    :param reload: Whether to reload intermediate files when available (e.g., layout, spice netlist) or to recompute them.
+    :param run_dir: Base directory where results are written.
+    :param extract_level: Extraction level used by the Extract step.
+    :param sweep_folder: If True, create a separate folder per sweep value when using the run_from_* methods.
+    """
+
     techno: Available_PDK = "sky130"
     reload: bool = True
     run_dir: Path = Path("./results")
@@ -26,7 +38,8 @@ class ConfigFlow:
 
 @dataclass
 class Flow:
-    """Flow dataclass
+    """
+    Flow dataclass.
 
     :param layout: function that generates the layout. It takes as argument a klayout Cell, a LayerStack and the dimensions of the layout to generate.
      It should return a klayout Cell with the generated layout.
@@ -43,6 +56,16 @@ class Flow:
     config: ConfigFlow = field(default_factory=ConfigFlow)
 
     def run_from_dim(self, dimensions: step.Dim) -> step.Dim:
+        """
+        Run the composed flow starting from explicit dimensions.
+
+        Args:
+            dimensions: a `Dim` instance describing layout dimensions/parameters.
+
+        Returns:
+            A `Dim`-like object containing aggregated performance metrics produced by the postprocess steps.
+
+        """
         datas = step.Dim()
         d_benches = [f.resolve() for f in self.benches]
         for bench, eval in zip(d_benches, self.postprocess):
@@ -50,7 +73,7 @@ class Flow:
                 dimensions, self.config.run_dir, self.config.sweep_folder
             )
             flow = step.compose(
-                Layout(ConfigLayout(self.config.techno, self.layout)),
+                Layout(ConfigLayout(self.layout, self.config.techno)),
                 Extract(ConfigExtract(self.config.techno, self.config.extract_level)),
                 BenchSim(ConfigSim(bench, self.config.techno)),
                 reload=self.config.reload,
@@ -66,7 +89,18 @@ class Flow:
         self,
         target: step.Dim,
         local_model: Callable[[step.Dim], step.Dim],
-    ):
+    ) -> step.Dim:
+        """
+        Run the flow from a target specification using a local model.
+
+        Args:
+            target: A `Dim` describing desired target values.
+            local_model: Callable that maps the `target` to actual layout `Dim` parameters.
+
+        Returns:
+            A `Dim`-like object containing aggregated performance metrics produced by the postprocess steps.
+
+        """
         perf = self.run_from_dim(local_model(target))
         res = [(key, perf.dct[key], target.dct.get(key, "N/A")) for key in perf.dct]
         logging.info(
@@ -76,3 +110,4 @@ class Flow:
         logging.info("compare performances to targets")
         cost = step.compare_to(perf.dct, target.dct)
         logging.info(f"current cost: {cost}")
+        return perf

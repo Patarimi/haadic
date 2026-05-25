@@ -1,3 +1,5 @@
+"""EKV model extraction and representation for transistors in the haadic design flow."""
+
 from functools import partial
 from dataclasses import dataclass, asdict
 import json
@@ -25,7 +27,8 @@ LENGTH_RATIO = 15
 
 @dataclass(slots=True)
 class EKV:
-    """EKV model class
+    """
+    EKV model class.
 
     :param Available_PDK techno: selected technologie
     :param float length: minimal length in the technologie (in µm).
@@ -53,39 +56,36 @@ class EKV:
     gds_r: float = 0
 
     def __post_init__(self):
+        """Load the model parameters from the pdk install directory if the techno is not mock."""
         if self.techno != "mock":
             model_file = get_file(self.techno, "ekv_model")
             if model_file.is_file():
                 self.load(model_file)
 
     def ic(self, id: np.ndarray) -> np.ndarray:
+        """Return the inversion coefficient for a given drain current."""
         return _IC(id, self.i_spec_square, self.ratio)
 
     @property
     def shape(self) -> Dim:
+        """Return the dimensions of the transistor as a Dim object, with keys "length", "width" and "n_finger"."""
         return Dim(
             {"length": self.length, "width": self.width, "n_finger": self.n_finger}
         )
 
     @property
     def ratio(self) -> float:
-        """
-        Return the width to length ratio of the transistor.
-        """
+        """Return the width to length ratio of the transistor."""
         return self.length / (self.width * self.n_finger)
 
     @property
     def lambda_c(self) -> float:
-        """
-        Return the channel length modulation parameter lambda_c.
-        """
+        """Return the channel length modulation parameter lambda_c."""
         return self.l_c / self.length
 
     @property
     def cgd(self) -> float:
-        """
-        Return the gate-drain capacitance (in F).
-        """
+        """Return the gate-drain capacitance (in F)."""
         return (
             self.cgd_wl * self.width * self.n_finger * self.length
             + self.cgd_w * self.width * self.n_finger
@@ -93,26 +93,25 @@ class EKV:
 
     @property
     def cbd(self) -> float:
-        """
-        Return the bulk-drain capacitance (in F).
-        """
+        """Return the bulk-drain capacitance (in F)."""
         return self.cbd_w * self.width * self.n_finger
 
     @property
     def cgs_gb(self) -> float:
-        """
-        Return the gate-source and gate-bulk capacitance (in F).
-        """
+        """Return the gate-source and gate-bulk capacitance (in F)."""
         return (
             self.cgs_gb_wl * self.width * self.n_finger * self.length
             + self.cgs_gb_w * self.width * self.n_finger
         )
 
     def gm_IC(self, id: np.ndarray) -> np.ndarray:
+        """Return the gm over IC ratio for a given drain current."""
         return _gm(id * self.ratio, self.l_c / self.length, self.n, self.i_spec_square)
 
     def load(self, filename: Optional[str | Path] = None) -> Self:
-        """Load the model parameters from a json file.
+        """
+        Load the model parameters from a json file.
+
         :param filename: The name of the file to load the model from. If None, it will look for the model in the pdk install directory., defaults to None
         :return Self: The EKV model with the loaded parameters.
         """
@@ -131,6 +130,7 @@ class EKV:
         return self
 
     def update(self, other: dict[str, float] | Dim) -> Self:
+        """Update the model parameters with the values from another dictionary or Dim object."""
         if isinstance(other, Dim):
             other = other.dct
         for key in other:
@@ -138,7 +138,9 @@ class EKV:
         return self
 
     def dump(self, filename: str | Path) -> None:
-        """Dump the model parameters to a json file.
+        """
+        Dump the model parameters to a json file.
+
         :param filename: The name of the file to dump the model to.
         """
         with open(filename, "w") as f:
@@ -146,11 +148,17 @@ class EKV:
 
     @property
     def model(self) -> dict:
+        """
+        Return the model parameters as a dictionary.
+
+        This is used for dumping the model to a json file.
+        """
         return asdict(self)
 
     def extract_model(self, output_dir: Optional[Path] = None, rf: bool = True) -> Self:
         """
         Extract the EKV model parameters for a transistor.
+
         :param output_dir: The directory to save the extracted model, by default (pdk install directory).
         :param rf: If true, extract the RF parameters of the EKV model. Else, only extract the DC parameters.
         :returns Self: The EKV model with the extracted parameters.
@@ -169,6 +177,14 @@ bench_ref = Path(__file__).parent / "ekv_bench.cir"
 def extract_dc_ekv(
     techno: Available_PDK, working_dir: Optional[Path] = None, l_min: float = 0.18
 ) -> Dim:
+    """
+    Extract the DC parameters of the EKV model for a transistor.
+
+    :param techno: The technology to extract the model for.
+    :param working_dir: The directory to save the extracted model, by default (pdk install directory).
+    :param l_min: The minimal length in the technology (in µm), used to define the layout dimensions for the extraction.
+    :returns Dim: A Dim object containing the extracted parameters.
+    """
     if techno == "mock":
         logging.warning("Using EKV model with mock techno for testing purposes only.")
         return EKV(techno=techno)
@@ -212,6 +228,14 @@ bench_ac_ref = Path(__file__).parent / "ekv_bench_ac.cir"
 def extract_rf_ekv(
     techno: Available_PDK, working_dir: Optional[Path] = None, l_min: float = 0.18
 ) -> Dim:
+    """
+    Extract the RF parameters of the EKV model for a transistor.
+
+    :param techno: The technology to extract the model for.
+    :param working_dir: The directory to save the extracted model, by default (pdk install directory).
+    :param l_min: The minimal length in the technology (in µm), used to define the layout dimensions for the extraction.
+    :returns Dim: A Dim object containing the extracted parameters.
+    """
     if techno not in get_args(Available_PDK):
         raise ValueError(f"Techno {techno} not supported in EKV model.")
 

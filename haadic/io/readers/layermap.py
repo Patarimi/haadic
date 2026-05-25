@@ -1,3 +1,5 @@
+"""Lark transformer for layermap (gds map files) grammar tokens."""
+
 from pathlib import Path
 from dataclasses import dataclass
 from haadic.io.readers.tools import parse
@@ -8,6 +10,7 @@ from lark import Transformer
 class Map:
     """
     Store one layer of a layermap file.
+
     :param layer: The layer number
     :param types: The list of type numbers and their corresponding datatype.
     """
@@ -16,9 +19,11 @@ class Map:
     layer: int
 
     def __str__(self):
+        """Return a string representation of the Map object."""
         return f"{self.layer} - {self.types}"
 
     def __getitem__(self, item: str):
+        """Return the layer number corresponding to a given datatype."""
         for key in self.types:
             if item.lower() in self.types[key]:
                 return self.layer, key
@@ -28,19 +33,25 @@ class Map:
 
 
 class LayerMap(Transformer):
+    """Lark transformer for layermap grammar tokens."""
+
     INTEGER = int
     NAME = str
 
     def SETOFTYPE(self, types):
+        """Convert a SETOFTYPE token to a list of strings."""
         return types.lower().split(",")
 
     def TYPE(self, types):
+        """Convert a TYPE token to a list of strings."""
         return types.lower().split(",")
 
     def layer(self, layer):
+        """Convert a layer token to a Map object."""
         return layer
 
     def start(self, start) -> dict[str, Map]:
+        """Convert the start token to a dictionary mapping layer names to Map objects."""
         map_d: dict[str, Map] = dict()
         for layer in start:
             name = layer[0]
@@ -52,6 +63,7 @@ class LayerMap(Transformer):
 
 
 def load_map(map_path: Path) -> dict[str, Map]:
+    """Load a layermap file and return a dictionary mapping layer names to Map objects."""
     t = parse(map_path, "layermap")
     map_list = LayerMap().transform(t)
     return map_list
@@ -62,6 +74,7 @@ def get_number(
 ) -> tuple[int, int]:
     """
     Read layer information (layer number and datatype) from layermap file.
+
     :param layer_data: a dict with oll layer map data.
     :param name: name of the layer
     :param datatype: type of the data (drawing, pin, etc.)

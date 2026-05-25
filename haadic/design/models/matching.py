@@ -1,3 +1,5 @@
+"""Models for matching circuits."""
+
 from math import sqrt, pi, atan
 import numpy as np
 from haadic.io.writers.netlist import Component
@@ -9,11 +11,12 @@ def lumped_l(
     z_load: complex, z_source: complex
 ) -> tuple[tuple[float, float], tuple[float, float]]:
     """
-    Return the two solutions to match a complex load to a line. The value of needed capacitor and inductor
-    can be computed using denorm function.
+    Return the two solutions to match a complex load to a line.
 
+    The value of needed capacitor and inductor can be computed using denorm function.
     *Source* : Microwave engineering, Fourth Edition, David Pozar, Chapter 5.1
         + original work to include complex z_source.
+
     :param z_load: impedance of the load.
     :param z_source: impedance of the source.
     :return: two tuples (B, X), respectively the shunt and series element of the matching.
@@ -45,16 +48,24 @@ def lumped_l(
 
 
 class Pos(Enum):
+    """
+    Position of the element in the matching circuit.
+
+    It can be either in series or in parallel.
+    """
+
     series = "series"
     parallel = "parallel"
 
     def __str__(self):
+        """Return the string representation of the position."""
         return self.name
 
 
 def denorm(x: float, f: float, pos: Pos = Pos.series, name: str = "") -> Component:
     """
     Return a component (capacity or inductance) of an element reactance.
+
     :param x: reactance
     :param f: frequency
     :param pos: element placement, can be "series" or "parallel"
@@ -84,6 +95,7 @@ def single_shunt_stub(
 ) -> tuple[list[float], list[float], list[float]]:
     """
     Return the solution to match a load *z_load* to a line of impedance *z_0* using a parallel (shunt) stub.
+
     This is mainly used with micro-strip lines.
     Two solutions are given either using an open or a shorted stub.
     *Source* : Microwave engineering, Fourth Edition, David Pozar, Chapter 5.2
@@ -127,6 +139,7 @@ def single_series_stub(
 ) -> tuple[list[float], list[float], list[float]]:
     """
     Return the solution to match a load *z_load* to a line of impedance *z_0* using a series stub.
+
     Two solutions are given either using an open or a shorted stub.
     This is mainly used with coplanar waveguide.
     *Source* : Microwave engineering, Fourth Edition, David Pozar, Chapter 5.2
@@ -150,6 +163,7 @@ def __delta(q1: float, q2: float, a: float):
 def transformer(z_load: complex, z_source: complex, k: float = 0.8) -> np.ndarray:
     """
     Return the two solutions to match two complex load with a transformer.
+
     :param z_load: impedance of the load.
     :param z_source: impedance of the source.
     :param k: coupling factor.
