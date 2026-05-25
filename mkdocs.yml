@@ -9,6 +9,8 @@ nav:
 
 theme:
   name: material
+  features: ['navigation.indexes']
+  
 markdown_extensions:
   - toc:
       permalink: True
@@ -26,4 +28,5 @@ plugins:
             docstring_style: sphinx
   - api-autonav:
       modules: ['haadic']
-      on_implicit_namespace_package: skip
+      nav_section_title: "Module Documentation"
+      exclude: ['haadic.data', 'haadic.main']
