@@ -29,4 +29,5 @@ plugins:
   - api-autonav:
       modules: ['haadic']
       nav_section_title: "Module Documentation"
-      exclude: ['haadic.data', 'haadic.main']
+      on_implicit_namespace_package: 'skip'
+      exclude: ['haadic.main']
