@@ -1,3 +1,4 @@
+"""Spice netlist writer."""
 from haadic.io.wrappers.tools import to_wsl
 from dataclasses import dataclass, field
 from pathlib import Path
