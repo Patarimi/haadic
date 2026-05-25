@@ -9,7 +9,7 @@ from haadic.design.layouts.microstrip import (
 )
 from haadic.design.layouts.tools import LayerStack, Port, check_diff
 
-layerstack = LayerStack("mock")
+layerstack = LayerStack("mock")  # ty:ignore[invalid-argument-type]
 
 
 def test_straight_line(tmp_path):

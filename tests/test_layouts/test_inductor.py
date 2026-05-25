@@ -10,7 +10,7 @@ pytestmark = pytest.mark.skipif(not is_installed("mock"), reason="PDK not instal
 
 
 def test_inductor(tmp_path):
-    layerstack = LayerStack("mock")
+    layerstack = LayerStack("mock")  # ty:ignore[invalid-argument-type]
     lib = db.Layout()
     octagonal_inductor(
         lib, 120e-6, 1, 5e-6, 2e-6, layerstack, port_gap=15e-6, port_ext=20e-6
