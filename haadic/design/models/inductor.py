@@ -1,3 +1,4 @@
+"""Models for inductors."""
 from numpy import pi
 from typing import Optional
 

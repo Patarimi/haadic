@@ -1,3 +1,4 @@
+"""Models for matching circuits."""
 from math import sqrt, pi, atan
 import numpy as np
 from haadic.io.writers.netlist import Component
@@ -45,10 +46,16 @@ def lumped_l(
 
 
 class Pos(Enum):
+    """Position of the element in the matching circuit.
+    
+    It can be either in series or in parallel.
+    """
+
     series = "series"
     parallel = "parallel"
 
     def __str__(self):
+        """Return the string representation of the position."""
         return self.name
 
 

@@ -1,3 +1,4 @@
+"""Models for micro-strip lines."""
 import numpy as np
 from numpy import log, sqrt, pi, e
 
