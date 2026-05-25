@@ -1,3 +1,4 @@
+"""NGSPICE wrapper for haadic."""
 from fileinput import FileInput
 from pathlib import Path
 from typing import Optional

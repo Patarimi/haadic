@@ -1,3 +1,4 @@
+"""Magic wrapper for haadic."""
 from pathlib import Path
 from typing import Literal
 from os.path import dirname

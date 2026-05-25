@@ -1,3 +1,4 @@
+"""EMX wrapper for haadic."""
 from dataclasses import dataclass
 import logging
 from pathlib import Path
@@ -7,9 +8,8 @@ import numpy as np
 import skrf as rf
 from haadic.design.layouts.tools import Port
 from subprocess import run
-from os.path import join
 from dotenv import load_dotenv
-from haadic.core.techno import load_pdk
+from haadic.core.techno import get_file
 import glob
 from typing import Optional
 
@@ -30,8 +30,7 @@ class Emx:
         :return: None
         """
         load_dotenv()
-        tech = load_pdk(techno)
-        self.proc = join(tech["base_dir"], tech["process"])
+        self.proc = get_file(techno, "process")
 
     def compute(
         self,
@@ -109,12 +108,14 @@ class Emx:
 
 
 def command(key: str, value: str) -> str:
+    """Convert a key-value pair to a command line argument."""
     if len(key) > 1:
         return f"--{key}={value}"
     return f"-{key} {value}"
 
 
 def parse(stream: str) -> rf.Network:
+    """Parse the output of EMX and return a scikit RF network."""
     f = list()
     ports = list()
     y = list()
