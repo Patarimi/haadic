@@ -17,25 +17,25 @@ from haadic.design.layouts.tools import LayerStack
 
 @dataclass
 class ConfigFlow:
+    """Configuration for a Flow execution.
+    
+    :param techno: Selected PDK name.
+    :param reload: Whether to reload intermediate files when available (e.g., layout, spice netlist) or to recompute them.
+    :param run_dir: Base directory where results are written.
+    :param extract_level: Extraction level used by the Extract step.
+    :param sweep_folder: If True, create a separate folder per sweep value when using the run_from_* methods.
+    """
+
     techno: Available_PDK = "sky130"
     reload: bool = True
     run_dir: Path = Path("./results")
     extract_level: ExtractLevels = "RC"
     sweep_folder: bool = True
-    """Configuration for a Flow execution.
-
-    Attributes:
-        techno: Selected PDK name.
-        reload: Whether to reload intermediate files when available (e.g., layout, spice netlist) or to recompute them.
-        run_dir: Base directory where results are written.
-        extract_level: Extraction level used by the Extract step.
-        sweep_folder: If True, create a separate folder per sweep value when using the run_from_* methods.
-    """
 
 
 @dataclass
 class Flow:
-    """Flow dataclass
+    """Flow dataclass.
 
     :param layout: function that generates the layout. It takes as argument a klayout Cell, a LayerStack and the dimensions of the layout to generate.
      It should return a klayout Cell with the generated layout.
@@ -59,6 +59,7 @@ class Flow:
 
         Returns:
             A `Dim`-like object containing aggregated performance metrics produced by the postprocess steps.
+
         """
         datas = step.Dim()
         d_benches = [f.resolve() for f in self.benches]
@@ -92,6 +93,7 @@ class Flow:
 
         Returns:
             A `Dim`-like object containing aggregated performance metrics produced by the postprocess steps.
+
         """
         perf = self.run_from_dim(local_model(target))
         res = [(key, perf.dct[key], target.dct.get(key, "N/A")) for key in perf.dct]

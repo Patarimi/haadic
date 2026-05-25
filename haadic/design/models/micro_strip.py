@@ -8,7 +8,8 @@ c_0 = 2.99e8
 def wheeler(
     width: float, height: float, k: float, thick: float = 1e-6, length: float = 0
 ):
-    """
+    """Calculate the characteristic impedance of a micro-strip line using Wheeler equation.
+    
     :param width: Width of the line
     :param height: Height of the dielectric
     :param k: Permittivity of the dielectric

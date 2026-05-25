@@ -59,8 +59,8 @@ def extract_small_l(
 def extract_big_l(
     bench_data: SimRes, dimensions: Dim, base_dir: Path, show_graph: bool
 ) -> Dim:
-    """
-    Extract the EKV model parameters from the bench data for a long channel transistor.
+    """Extract the EKV model parameters from the bench data for a long channel transistor.
+
     The parameters extracted are n and i_spec. (lambda_c is assumed to be 0).
     """
     ekv = Dim(
@@ -175,41 +175,28 @@ def extract_rf(
 
 
 def _IC(id: np.ndarray, i_spec_square: float, ratio: float) -> np.ndarray:
-    """
-    Compute the inversion coefficient of a MOS transistor in the EKV model.
-    Parameters
-    ----------
-    id : np.ndarray
-        The drain current of the transistor (in A).
-    i_spec_square : float
-        The subthreshold square current factor (in A).
-    ratio : float
-        The length-to-width ratio of the transistor.
-    Returns
-    -------
-    np.ndarray
-        The inversion coefficient of the transistor.
+    """Compute the inversion coefficient of a MOS transistor in the EKV model.
+
+    :param id: The drain current of the transistor (in A).
+    :param i_spec_square: The subthreshold square current factor (in A).
+    :param ratio: The length-to-width ratio of the transistor.
+
+    :return: The inversion coefficient of the transistor.
+
     """
     return id / i_spec_square * ratio
 
 
 def _gm(id: np.ndarray, l_c: float, n: float, i_ssq: float) -> np.ndarray:
-    """
-    Compute the transconductance of a MOS transistor in the EKV model.
-    Parameters
-    ----------
-    id : np.ndarray
-        The drain current of the transistor (in A).
-    l_c : float
-        The channel length modulation parameter (no units).
-    n : float
-        The subthreshold slope factor (no units).
-    i_ssq : float
-        The subthreshold square current factor (in A).
-    Returns
-    -------
-    np.ndarray
-        The transconductance of the transistor.
+    """Compute the transconductance of a MOS transistor in the EKV model.
+
+    :param id: The drain current of the transistor (in A).
+    :param l_c: The channel length modulation parameter (no units).
+    :param n: The subthreshold slope factor (no units).
+    :param i_ssq: The subthreshold square current factor (in A).
+
+    :return: The transconductance of the transistor.
+
     """
     IC = id / i_ssq
     return (np.sqrt((l_c * IC + 1) ** 2 + 4 * IC) - 1) / (

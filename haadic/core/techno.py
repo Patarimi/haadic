@@ -136,6 +136,7 @@ def load_pdk(pdk_name: str, path: Optional[str] = None) -> dict[str, str]:
 
     Raises:
         KeyError: if the PDK name cannot be found.
+
     """
     if path is not None:
         PATHS.insert(0, Path(path))
@@ -152,14 +153,15 @@ def load_pdk(pdk_name: str, path: Optional[str] = None) -> dict[str, str]:
 def add_reference(
     pdk_name: str, ref_name: str, path_file: str, path_tech: Optional[Path] = None
 ) -> None:
-    """
-    Add a reference file to the techno.yml file.
+    """Add a reference file to the techno.yml file.
+
     The reference file can be a LEF, a SPICE model or a HAADIC json file.
 
-    Args:
-        pdk_name: Name of the PDK to which the reference file is added.
-        ref_name: Name of the reference file (e.g., 'techlef', 'haadic', 'spice').
-        path_file: Path to the reference file.
+    
+    :param pdk_name: Name of the PDK to which the reference file is added.
+    :param ref_name: Name of the reference file (e.g., 'techlef', 'haadic', 'spice').
+    :param path_file: Path to the reference file.
+    :param path_tech: Optional path to the techno.yml file to update. If None, it will look for techno.yml in the current directory and then in the data directory.
     """
     if path_tech is None:
         path_tech = DATA_DIR / "techno.yml"
@@ -172,7 +174,7 @@ def add_reference(
 
 
 def get_file(pdk_name: str, file_type: str) -> Path:
-    """Utility function to get a configuration file for a given technologie.
+    """Get a configuration file for a given technologie.
 
     :param str pdk_name: selected technologie (from Available_PDK).
     :param str file_type: software configuration files.
@@ -194,6 +196,7 @@ def _read_tech(tech_file: str | Path) -> dict[str, dict[str, str]]:
 
     Returns:
         Parsed YAML content as a Python dict.
+
     """
     with open(tech_file, "r") as f:
         process_d = yaml.load(f, Loader=yaml.Loader)

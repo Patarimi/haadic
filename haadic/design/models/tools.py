@@ -1,6 +1,4 @@
-"""
-module for common rf functions and utilities.
-"""
+"""Module for common rf functions and utilities."""
 
 from typing import Sequence
 import numpy as np
@@ -11,8 +9,8 @@ from haadic.io.writers.netlist import Component
 
 
 def db20(x_lin: Sequence[complex] | complex, /) -> float:
-    """
-    Return the decibel value of the sum of the given complex number.
+    """Return the decibel value of the sum of the given complex number.
+
     :param x_lin: input complex numbers
     :return: sum of absolute value of the input complex numbers in decibel
     examples:
@@ -28,22 +26,18 @@ def db20(x_lin: Sequence[complex] | complex, /) -> float:
 
 
 def quality(z: complex) -> float:
-    """
-    Return the quality factor of an impedance.
-    """
+    """Return the quality factor of an impedance."""
     return z.imag / z.real
 
 
 def norm_diff(a: float, b: float, /) -> float:
-    """
-    return the normalized difference of two numbers a and b.
-    """
+    """Return the normalized difference of two numbers a and b."""
     return abs(a - b) / (abs(a) + abs(b))
 
 
 def med_Xpercentile(data: np.ndarray, fun: str = "max", percent: float = 0.1) -> float:
-    """
-    Return the median of the _percent_ top (or bottom) percentile of the data.
+    """Return the median of the _percent_ top (or bottom) percentile of the data.
+
     :param data: input data array
     :param fun: "max" or "min" to select top or bottom percentile
     :param percent: percentile threshold (between 0 and 1)
@@ -60,9 +54,7 @@ def med_Xpercentile(data: np.ndarray, fun: str = "max", percent: float = 0.1) ->
 
 
 def network(component: Component, media: Media) -> Network:
-    """
-    Create a scikit-rf network from a component definition and a media.
-    """
+    """Create a scikit-rf network from a component definition and a media."""
     if "0" in component.node:
         if component.type == "C":
             sp = media.shunt_capacitor(component.value, name=component.full_name())  # ty: ignore invalid-argument-type

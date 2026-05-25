@@ -220,13 +220,13 @@ class LayerStack:
         self._via_list = via_list
 
     def apply_patch(self):
-        """
-        Apply a patch file to the techno.yml file.
+        """Apply a patch file to the techno.yml file.
+
         The patch file is a json file that contains the modifications to be applied to the techno.yml file.
 
-        Args:
-            pdk_name: Name of the PDK to which the patch file is applied.
-            patch_file: Path to the patch file.
+        :param pdk_name: Name of the PDK to which the patch file is applied.
+        :param patch_file: Path to the patch file.
+
         """
         patch_file = DATA_DIR / "patches" / f"{self.techno}.json"
         if not Path(patch_file).is_file():
@@ -238,9 +238,9 @@ class LayerStack:
 
 @dataclass
 class Port:
-    """
-    Class to store port information.
-    :param name: name of the port (name of the label on the positive side
+    """Class to store port information.
+
+    :param name: name of the port (name of the label on the positive side)
     :param ref: reference of the port (name of the label on the negative side)
         - leave empty to force a connection to the ground
     """
@@ -259,8 +259,8 @@ class Port:
 
 
 def check_diff(gds1: str | Path, gds2: str | Path) -> bool:
-    """
-    Test if the 2 gds files are the same. Raise error if they differ.
+    """Test if the 2 gds files are the same. Raise error if they differ.
+    
     :param gds1: path of the first gds
     :param gds2: path of the second gds
     :return: None

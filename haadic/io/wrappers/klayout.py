@@ -6,8 +6,8 @@ from klayout import db as kl
 
 
 def check_diff(file1: Path, file2: Path) -> bool:
-    """
-    Check if two netlist are identical.
+    """Check if two netlist are identical.
+
     :param file1: Path to the first file.
     :param file2: Path to the second file.
     :return: True if the files are identical, False otherwise.
@@ -24,8 +24,8 @@ def check_diff(file1: Path, file2: Path) -> bool:
 def extract_spice(
     gds_file: Path, techno: str, output_path: Optional[Path] = None
 ) -> Path:
-    """
-    Extract the equivalent spice schematic of a gdsii file.
+    """Extract the equivalent spice schematic of a gdsii file.
+    
     :param gds_file: Input file to be simulated
     :param techno: name of technology to be used in the simulation.
     :return: A spice schematic to be used by ngspice

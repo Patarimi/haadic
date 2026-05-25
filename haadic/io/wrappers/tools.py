@@ -24,9 +24,7 @@ def nix_check():
 
 
 def to_wsl(path: (Path | str)) -> str:
-    """
-    Convert a windows path to a linux path for WSL usage.
-    """
+    """Convert a windows path to a linux path for WSL usage."""
     if os.name != "nt" or str(path).startswith("/mnt/"):
         return str(path)
     if type(path) is not Path:

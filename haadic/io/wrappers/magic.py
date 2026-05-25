@@ -17,8 +17,8 @@ def extract_spice(
     output_path: Path = Path(),
     options: ExtractLevels = "RC",
 ) -> Path:
-    """
-    Extract the equivalent spice schematic of a gdsii file using magic-vlsi.
+    """Extract the equivalent spice schematic of a gdsii file using magic-vlsi.
+    
     :param cell_name: name of the cell in the gdsii file to be extracted.
     :param gds_file: Input file to be extracted.
     :param rc_file: RC file to be used in the extraction.

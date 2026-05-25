@@ -27,8 +27,7 @@ class Layout(Step):
     output_suffix: str = ".gds"
 
     def run(self, input_file: Path) -> Path:
-        """
-        Generate a layout in the requested techologies with the given parametric layout and the given set of parameters.
+        """Generate a layout in the requested techologies with the given parametric layout and the given set of parameters.
 
         :param input_file: set of parameters for the layout.
         """

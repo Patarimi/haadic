@@ -26,8 +26,8 @@ def octagonal_inductor(
     port_gap: float = -1,
     bridge_nb: Optional[int] = None,
 ) -> db.Cell:
-    """
-    generate a multi-turn octagonal inductor.
+    """Generate a multi-turn octagonal inductor.
+    
     :param layout: layout where the inductor will be drawn
     :param d_i: inner diameter in micron
     :param n_turn: number of turn

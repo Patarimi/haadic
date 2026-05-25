@@ -1,3 +1,1 @@
-"""
-This module centralizes various parsers used within the HAADIC package.
-"""
+"""Various parsers used within the HAADIC package."""

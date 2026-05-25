@@ -1,5 +1,5 @@
-"""
-List of function to parse technological lef (TLEF) files.
+"""List of function to parse technological lef (TLEF) files.
+
 TLEF files give the information on the back-end composition and associated design rules.
 """
 
@@ -103,8 +103,8 @@ class TechLef(Transformer):
 
 @functools.cache
 def load_tlef(tlef_path: str | Path) -> TechStack:
-    """
-    Load a TLEF file and return a dictionary of layer names.
+    """Load a TLEF file and return a dictionary of layer names.
+
     :param tlef_path: path to the TLEF file
     """
     t = parse(tlef_path, "tlef")
@@ -112,8 +112,8 @@ def load_tlef(tlef_path: str | Path) -> TechStack:
 
 
 def get_all_by_type(l_type: str, tlef_path: Path | str) -> list[Layer]:
-    """
-    Return the layers of the given type.
+    """Return the layers of the given type.
+
     :param l_type: type of the layer
     :param tlef_path: path to the TLEF file
     :return: list of layer names for the given type
@@ -129,8 +129,8 @@ def get_all_by_type(l_type: str, tlef_path: Path | str) -> list[Layer]:
 
 
 def get_by_type(l_type: str, tlef_path: Path, nbr: int) -> Layer:
-    """
-    Return the $nbr^{th}$ layer of the given type.
+    """Return the $nbr^{th}$ layer of the given type.
+
     :param l_type: layer type
     :param tlef_path: path to the TLEF file
     :param nbr: indice of the layer to return
@@ -145,8 +145,8 @@ def get_by_type(l_type: str, tlef_path: Path, nbr: int) -> Layer:
 
 
 def get_metal(nbr: int, tlef_path: Path) -> Layer:
-    """
-    Return the name of the $nbr^{th}$ metal (starting at 1).
+    """Return the name of the $nbr^{th}$ metal (starting at 1).
+
     :param tlef_path: path to the TLEF file
     :param nbr: metal layer number
     :return: name of the metal layer
@@ -155,8 +155,8 @@ def get_metal(nbr: int, tlef_path: Path) -> Layer:
 
 
 def get_via(nbr: int, tlef_path: Path) -> Layer:
-    """
-    Return the name of the $nbr^{th}$ via (starting at 1).
+    """Return the name of the $nbr^{th}$ via (starting at 1).
+    
     :param nbr: via layer number
     :param tlef_path: path to the TLEF file
     :return: name of the via layer

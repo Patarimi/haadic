@@ -25,7 +25,7 @@ LENGTH_RATIO = 15
 
 @dataclass(slots=True)
 class EKV:
-    """EKV model class
+    """EKV model class.
 
     :param Available_PDK techno: selected technologie
     :param float length: minimal length in the technologie (in µm).
@@ -69,23 +69,17 @@ class EKV:
 
     @property
     def ratio(self) -> float:
-        """
-        Return the width to length ratio of the transistor.
-        """
+        """Return the width to length ratio of the transistor."""
         return self.length / (self.width * self.n_finger)
 
     @property
     def lambda_c(self) -> float:
-        """
-        Return the channel length modulation parameter lambda_c.
-        """
+        """Return the channel length modulation parameter lambda_c."""
         return self.l_c / self.length
 
     @property
     def cgd(self) -> float:
-        """
-        Return the gate-drain capacitance (in F).
-        """
+        """Return the gate-drain capacitance (in F)."""
         return (
             self.cgd_wl * self.width * self.n_finger * self.length
             + self.cgd_w * self.width * self.n_finger
@@ -93,16 +87,12 @@ class EKV:
 
     @property
     def cbd(self) -> float:
-        """
-        Return the bulk-drain capacitance (in F).
-        """
+        """Return the bulk-drain capacitance (in F)."""
         return self.cbd_w * self.width * self.n_finger
 
     @property
     def cgs_gb(self) -> float:
-        """
-        Return the gate-source and gate-bulk capacitance (in F).
-        """
+        """Return the gate-source and gate-bulk capacitance (in F)."""
         return (
             self.cgs_gb_wl * self.width * self.n_finger * self.length
             + self.cgs_gb_w * self.width * self.n_finger
@@ -113,6 +103,7 @@ class EKV:
 
     def load(self, filename: Optional[str | Path] = None) -> Self:
         """Load the model parameters from a json file.
+
         :param filename: The name of the file to load the model from. If None, it will look for the model in the pdk install directory., defaults to None
         :return Self: The EKV model with the loaded parameters.
         """
@@ -139,6 +130,7 @@ class EKV:
 
     def dump(self, filename: str | Path) -> None:
         """Dump the model parameters to a json file.
+
         :param filename: The name of the file to dump the model to.
         """
         with open(filename, "w") as f:
@@ -151,6 +143,7 @@ class EKV:
     def extract_model(self, output_dir: Optional[Path] = None, rf: bool = True) -> Self:
         """
         Extract the EKV model parameters for a transistor.
+        
         :param output_dir: The directory to save the extracted model, by default (pdk install directory).
         :param rf: If true, extract the RF parameters of the EKV model. Else, only extract the DC parameters.
         :returns Self: The EKV model with the extracted parameters.

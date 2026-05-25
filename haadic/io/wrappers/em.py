@@ -16,16 +16,16 @@ from typing import Optional
 
 @dataclass
 class Emx:
-    """
-    Base class for emx simulation.
+    """Base class for emx simulation.
+
     :param proc: path to the process file.
     """
 
     proc: Path
 
     def prepare(self, techno: str):
-        """
-        Automatically set the process file for the given technology.
+        """Automatically set the process file for the given technology.
+
         :param techno: name of technology to be used in the simulation.
         :return: None
         """
@@ -41,8 +41,8 @@ class Emx:
         ports: Optional[list[Port | str]] = None,
         **options,
     ):
-        """
-        Run the simulation
+        """Run the simulation.
+
         :param ports: list of ports to be used in simulation. Ports name and ref must be labels in the layout.
             If ports are not given, all the ports in the layout will be used.
             If ports are given, the simulation will be done only on the given ports. Remaining ports will be grounded.
