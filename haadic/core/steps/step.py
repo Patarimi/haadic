@@ -227,13 +227,15 @@ def import_or_default(
 
     """
     if isinstance(to_be_loaded, str):
-        to_be_loaded = set(to_be_loaded)
+        to_be_loaded = {to_be_loaded}
+
+    if not source.is_file():
+        raise FileNotFoundError(f"Source file {source} not found for import")
 
     imp_d = dict()
     for name in to_be_loaded:
-        source = Path(source)
-        if str(source.parent.absolute()) not in sys.path:
-            sys.path.append(str(source.parent.absolute()))
+        if str(source.parent.resolve()) not in sys.path:
+            sys.path.append(str(source.parent.resolve()))
         src_name = str(source.stem)
         imp = __import__(src_name, fromlist=name).__dict__
         if imp.get(name, None) is not None:
