@@ -1,3 +1,4 @@
+"""Functions to generate inductors. These functions can be used to create cells that can be exported as gds files."""
 from numpy import tan, pi
 from typing import Optional, Self, Any
 import logging
@@ -7,9 +8,15 @@ import klayout.db as db
 from .tools import LayerStack
 from .general import via
 
-
+# TODO: Refactor using dataclass.
 class Path(list):
+    """Class representing a path for the inductor.
+    
+    It is a list of tuples of (x, y) coordinates in nm.
+    """
+
     def __new__(cls, value: Any) -> Self:
+        """Create a new Path instance from a list of tuples or a list of lists."""
         return super().__new__(cls, list([(int(x), int(y)) for x, y in value]))  # ty: ignore too-many-positional-arguments
 
 

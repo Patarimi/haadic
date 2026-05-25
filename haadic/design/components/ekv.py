@@ -1,3 +1,4 @@
+"""EKV model extraction and representation for transistors in the haadic design flow."""
 from functools import partial
 from dataclasses import dataclass, asdict
 import json
@@ -59,10 +60,12 @@ class EKV:
                 self.load(model_file)
 
     def ic(self, id: np.ndarray) -> np.ndarray:
+        """Return the inversion coefficient for a given drain current."""
         return _IC(id, self.i_spec_square, self.ratio)
 
     @property
     def shape(self) -> Dim:
+        """Return the dimensions of the transistor as a Dim object, with keys "length", "width" and "n_finger"."""
         return Dim(
             {"length": self.length, "width": self.width, "n_finger": self.n_finger}
         )
@@ -99,6 +102,7 @@ class EKV:
         )
 
     def gm_IC(self, id: np.ndarray) -> np.ndarray:
+        """Return the gm over IC ratio for a given drain current."""
         return _gm(id * self.ratio, self.l_c / self.length, self.n, self.i_spec_square)
 
     def load(self, filename: Optional[str | Path] = None) -> Self:
@@ -138,6 +142,10 @@ class EKV:
 
     @property
     def model(self) -> dict:
+        """Return the model parameters as a dictionary.
+        
+        This is used for dumping the model to a json file.
+        """
         return asdict(self)
 
     def extract_model(self, output_dir: Optional[Path] = None, rf: bool = True) -> Self:
@@ -162,6 +170,13 @@ bench_ref = Path(__file__).parent / "ekv_bench.cir"
 def extract_dc_ekv(
     techno: Available_PDK, working_dir: Optional[Path] = None, l_min: float = 0.18
 ) -> Dim:
+    """Extract the DC parameters of the EKV model for a transistor.
+
+    :param techno: The technology to extract the model for.
+    :param working_dir: The directory to save the extracted model, by default (pdk install directory).
+    :param l_min: The minimal length in the technology (in µm), used to define the layout dimensions for the extraction.
+    :returns Dim: A Dim object containing the extracted parameters.
+    """
     if techno == "mock":
         logging.warning("Using EKV model with mock techno for testing purposes only.")
         return EKV(techno=techno)
@@ -205,6 +220,13 @@ bench_ac_ref = Path(__file__).parent / "ekv_bench_ac.cir"
 def extract_rf_ekv(
     techno: Available_PDK, working_dir: Optional[Path] = None, l_min: float = 0.18
 ) -> Dim:
+    """Extract the RF parameters of the EKV model for a transistor.
+
+    :param techno: The technology to extract the model for.
+    :param working_dir: The directory to save the extracted model, by default (pdk install directory).
+    :param l_min: The minimal length in the technology (in µm), used to define the layout dimensions for the extraction.
+    :returns Dim: A Dim object containing the extracted parameters.
+    """
     if techno not in get_args(Available_PDK):
         raise ValueError(f"Techno {techno} not supported in EKV model.")
 

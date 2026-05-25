@@ -1,3 +1,4 @@
+"""Functions to generate micro-strip lines and couplers. These functions can be used to create cells that can be exported as gds files."""
 from typing import Sequence
 import klayout.db as db
 

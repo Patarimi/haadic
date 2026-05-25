@@ -1,3 +1,4 @@
+"""Functions to generate common source layouts. These functions can be used to create cells that can be exported as gds files."""
 from klayout import db
 
 from haadic.core.steps.step import Dim

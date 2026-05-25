@@ -124,6 +124,13 @@ def get_dtext(
 
 
 def get_shape(layout: db.Layout, point: db.DPoint, layer: int) -> tuple[db.DBox, int]:
+    """Return the shape at the given point and layer.
+
+    :param layout: Layout to be explored.
+    :param point: point to be found.
+    :param layer: layer to explore.
+    :return: the shape at the given point and layer.
+    """
     for cell in layout.each_cell():
         for lyr in layout.layer_indexes():
             for shape in cell.shapes(lyr):

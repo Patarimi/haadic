@@ -1,3 +1,4 @@
+"""Tools to handle layers and ports in the layout generation process."""
 import logging
 import json
 from dataclasses import dataclass, field
@@ -7,11 +8,21 @@ import klayout.db as kdb
 from haadic._config import DATA_DIR
 from haadic.io.readers.tlef import load_tlef
 from haadic.io.readers.layermap import load_map, get_number
-from haadic.core.techno import add_reference, load_pdk, get_file
+from haadic.core.techno import add_reference, load_pdk, get_file, Available_PDK
 
 
 @dataclass
 class Layer:
+    """Layer class to store layer information.
+
+    :param layer: layer number in the GDS file.
+    :param datatype: datatype number in the GDS file.
+    :param name: name of the layer (e.g., "M1", "V1", "Pwell").
+    :param width: minimum width of the layer (for routing layers).
+    :param spacing: minimum spacing of the layer (for routing layers).
+    :param _pin: datatype number for the pin layer (if different from the drawing layer).
+    """
+
     layer: int
     datatype: int = 0
     name: str = ""
@@ -20,42 +31,69 @@ class Layer:
     _pin: int = 0
 
     def __str__(self):
+        r"""Get a string representation of the layer, in the format \"name: layer/datatype\"."""
         return f"{self.name}: {self.layer}/{self.datatype}"
 
     @property
     def map(self):
+        """Get a dictionary representation of the layer, with keys 'layer' and 'datatype'."""
         return {"layer": self.layer, "datatype": self.datatype}
 
     @property
     def drawing(self) -> kdb.LayerInfo:
+        """Get the kdb.LayerInfo corresponding to the drawing layer."""
         return kdb.LayerInfo(self.layer, self.datatype)
 
     @property
     def pin(self) -> kdb.LayerInfo:
+        """Get the kdb.LayerInfo corresponding to the pin layer."""
         return kdb.LayerInfo(self.layer, self._pin)
 
     @property
     def pitch(self) -> float:
+        """Get the minimum pitch of the layer, which is the sum of the width and the spacing."""
         return self.width + self.spacing
 
 
 @dataclass
 class ViaLayer(Layer):
+    """ViaLayer class to store via layer information. Inherits from Layer.
+    
+    :param between: tuple of the two metal layers between which the via is located. The metal layers are represented by their index in the LayerStack (starting from 1 for the first metal layer, 0 for the gate layer).
+    :param enclosure: enclosure of the via layer (can be a single value or a tuple of the enclosure on the lower and upper metal layers).
+    """
+
     between: tuple[int, int] = (0, 0)
     enclosure: float | tuple[float, float] = 0
 
     def __post_init__(self):
+        """Ensure that the between attribute is a tuple of two integers and the enclosure attribute is a tuple of two floats."""
         if isinstance(self.between, list):
             self.between = (self.between[0], self.between[1])
 
 
 def default_layer():
+    """Return a default layer with layer number 0 and name 'NotFound'."""
     return Layer(0, name="NotFound")
 
 
 @dataclass
 class LayerStack:
-    techno: str
+    """LayerStack class to store the layer stack information of a PDK.
+
+    :param techno: name of the PDK technology (e.g., "sky130").
+    :param _stack: list of Layer objects representing the routing layers, ordered from the lowest to the highest layer.
+    :param _via_list: list of ViaLayer objects representing the via layers, ordered from the lowest to the highest layer.
+    :param _pad: Layer object representing the pad layer (usually the uppermost layer).
+    :param _gate: Layer object representing the gate layer (usually the lowest layer).
+    :param _nplus: Layer object representing the n+ implant layer.
+    :param _pplus: Layer object representing the p+ implant layer.
+    :param _nwell: Layer object representing the nwell layer.
+    :param _active: Layer object representing the active layer.
+    :param grid: grid size of the technology (in meters).
+    """
+
+    techno: Available_PDK
     _stack: list[Layer] = field(default_factory=list)
     _via_list: list[ViaLayer] = field(default_factory=list)
     _pad: Layer = field(init=False)
@@ -67,6 +105,7 @@ class LayerStack:
     grid: float = 1e-9
 
     def __post_init__(self):
+        """Initialize the LayerStack by loading the technology information from the techno.yml file."""
         pdk = load_pdk(self.techno)
         if "haadic" in pdk.keys() and get_file(self.techno, "haadic").is_file():
             path_json = get_file(self.techno, "haadic")
@@ -83,14 +122,26 @@ class LayerStack:
         self.apply_patch()
 
     def __len__(self):
+        """Return the number of routing layers in the stack."""
         return len(self._stack)
 
     def get_metal_layer(self, num: int) -> Layer:
+        """Get the Layer object corresponding to the metal layer level.
+        
+        :param num: metal layer level (starting from 1 for the first metal layer, 0 for the gate layer, and negative values for counting from the top layer).
+        :return: the Layer object corresponding to the requested metal layer level.
+        """
         if num == 0:
             return self._gate
         return self._stack[num - 1 if num > 0 else num]
 
     def get_layer_index(self, layer: int, datatype: int = 0) -> int:
+        """Get the index of a layer in the stack.
+
+        :param layer: layer number.
+        :param datatype: datatype of the layer.
+        :return: the index of the layer in the stack.
+        """
         for i, lyr in enumerate(self._stack):
             if lyr.layer == layer and lyr.datatype == datatype:
                 return i + 1
@@ -100,12 +151,19 @@ class LayerStack:
         raise ValueError(f"Layer {layer}/{datatype} not found in LayerStack.")
 
     def get_pad_layer(self) -> Layer:
+        """Get the Layer object corresponding to the pad layer."""
         return self._pad
 
     def get_gate_layer(self) -> Layer:
+        """Get the Layer object corresponding to the gate layer."""
         return self._gate
 
     def get_via_layer(self, num: int) -> ViaLayer:
+        """Get the ViaLayer object corresponding to the via layer between the metal layer num and num+1.
+
+        :param num: metal layer level (starting from 1 for the first metal layer, 0 for the gate layer, and negative values for counting from the top layer).
+        :return: the ViaLayer object corresponding to the requested via layer.
+        """
         if num < 0:
             num = len(self._stack) + num + 1
         for vlyr in self._via_list:
@@ -114,6 +172,12 @@ class LayerStack:
         raise IndexError(f"No via layer found for metal layer {num}.")
 
     def layers_from_to(self, start: int, end: int) -> list[int]:
+        """Get the list of layer indices in the stack between the metal layers start and end (inclusive).
+
+        :param start: starting metal layer level (starting from 1 for the first metal layer, 0 for the gate layer, and negative values for counting from the top layer).
+        :param end: ending metal layer level (starting from 1 for the first metal layer, 0 for the gate layer, and negative values for counting from the top layer).
+        :return: the list of layer indices in the stack between the requested metal layers.
+        """
         if start < 0:
             start = len(self._stack) + start + 1
         if end < 0:
@@ -121,6 +185,7 @@ class LayerStack:
         return list(range(start, end + 1))
 
     def load_from_json(self, path_json: Path | str):
+        """Load the layer stack information from a JSON file."""
         with open(path_json, "r") as f:
             data = json.load(f)
             self.grid = data.get("grid", 1e-9)
@@ -140,6 +205,7 @@ class LayerStack:
                     self._via_list.append(ViaLayer(**lyr))
 
     def load_from_tlef(self, path: Path | str):
+        """Load the layer stack information from a TLEF file."""
         t_stack = load_tlef(path)
         self.grid = t_stack.unit
         map_path = get_file(self.techno, "layermap")
@@ -245,10 +311,12 @@ class Port:
     ref: str = ""
 
     def __post_init__(self):
+        """If the reference is empty, set it to the name with '_r' suffix."""
         if self.ref == "" and self.name != "":
             self.ref = self.name + "_r"
 
     def __str__(self):
+        r"""Get a string representation of the port, in the format \"name=ref\" if ref is different from name, or \"name\" if ref is the same as name."""
         if self.ref == "":
             return self.name
         return f"{self.name}={self.name}:{self.ref}"
