@@ -86,18 +86,12 @@ class LayerStack:
     LayerStack class to store the layer stack information of a PDK.
 
     :param techno: name of the PDK technology (e.g., "sky130").
-    :param _stack: list of Layer objects representing the routing layers, ordered from the lowest to the highest layer.
-    :param _via_list: list of ViaLayer objects representing the via layers, ordered from the lowest to the highest layer.
-    :param _pad: Layer object representing the pad layer (usually the uppermost layer).
-    :param _gate: Layer object representing the gate layer (usually the lowest layer).
-    :param _nplus: Layer object representing the n+ implant layer.
-    :param _pplus: Layer object representing the p+ implant layer.
-    :param _nwell: Layer object representing the nwell layer.
-    :param _active: Layer object representing the active layer.
     :param grid: grid size of the technology (in meters).
     """
 
     techno: Available_PDK
+    grid: float = 1e-9
+    
     _stack: list[Layer] = field(default_factory=list)
     _via_list: list[ViaLayer] = field(default_factory=list)
     _pad: Layer = field(init=False)
@@ -106,7 +100,6 @@ class LayerStack:
     _pplus: Layer = field(default_factory=default_layer)
     _nwell: Layer = field(default_factory=default_layer)
     _active: Layer = field(default_factory=default_layer)
-    grid: float = 1e-9
 
     def __post_init__(self):
         """Initialize the LayerStack by loading the technology information from the techno.yml file."""
