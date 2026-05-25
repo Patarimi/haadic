@@ -1,4 +1,5 @@
-"""Contains function to generate general purpose cells.
+"""
+Contains function to generate general purpose cells.
 
 (Via, via stack, ground plane, etc.)
 """
@@ -12,7 +13,8 @@ from .tools import LayerStack, ViaLayer, Layer
 
 
 def via(layout: db.Layout, layer: ViaLayer, size: tuple[float, float]) -> db.Cell:
-    """Generate a via cell.
+    """
+    Generate a via cell.
 
     :param layout: The layout to use.
     :param layer: The Layers to use.
@@ -60,7 +62,8 @@ def via_stack(
     id_bot: int,
     size: tuple[float, float],
 ) -> db.Cell:
-    """Generate a via stack cell.
+    """
+    Generate a via stack cell.
 
     :param layout: The layout to use.
     :param layers: The stack of layers to use.
@@ -93,7 +96,8 @@ Label = tuple[db.DText, int]
 def get_dtext(
     layout: db.Layout, label: Optional[str] = None, cell: Optional[str] = None
 ) -> list[Label]:
-    """Return the dtext with the associated label in the layout.
+    """
+    Return the dtext with the associated label in the layout.
 
     :param layout: Layout to be explored.
     :param label: label (string) to be found, if None, return all label.
@@ -124,7 +128,8 @@ def get_dtext(
 
 
 def get_shape(layout: db.Layout, point: db.DPoint, layer: int) -> tuple[db.DBox, int]:
-    """Return the shape at the given point and layer.
+    """
+    Return the shape at the given point and layer.
 
     :param layout: Layout to be explored.
     :param point: point to be found.
@@ -144,7 +149,8 @@ def get_shape(layout: db.Layout, point: db.DPoint, layer: int) -> tuple[db.DBox,
 
 
 def set_as_port(cell: db.Cell, label: str):
-    """Retrieve label in subcells and copy to cell.
+    """
+    Retrieve label in subcells and copy to cell.
 
     :param cell:
     :param label:
@@ -163,7 +169,8 @@ def set_as_port(cell: db.Cell, label: str):
 def ground_plane(
     layout: db.Layout, layers: LayerStack, size: tuple[float, float], id_gnd: int = 1
 ) -> db.Cell:
-    """Generate a ground plane cell.
+    """
+    Generate a ground plane cell.
 
     :param layout: The layout to use.
     :param layers: The stack of layers to use.
@@ -188,7 +195,8 @@ def enclose(
     extension: float = 0.0,
     filter: Layer | None = None,
 ) -> db.DBox:
-    """Enclose the cell with a box on the given layer.
+    """
+    Enclose the cell with a box on the given layer.
     
     :param cell: The cell to enclose.
     :param layer: The layer to use for the enclosure.

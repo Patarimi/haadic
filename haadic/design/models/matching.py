@@ -9,7 +9,8 @@ from enum import Enum
 def lumped_l(
     z_load: complex, z_source: complex
 ) -> tuple[tuple[float, float], tuple[float, float]]:
-    """Return the two solutions to match a complex load to a line.
+    """
+    Return the two solutions to match a complex load to a line.
     
     The value of needed capacitor and inductor can be computed using denorm function.
     *Source* : Microwave engineering, Fourth Edition, David Pozar, Chapter 5.1
@@ -46,7 +47,8 @@ def lumped_l(
 
 
 class Pos(Enum):
-    """Position of the element in the matching circuit.
+    """
+    Position of the element in the matching circuit.
     
     It can be either in series or in parallel.
     """
@@ -60,7 +62,8 @@ class Pos(Enum):
 
 
 def denorm(x: float, f: float, pos: Pos = Pos.series, name: str = "") -> Component:
-    """Return a component (capacity or inductance) of an element reactance.
+    """
+    Return a component (capacity or inductance) of an element reactance.
 
     :param x: reactance
     :param f: frequency
@@ -89,7 +92,8 @@ def denorm(x: float, f: float, pos: Pos = Pos.series, name: str = "") -> Compone
 def single_shunt_stub(
     z_load: complex, z_0: complex
 ) -> tuple[list[float], list[float], list[float]]:
-    """Return the solution to match a load *z_load* to a line of impedance *z_0* using a parallel (shunt) stub.
+    """
+    Return the solution to match a load *z_load* to a line of impedance *z_0* using a parallel (shunt) stub.
 
     This is mainly used with micro-strip lines.
     Two solutions are given either using an open or a shorted stub.
@@ -132,7 +136,8 @@ def single_shunt_stub(
 def single_series_stub(
     z_load: complex, z_0: float
 ) -> tuple[list[float], list[float], list[float]]:
-    """Return the solution to match a load *z_load* to a line of impedance *z_0* using a series stub.
+    """
+    Return the solution to match a load *z_load* to a line of impedance *z_0* using a series stub.
 
     Two solutions are given either using an open or a shorted stub.
     This is mainly used with coplanar waveguide.
@@ -155,7 +160,8 @@ def __delta(q1: float, q2: float, a: float):
 
 
 def transformer(z_load: complex, z_source: complex, k: float = 0.8) -> np.ndarray:
-    """Return the two solutions to match two complex load with a transformer.
+    """
+    Return the two solutions to match two complex load with a transformer.
     
     :param z_load: impedance of the load.
     :param z_source: impedance of the source.

@@ -58,7 +58,8 @@ def compute(
     show_model: bool = False,
     skip_run: bool = False,
 ):
-    """Run the simulation using openEMS.
+    """
+    Run the simulation using openEMS.
 
     :param input_file: gds file to be simulated.
     :param cell_name: name of the cell to simulate (default value: top cell of the layout)
@@ -178,7 +179,8 @@ def make_geometry(
     *,
     margin: float = 0.2,
 ):
-    """Create a geometry in OpenEMS from a gds and a technology.
+    """
+    Create a geometry in OpenEMS from a gds and a technology.
     
     :param cell_name: Name of the cell to simulate (default value: top cell of the layout).
     :param gds_file: The input gds file (the top cell is used by default).

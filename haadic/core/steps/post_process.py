@@ -14,7 +14,8 @@ type PostProcessFunc = Callable[[SimRes, Dim, Path], Dim]
 
 @dataclass
 class ConfigPostProc:
-    """Configuration for the PostProcess step.
+    """
+    Configuration for the PostProcess step.
     
     :param evaluate: function that evaluates the performances of the circuit.
         It takes as argument the simulation results of the benches and the dimensions of the layout.
@@ -26,7 +27,8 @@ class ConfigPostProc:
 
 @dataclass
 class PostProcess:
-    """Step to post-process the simulation results and extract performance metrics.
+    """
+    Step to post-process the simulation results and extract performance metrics.
 
     This step is meant to be run after a spice simulation step, and it takes as input the raw output file of the simulation (with suffix .raw)
     and produces as output a Dim class with the performance metrics.
@@ -41,7 +43,8 @@ class PostProcess:
     output_suffix: str = ""
 
     def run(self, data_file: Path = Path("top.raw"), dimensions: Dim = Dim()) -> Dim:
-        """Run the post-processing step.
+        """
+        Run the post-processing step.
 
         This method reads the raw simulation output file, evaluates the performance metrics using the provided evaluate function, and returns a Dim class with the performance metrics.
 

@@ -48,7 +48,8 @@ def run_cli(
     reload_result: Optional[bool] = None,
     sweep_folder: bool = False,
 ) -> Dim:
-    r"""Run the full haadic flow.
+    r"""
+    Run the full haadic flow.
 
     It runs the following steps :\n
         - Generate the layout using the specified technology.\n
@@ -105,7 +106,8 @@ def extract_ekv_cli(
     rf: bool = True,
     force: bool = False,
 ) -> EKV:
-    """Extract EKV model parameters from a given technology and save them in a json file.
+    """
+    Extract EKV model parameters from a given technology and save them in a json file.
 
     :param techno_name: name of the technology to extract the EKV model from. Must be one of the techno supported by haadic.
     :param output: path of the json file to save the extracted model. If None, the model is saved in the pdk install directory with the name ekv_model_<techno_name>.json.

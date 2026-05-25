@@ -19,7 +19,8 @@ class Component:
     node: tuple[str, str]
 
     def __repr__(self) -> str:
-        """Get a string representation of the component, in the format "type name node1 node2 value" compatible with spice netlist format.
+        """
+        Get a string representation of the component, in the format "type name node1 node2 value" compatible with spice netlist format.
 
         For example, a resistor named "R1" with a value of 1000 between nodes "n1" and "n2" will be represented as "R R1 n1 n2 1kΩ".
         """
@@ -27,7 +28,8 @@ class Component:
         return f"{self.full_name()} {self.node[0]} {self.node[1]} {value}"
 
     def readable_value(self) -> str:
-        """Get the value of the component in a human readable format, with the appropriate unit.
+        """
+        Get the value of the component in a human readable format, with the appropriate unit.
 
         For example, a resistor with a value of 1000 will be represented as "1kΩ".
         """
@@ -40,7 +42,8 @@ class Component:
 
 @dataclass
 class Netlist:
-    """Represents a Netlist. The connexion list is stored in circuit.
+    """
+    Represents a Netlist. The connexion list is stored in circuit.
 
     The spice netlist can be generated using the spice function.
     """
@@ -51,7 +54,8 @@ class Netlist:
     others: list[str] = field(default_factory=list)
 
     def load(self, spice_file: Path | str) -> Self:
-        """Load a spice netlist from a file.
+        """
+        Load a spice netlist from a file.
 
         :param spice_file: path of the spice file to load.
         :return: the Netlist instance with the content of the spice file.
@@ -85,7 +89,8 @@ class Netlist:
         self.controls.append(control)
 
     def add_other(self, other: str):
-        """Add an 'other' element to the netlist (not a component and not in the control section).
+        """
+        Add an 'other' element to the netlist (not a component and not in the control section).
 
         Use by higher level such as add_lib and add_include functions.
 
@@ -95,7 +100,8 @@ class Netlist:
         self.others.append(other)
 
     def add_lib(self, lib_path: Path | str, section: Optional[str] = None):
-        """Add a library definition in the netlist.
+        """
+        Add a library definition in the netlist.
 
         :param lib_path: path of the library file to add.
         :param section: if the library file contains several sections, specify the section to include in the netlist. Else, the whole library file is included.
@@ -109,7 +115,8 @@ class Netlist:
         self.add_other(" ".join(item))
 
     def add_include(self, include_path: Path | str) -> None:
-        """Add an include statement in the netlist.
+        """
+        Add an include statement in the netlist.
 
         :param include_path: path of the include file to add (such as subcircuit or model).
         :return: None.
@@ -119,7 +126,8 @@ class Netlist:
         self.add_other(".include " + to_wsl(include_path))
 
     def is_in_other(self, key: str, file: Path) -> bool:
-        """Check if a command is already in the 'other' section of the netlist.
+        """
+        Check if a command is already in the 'other' section of the netlist.
 
         :param key: the command to check (e.g., '.lib' or '.include').
         :param file: the file associated to the command (e.g., the library or include file).
@@ -143,7 +151,8 @@ class Netlist:
         return spice
 
     def write(self, filename: Path = Path("netlist.cir")) -> Path:
-        """Write the spice netlist in the file given in parameter.
+        """
+        Write the spice netlist in the file given in parameter.
 
         :param filename: path of the file where the netlist will be written. Default is "netlist.cir".
         :return: the path of the file where the netlist is written.

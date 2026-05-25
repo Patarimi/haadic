@@ -7,7 +7,8 @@ from lark import Transformer
 
 @dataclass
 class Map:
-    """Store one layer of a layermap file.
+    """
+    Store one layer of a layermap file.
 
     :param layer: The layer number
     :param types: The list of type numbers and their corresponding datatype.
@@ -70,7 +71,8 @@ def load_map(map_path: Path) -> dict[str, Map]:
 def get_number(
     layer_data: dict[str, Map], name: str, datatype: str = "drawing"
 ) -> tuple[int, int]:
-    """Read layer information (layer number and datatype) from layermap file.
+    """
+    Read layer information (layer number and datatype) from layermap file.
     
     :param layer_data: a dict with oll layer map data.
     :param name: name of the layer

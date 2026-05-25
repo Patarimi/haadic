@@ -16,7 +16,8 @@ def mosfet(
     length: float = 0.13,
     doping: Literal["N", "P"] = "N",
 ):
-    """Create and insert a mosfet in the given cell.
+    """
+    Create and insert a mosfet in the given cell.
 
     :param cell: top cell in which the mosfet is inserted
     :param layers: LayerStack to use
@@ -90,7 +91,8 @@ def line(
     layer: Layer = Layer(1, 0, "M2", 1, 0.5),
     below=False,
 ):
-    """Draw a horizontal line above (or below if _below_ = True) the content of the cell.
+    """
+    Draw a horizontal line above (or below if _below_ = True) the content of the cell.
 
     :param cell: cell to be used.
     :param name: name of the line, a label will be added.
@@ -126,7 +128,8 @@ def line(
 def connect(
     cell: db.Cell, layers: LayerStack, label_line: str, label_mos: str
 ) -> db.Cell:
-    """Connect a horizontal line to a label using a vertical line.
+    """
+    Connect a horizontal line to a label using a vertical line.
 
     :param cell: top cell to be used.
     :param layers: LayerStack to be used (for via generation).
@@ -150,7 +153,8 @@ def connect(
 def pattern_connect(
     cell: db.Cell, layers: LayerStack, device_name: str, pattern: Sequence[str]
 ) -> db.Cell:
-    """Connect the ports of a device to lines following the given pattern.
+    """
+    Connect the ports of a device to lines following the given pattern.
 
     Pattern is replicated until all ports are connected.
 

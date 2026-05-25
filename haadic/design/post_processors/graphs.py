@@ -28,7 +28,8 @@ def export_graph(
     show_graph: bool = False,
     x_scale: Literal["lin", "log"] = "log",
 ):
-    """Export a graph for the selected datas.
+    """
+    Export a graph for the selected datas.
 
     The datas can be an array or a tuple of array and label.
 

@@ -30,7 +30,8 @@ PDK_INSTALL_DIR = Path(
 
 @pkd_app.command(name="install")
 def install(pdk_name: Available_PDK):
-    """Install the _pdk_name_ technology in its default location.
+    """
+    Install the _pdk_name_ technology in its default location.
 
     :param Available_PDK pdk_name: name of the PDK to be installed.
     """
@@ -107,7 +108,8 @@ def print_pdk() -> None:
 
 
 def list_pdk():
-    """Return a list of PDK names discovered in configured PATHS.
+    """
+    Return a list of PDK names discovered in configured PATHS.
 
     Scans `PATHS` for YAML entries and aggregates available PDK keys.
     """
@@ -126,7 +128,8 @@ def is_installed(pdk_name: str) -> bool:
 
 @functools.cache
 def load_pdk(pdk_name: str, path: Optional[str] = None) -> dict[str, str]:
-    """Load the metadata dictionary for a PDK by name.
+    """
+    Load the metadata dictionary for a PDK by name.
 
     Args:
         pdk_name: the PDK name to load (one of `Available_PDK`).
@@ -154,7 +157,8 @@ def load_pdk(pdk_name: str, path: Optional[str] = None) -> dict[str, str]:
 def add_reference(
     pdk_name: str, ref_name: str, path_file: str, path_tech: Optional[Path] = None
 ) -> None:
-    """Add a reference file to the techno.yml file.
+    """
+    Add a reference file to the techno.yml file.
 
     The reference file can be a LEF, a SPICE model or a HAADIC json file.
 
@@ -175,7 +179,8 @@ def add_reference(
 
 
 def get_file(pdk_name: str, file_type: str) -> Path:
-    """Get a configuration file for a given technologie.
+    """
+    Get a configuration file for a given technologie.
 
     :param str pdk_name: selected technologie (from Available_PDK).
     :param str file_type: software configuration files.
@@ -190,7 +195,8 @@ def get_file(pdk_name: str, file_type: str) -> Path:
 
 
 def _read_tech(tech_file: str | Path) -> dict[str, dict[str, str]]:
-    """Read a YAML technology description file and return it as a dict.
+    """
+    Read a YAML technology description file and return it as a dict.
 
     Args:
         tech_file: path to a YAML file describing one or more PDKs.

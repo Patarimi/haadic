@@ -13,7 +13,8 @@ from haadic.core.steps.step import Dim, Step
 
 @dataclass
 class ConfigLayout:
-    """Configuration for the Layout step.
+    """
+    Configuration for the Layout step.
 
     :param layout: function that generates the layout.
     :param techno: technology to be used.
@@ -25,7 +26,8 @@ class ConfigLayout:
 
 @dataclass
 class Layout(Step):
-    """Step to generate a layout from a parametric description.
+    """
+    Step to generate a layout from a parametric description.
 
     :param config: configuration for the layout generation step, including the layout function and the technology to use.
     :param input_suffixes: list of expected suffixes for the input files. By default, it is set to [".json"].
@@ -37,7 +39,8 @@ class Layout(Step):
     output_suffix: str = ".gds"
 
     def run(self, input_file: Path) -> Path:
-        """Generate a layout in the requested techologies with the given parametric layout and the given set of parameters.
+        """
+        Generate a layout in the requested techologies with the given parametric layout and the given set of parameters.
 
         :param input_file: set of parameters for the layout.
         """

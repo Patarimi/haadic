@@ -1,4 +1,5 @@
-r"""Functions to ease the design of passive filter using the insertion loss method.
+r"""
+Functions to ease the design of passive filter using the insertion loss method.
 
 ```mermaid
 flowchart LR
@@ -11,7 +12,8 @@ import numpy as np
 
 
 def prototype(order: int, style: str, ripple: float = 0.2):
-    """Compute a low pass filter prototype.
+    """
+    Compute a low pass filter prototype.
     
     The equations are from [source](https://ia803103.us.archive.org/15/items/MicrowaveFiltersImpedanceMatchingNetworksAndCouplingStructures/Microwave%20Filters%2C%20Impedance-Matching%20Networks%2C%20and%20Coupling%20Structures.pdf).
 
@@ -41,7 +43,8 @@ def prototype(order: int, style: str, ripple: float = 0.2):
 
 
 def scaling(proto: np.ndarray, f: float, r_0: float):
-    """Properly scale a low-pass filter prototype.
+    """
+    Properly scale a low-pass filter prototype.
 
     :param proto: list of coefficient of the prototype (see [prototype](filter.md#haadic.models.filter.prototype))
     :param f:
@@ -59,7 +62,8 @@ def scaling(proto: np.ndarray, f: float, r_0: float):
 def to_stepped_impedance(
     proto: np.ndarray, z_high: float, z_low: float, r_0: float = 50
 ):
-    """Convert a low-pass prototype to a stepped_impedance line filter.
+    """
+    Convert a low-pass prototype to a stepped_impedance line filter.
     
     The exact function is implemented instead of the approximation presented in Pozar 2012 chapter. 8.6.
     

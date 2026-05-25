@@ -1,4 +1,5 @@
-"""Module for the design components of the haadic design flow.
+"""
+Module for the design components of the haadic design flow.
 
 The module is composed of this sub-modules:
 - layouts: collection of layout generators for different components (e.g., transistors, capacitors, resistors).

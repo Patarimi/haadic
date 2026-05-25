@@ -4,7 +4,8 @@ import numpy as np
 
 
 def eng(x: float, precision: int = 3, prefix: bool = True) -> str:
-    """Convert a number to engineer notation (notation with an exponent multiple of 3).
+    """
+    Convert a number to engineer notation (notation with an exponent multiple of 3).
 
     For example, 0.000001 will be converted to 1µ, 1000 will be converted to 1k, etc.
 

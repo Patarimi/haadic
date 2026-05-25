@@ -10,7 +10,8 @@ from .general import via
 
 # TODO: Refactor using dataclass.
 class Path(list):
-    """Class representing a path for the inductor.
+    """
+    Class representing a path for the inductor.
     
     It is a list of tuples of (x, y) coordinates in nm.
     """
@@ -33,7 +34,8 @@ def octagonal_inductor(
     port_gap: float = -1,
     bridge_nb: Optional[int] = None,
 ) -> db.Cell:
-    """Generate a multi-turn octagonal inductor.
+    """
+    Generate a multi-turn octagonal inductor.
     
     :param layout: layout where the inductor will be drawn
     :param d_i: inner diameter in micron

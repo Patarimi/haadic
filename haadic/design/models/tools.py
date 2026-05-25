@@ -9,7 +9,8 @@ from haadic.io.writers.netlist import Component
 
 
 def db20(x_lin: Sequence[complex] | complex, /) -> float:
-    """Return the decibel value of the sum of the given complex number.
+    """
+    Return the decibel value of the sum of the given complex number.
 
     :param x_lin: input complex numbers
     :return: sum of absolute value of the input complex numbers in decibel
@@ -36,7 +37,8 @@ def norm_diff(a: float, b: float, /) -> float:
 
 
 def med_Xpercentile(data: np.ndarray, fun: str = "max", percent: float = 0.1) -> float:
-    """Return the median of the _percent_ top (or bottom) percentile of the data.
+    """
+    Return the median of the _percent_ top (or bottom) percentile of the data.
 
     :param data: input data array
     :param fun: "max" or "min" to select top or bottom percentile

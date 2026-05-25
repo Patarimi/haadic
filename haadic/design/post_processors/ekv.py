@@ -14,7 +14,8 @@ from haadic.design.post_processors.graphs import export_graph, Data
 def extract_small_l(
     bench_data: SimRes, geo: Dim, base_dir: Path, show_graph: bool, i_spec_square: float
 ) -> Dim:
-    """Extract the EKV model parameters from the bench data for a short channel transistor.
+    """
+    Extract the EKV model parameters from the bench data for a short channel transistor.
 
     The parameters extracted are n, i_spec and l_c.
 
@@ -71,7 +72,8 @@ def extract_small_l(
 def extract_big_l(
     bench_data: SimRes, dimensions: Dim, base_dir: Path, show_graph: bool
 ) -> Dim:
-    """Extract the EKV model parameters from the bench data for a long channel transistor.
+    """
+    Extract the EKV model parameters from the bench data for a long channel transistor.
 
     The parameters extracted are n and i_spec. (lambda_c is assumed to be 0).
 
@@ -117,7 +119,8 @@ def extract_rf(
     base_dir: Path = Path("."),
     show_graph: bool = False,
 ) -> Dim:
-    """Extract the EKV model parameters from the bench data for a RF transistor.
+    """
+    Extract the EKV model parameters from the bench data for a RF transistor.
 
     The parameters extracted are cgd, cbd, cgs_gb, gds, rg and gm.
     The extraction is based on the Y-parameters of the transistor, which are computed from the S-parameters measured on the bench.
@@ -204,7 +207,8 @@ def extract_rf(
 
 
 def _IC(id: np.ndarray, i_spec_square: float, ratio: float) -> np.ndarray:
-    """Compute the inversion coefficient of a MOS transistor in the EKV model.
+    """
+    Compute the inversion coefficient of a MOS transistor in the EKV model.
 
     :param id: The drain current of the transistor (in A).
     :param i_spec_square: The subthreshold square current factor (in A).
@@ -217,7 +221,8 @@ def _IC(id: np.ndarray, i_spec_square: float, ratio: float) -> np.ndarray:
 
 
 def _gm(id: np.ndarray, l_c: float, n: float, i_ssq: float) -> np.ndarray:
-    """Compute the transconductance of a MOS transistor in the EKV model.
+    """
+    Compute the transconductance of a MOS transistor in the EKV model.
 
     :param id: The drain current of the transistor (in A).
     :param l_c: The channel length modulation parameter (no units).

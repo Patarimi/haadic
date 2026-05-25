@@ -42,7 +42,8 @@ def to_wsl(path: (Path | str)) -> str:
 
 
 def nix_run(cmd: list[str], shell_path: Path = Path(dirname(__file__) + "/shell.nix")) -> CompletedProcess:
-    """Run a command in a nix-shell.
+    """
+    Run a command in a nix-shell.
 
     :param cmd: the command to run, as a list of strings (e.g., ["ls", "-l"]).
     :param shell_path: the path to the nix-shell file.

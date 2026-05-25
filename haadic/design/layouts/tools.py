@@ -13,7 +13,8 @@ from haadic.core.techno import add_reference, load_pdk, get_file, Available_PDK
 
 @dataclass
 class Layer:
-    """Layer class to store layer information.
+    """
+    Layer class to store layer information.
 
     :param layer: layer number in the GDS file.
     :param datatype: datatype number in the GDS file.
@@ -57,7 +58,8 @@ class Layer:
 
 @dataclass
 class ViaLayer(Layer):
-    """ViaLayer class to store via layer information. Inherits from Layer.
+    """
+    ViaLayer class to store via layer information. Inherits from Layer.
     
     :param between: tuple of the two metal layers between which the via is located. The metal layers are represented by their index in the LayerStack (starting from 1 for the first metal layer, 0 for the gate layer).
     :param enclosure: enclosure of the via layer (can be a single value or a tuple of the enclosure on the lower and upper metal layers).
@@ -79,7 +81,8 @@ def default_layer():
 
 @dataclass
 class LayerStack:
-    """LayerStack class to store the layer stack information of a PDK.
+    """
+    LayerStack class to store the layer stack information of a PDK.
 
     :param techno: name of the PDK technology (e.g., "sky130").
     :param _stack: list of Layer objects representing the routing layers, ordered from the lowest to the highest layer.
@@ -126,7 +129,8 @@ class LayerStack:
         return len(self._stack)
 
     def get_metal_layer(self, num: int) -> Layer:
-        """Get the Layer object corresponding to the metal layer level.
+        """
+        Get the Layer object corresponding to the metal layer level.
         
         :param num: metal layer level (starting from 1 for the first metal layer, 0 for the gate layer, and negative values for counting from the top layer).
         :return: the Layer object corresponding to the requested metal layer level.
@@ -136,7 +140,8 @@ class LayerStack:
         return self._stack[num - 1 if num > 0 else num]
 
     def get_layer_index(self, layer: int, datatype: int = 0) -> int:
-        """Get the index of a layer in the stack.
+        """
+        Get the index of a layer in the stack.
 
         :param layer: layer number.
         :param datatype: datatype of the layer.
@@ -159,7 +164,8 @@ class LayerStack:
         return self._gate
 
     def get_via_layer(self, num: int) -> ViaLayer:
-        """Get the ViaLayer object corresponding to the via layer between the metal layer num and num+1.
+        """
+        Get the ViaLayer object corresponding to the via layer between the metal layer num and num+1.
 
         :param num: metal layer level (starting from 1 for the first metal layer, 0 for the gate layer, and negative values for counting from the top layer).
         :return: the ViaLayer object corresponding to the requested via layer.
@@ -172,7 +178,8 @@ class LayerStack:
         raise IndexError(f"No via layer found for metal layer {num}.")
 
     def layers_from_to(self, start: int, end: int) -> list[int]:
-        """Get the list of layer indices in the stack between the metal layers start and end (inclusive).
+        """
+        Get the list of layer indices in the stack between the metal layers start and end (inclusive).
 
         :param start: starting metal layer level (starting from 1 for the first metal layer, 0 for the gate layer, and negative values for counting from the top layer).
         :param end: ending metal layer level (starting from 1 for the first metal layer, 0 for the gate layer, and negative values for counting from the top layer).
@@ -286,7 +293,8 @@ class LayerStack:
         self._via_list = via_list
 
     def apply_patch(self):
-        """Apply a patch file to the techno.yml file.
+        """
+        Apply a patch file to the techno.yml file.
 
         The patch file is a json file that contains the modifications to be applied to the techno.yml file.
         """
@@ -300,7 +308,8 @@ class LayerStack:
 
 @dataclass
 class Port:
-    """Class to store port information.
+    """
+    Class to store port information.
 
     :param name: name of the port (name of the label on the positive side)
     :param ref: reference of the port (name of the label on the negative side)
@@ -323,7 +332,8 @@ class Port:
 
 
 def check_diff(gds1: str | Path, gds2: str | Path) -> bool:
-    """Test if the 2 gds files are the same. Raise error if they differ.
+    """
+    Test if the 2 gds files are the same. Raise error if they differ.
     
     :param gds1: path of the first gds
     :param gds2: path of the second gds

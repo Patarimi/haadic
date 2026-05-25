@@ -18,7 +18,8 @@ from haadic.design.layouts.tools import LayerStack
 
 @dataclass
 class ConfigFlow:
-    """Configuration for a Flow execution.
+    """
+    Configuration for a Flow execution.
     
     :param techno: Selected PDK name.
     :param reload: Whether to reload intermediate files when available (e.g., layout, spice netlist) or to recompute them.
@@ -36,7 +37,8 @@ class ConfigFlow:
 
 @dataclass
 class Flow:
-    """Flow dataclass.
+    """
+    Flow dataclass.
 
     :param layout: function that generates the layout. It takes as argument a klayout Cell, a LayerStack and the dimensions of the layout to generate.
      It should return a klayout Cell with the generated layout.
@@ -53,7 +55,8 @@ class Flow:
     config: ConfigFlow = field(default_factory=ConfigFlow)
 
     def run_from_dim(self, dimensions: step.Dim) -> step.Dim:
-        """Run the composed flow starting from explicit dimensions.
+        """
+        Run the composed flow starting from explicit dimensions.
 
         Args:
             dimensions: a `Dim` instance describing layout dimensions/parameters.
@@ -86,7 +89,8 @@ class Flow:
         target: step.Dim,
         local_model: Callable[[step.Dim], step.Dim],
     ) -> step.Dim:
-        """Run the flow from a target specification using a local model.
+        """
+        Run the flow from a target specification using a local model.
 
         Args:
             target: A `Dim` describing desired target values.

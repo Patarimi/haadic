@@ -1,3 +1,5 @@
+"""Template for the flow module of a haadic project."""
+#TODO: rewrite with the flow class.
 from haadic.design.layouts.tools import LayerStack
 from haadic.core.steps.step import Dim
 from haadic.core.steps.post_process import SimRes
@@ -17,7 +19,8 @@ dimensions: Dim = Dim({})
 
 
 def layout(cell: Cell, layerstack: LayerStack, dimensions: Dim) -> Cell:
-    """Insert the layout generation code here.
+    """
+    Insert the layout generation code here.
     
     It should return a klayout Cell with the generated layout.
     
@@ -30,7 +33,8 @@ def layout(cell: Cell, layerstack: LayerStack, dimensions: Dim) -> Cell:
 
 
 def evaluate(bench_data: SimRes, geometry: Dim) -> Dim:
-    """Insert the code to evaluate the performance of the circuit here.
+    """
+    Insert the code to evaluate the performance of the circuit here.
     
     It should return a dictionary with the performance metrics to optimize as keys and their values as values.
     

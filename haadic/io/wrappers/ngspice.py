@@ -11,7 +11,8 @@ def compute(
     data_file: Optional[Path] = None,
     log_file: Optional[Path] = None,
 ) -> None:
-    """Simulate the spice input file with ngspice.
+    """
+    Simulate the spice input file with ngspice.
     
     :param input_file: a path to the spice input file.
     :param data_file: a path to the data file. (default: same as input_file with .raw extension)

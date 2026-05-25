@@ -12,7 +12,8 @@ def layout(
     layerstack: LayerStack,
     shape: Dim,
 ) -> db.Cell:
-    """Layout of a MOS transistor with given dimensions. The gate and the drain are on the top and the source on the bottom, connected to ground.
+    """
+    Layout of a MOS transistor with given dimensions. The gate and the drain are on the top and the source on the bottom, connected to ground.
 
     :param cell: The cell to draw the layout in.
     :param layerstack: The layerstack to use for the layout.

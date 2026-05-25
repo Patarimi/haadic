@@ -26,7 +26,8 @@ LENGTH_RATIO = 15
 
 @dataclass(slots=True)
 class EKV:
-    """EKV model class.
+    """
+    EKV model class.
 
     :param Available_PDK techno: selected technologie
     :param float length: minimal length in the technologie (in µm).
@@ -106,7 +107,8 @@ class EKV:
         return _gm(id * self.ratio, self.l_c / self.length, self.n, self.i_spec_square)
 
     def load(self, filename: Optional[str | Path] = None) -> Self:
-        """Load the model parameters from a json file.
+        """
+        Load the model parameters from a json file.
 
         :param filename: The name of the file to load the model from. If None, it will look for the model in the pdk install directory., defaults to None
         :return Self: The EKV model with the loaded parameters.
@@ -133,7 +135,8 @@ class EKV:
         return self
 
     def dump(self, filename: str | Path) -> None:
-        """Dump the model parameters to a json file.
+        """
+        Dump the model parameters to a json file.
 
         :param filename: The name of the file to dump the model to.
         """
@@ -142,7 +145,8 @@ class EKV:
 
     @property
     def model(self) -> dict:
-        """Return the model parameters as a dictionary.
+        """
+        Return the model parameters as a dictionary.
         
         This is used for dumping the model to a json file.
         """
@@ -170,7 +174,8 @@ bench_ref = Path(__file__).parent / "ekv_bench.cir"
 def extract_dc_ekv(
     techno: Available_PDK, working_dir: Optional[Path] = None, l_min: float = 0.18
 ) -> Dim:
-    """Extract the DC parameters of the EKV model for a transistor.
+    """
+    Extract the DC parameters of the EKV model for a transistor.
 
     :param techno: The technology to extract the model for.
     :param working_dir: The directory to save the extracted model, by default (pdk install directory).
@@ -220,7 +225,8 @@ bench_ac_ref = Path(__file__).parent / "ekv_bench_ac.cir"
 def extract_rf_ekv(
     techno: Available_PDK, working_dir: Optional[Path] = None, l_min: float = 0.18
 ) -> Dim:
-    """Extract the RF parameters of the EKV model for a transistor.
+    """
+    Extract the RF parameters of the EKV model for a transistor.
 
     :param techno: The technology to extract the model for.
     :param working_dir: The directory to save the extracted model, by default (pdk install directory).
