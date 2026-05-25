@@ -97,23 +97,28 @@ def run_cli(
 @app.command(name="extract-ekv")
 def extract_ekv_cli(
     techno_name: techno.Available_PDK,
-    output: Optional[str | Path] = None,
+    output: Optional[Path] = None,
+    rf: bool = True,
+    force: bool = False,
 ) -> EKV:
     """Extract EKV model parameters from a given technology and save them in a json file.
     :param techno_name: name of the technology to extract the EKV model from. Must be one of the techno supported by haadic.
     :param output: path of the json file to save the extracted model. If None, the model is saved in the pdk install directory with the name ekv_model_<techno_name>.json.
+    :param rf: If true, extract the RF parameters of the EKV model. Else, only extract the DC parameters.
+    :param force: If true, overwrite the existing model file. Else, skip extraction if the file already exists.
     :return: The extracted EKV model.
     """
 
     if output is None:
-        haadic_dir = techno.get_file(techno_name, "base_dir") / "libs.tech/haadic"
-        if not haadic_dir.is_dir():
-            haadic_dir.mkdir()
-        output = haadic_dir / f"ekv_model_{techno_name}.json"
+        output = techno.get_file(techno_name, "ekv_model")
+        output.parent.mkdir(parents=True, exist_ok=True)
     ekv = EKV(techno=techno_name)
-    ekv.extract_model()
-    ekv.dump(output)
-    logging.info(f"EKV model parameters saved in {output}")
+    if not output.is_file() or force:
+        logging.info(
+            f"Extracting EKV model for {techno_name} and saving it in {output}."
+        )
+        ekv.extract_model(output.parent, rf=rf)
+        ekv.dump(output)
     return ekv
 
 
