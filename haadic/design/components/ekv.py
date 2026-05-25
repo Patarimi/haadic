@@ -158,7 +158,7 @@ class EKV:
     def extract_model(self, output_dir: Optional[Path] = None, rf: bool = True) -> Self:
         """
         Extract the EKV model parameters for a transistor.
-        
+
         :param output_dir: The directory to save the extracted model, by default (pdk install directory).
         :param rf: If true, extract the RF parameters of the EKV model. Else, only extract the DC parameters.
         :returns Self: The EKV model with the extracted parameters.
