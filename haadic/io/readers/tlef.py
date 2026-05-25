@@ -44,7 +44,9 @@ class Layer:
     name: str
     type: Type
     width: float = 0
-    enclosure: float = 0 #TODO: use the Enclosure class to store the enclosure rules for the layer
+    enclosure: float = (
+        0  # TODO: use the Enclosure class to store the enclosure rules for the layer
+    )
     spacing: float = 0
 
 
@@ -73,13 +75,13 @@ class TechLef(Transformer):
     def item(self, item) -> Layer | list[str]:
         """Transform an item of the TLEF file into a Layer object if it is a layer definition, or discard it otherwise."""
         if item is None or len(item) == 0:
-            return Discard # ty:ignore[invalid-return-type]
+            return Discard  # ty:ignore[invalid-return-type]
         if item[0] in ("WIDTH", "TYPE", "SPACING", "ENCLOSURE"):
             return list(item)
         if item[0] in ("MANUFACTURINGGRID",):
             return list(item)
         logging.debug(f"Discarding item: {item}")
-        return Discard # ty:ignore[invalid-return-type]
+        return Discard  # ty:ignore[invalid-return-type]
 
     def table(self, _):
         """Discard tables."""
@@ -93,10 +95,10 @@ class TechLef(Transformer):
         """Transform a setting into a string or a float, depending on the type of the value."""
         return setting[0] if len(setting) == 1 else setting
 
-    def lef58_property(self, prop) -> tuple[str, str]: #type: ignore[return]
+    def lef58_property(self, prop) -> tuple[str, str]:  # type: ignore[return]
         """Transform a lef58_property into a Layer object if it is a layer definition, or discard it otherwise."""
         if prop[0] in ("EOLENCLOSURE",):
-            return Discard # ty:ignore[invalid-return-type]
+            return Discard  # ty:ignore[invalid-return-type]
         if prop[3] in ("PWELL", "NWELL"):
             return ("WELL", prop[3])
         raise ValueError(f"expecting PWELL or NWELL, {prop[3]} provided. {prop[0]}")
@@ -195,7 +197,7 @@ def get_metal(nbr: int, tlef_path: Path) -> Layer:
 def get_via(nbr: int, tlef_path: Path) -> Layer:
     """
     Return the name of the $nbr^{th}$ via (starting at 1).
-    
+
     :param nbr: via layer number
     :param tlef_path: path to the TLEF file
     :return: name of the via layer

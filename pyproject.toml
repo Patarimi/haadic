@@ -58,6 +58,11 @@ sequence = [
 
 [tool.ruff]
 extend-include = ["./workdir/*.py"]
+lint.extend-select = ["D"]
+lint.extend-ignore = ["D203", "D212"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

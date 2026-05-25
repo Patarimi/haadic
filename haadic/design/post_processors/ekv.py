@@ -1,4 +1,5 @@
 """Module for extracting EKV model parameters from bench simulation results."""
+
 from pathlib import Path
 
 import numpy as np

@@ -1,4 +1,5 @@
 """EKV model extraction and representation for transistors in the haadic design flow."""
+
 from functools import partial
 from dataclasses import dataclass, asdict
 import json
@@ -147,7 +148,7 @@ class EKV:
     def model(self) -> dict:
         """
         Return the model parameters as a dictionary.
-        
+
         This is used for dumping the model to a json file.
         """
         return asdict(self)

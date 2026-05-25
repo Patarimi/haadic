@@ -1,4 +1,5 @@
 """Module defining the PostProcess step for post-processing simulation results and extracting performance metrics."""
+
 from haadic.io.readers.raw import parse_out
 from typing import Callable, Sequence
 from dataclasses import field, dataclass
@@ -16,7 +17,7 @@ type PostProcessFunc = Callable[[SimRes, Dim, Path], Dim]
 class ConfigPostProc:
     """
     Configuration for the PostProcess step.
-    
+
     :param evaluate: function that evaluates the performances of the circuit.
         It takes as argument the simulation results of the benches and the dimensions of the layout.
         It should return a Dim class with the performance metrics.

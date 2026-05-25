@@ -1,4 +1,5 @@
 """Lark transformer for layermap (gds map files) grammar tokens."""
+
 from pathlib import Path
 from dataclasses import dataclass
 from haadic.io.readers.tools import parse
@@ -73,7 +74,7 @@ def get_number(
 ) -> tuple[int, int]:
     """
     Read layer information (layer number and datatype) from layermap file.
-    
+
     :param layer_data: a dict with oll layer map data.
     :param name: name of the layer
     :param datatype: type of the data (drawing, pin, etc.)

@@ -1,4 +1,5 @@
 """NGSPICE wrapper for haadic."""
+
 from fileinput import FileInput
 from pathlib import Path
 from typing import Optional
@@ -13,7 +14,7 @@ def compute(
 ) -> None:
     """
     Simulate the spice input file with ngspice.
-    
+
     :param input_file: a path to the spice input file.
     :param data_file: a path to the data file. (default: same as input_file with .raw extension)
     :param log_file: a path to the log file. (default: same as data_file with .log extension)

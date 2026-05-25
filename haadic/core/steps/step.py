@@ -1,4 +1,5 @@
 """Module defining the Step protocol and related utilities for managing steps in the haadic flow."""
+
 import json
 from functools import reduce
 import sys
@@ -33,7 +34,7 @@ class Dim:
     def __str__(self) -> str:
         """
         Get a string representation of the dimensions, in the format "key1_value1__key2_value2".
-        
+
         This format is used for naming files and folders corresponding to specific dimension values.
         """
         return "__".join([f"{key}_{value:g}" for key, value in self.dct.items()])
@@ -57,7 +58,7 @@ class Step(Protocol):
     def run(self, input_file: Path) -> Path:
         """
         Meta-method to be implemented by each step.
-        
+
         :param input_file: path to the input file for the step.
         :return: path to the output file produced by the step.
         """

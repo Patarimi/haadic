@@ -1,4 +1,5 @@
 """KLayout wrapper for haadic."""
+
 from pathlib import Path
 from os.path import dirname
 from typing import Optional
@@ -28,7 +29,7 @@ def extract_spice(
 ) -> Path:
     """
     Extract the equivalent spice schematic of a gdsii file.
-    
+
     :param gds_file: Input file to be simulated
     :param techno: name of technology to be used in the simulation.
     :return: A spice schematic to be used by ngspice

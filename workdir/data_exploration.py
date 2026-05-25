@@ -1,4 +1,5 @@
 """Script to explore the data from the simulations and find simplified models for the parameters."""
+
 from itertools import product
 from pathlib import Path
 from typing import Sequence

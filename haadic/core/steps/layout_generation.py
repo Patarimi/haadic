@@ -1,4 +1,5 @@
 """Module defining the Layout step for generating layouts from parametric descriptions."""
+
 import logging
 from haadic.core.techno import Available_PDK
 from pathlib import Path
@@ -33,7 +34,7 @@ class Layout(Step):
     :param input_suffixes: list of expected suffixes for the input files. By default, it is set to [".json"].
     :param output_suffix: suffix for the output file. By default, it is set to ".gds".
     """
-    
+
     config: ConfigLayout
     input_suffixes: Sequence[str] = field(default_factory=lambda: [".json"])
     output_suffix: str = ".gds"

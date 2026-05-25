@@ -1,4 +1,5 @@
 """Module for managing technology files and PDK installations in the haadic design flow."""
+
 import functools
 import logging
 import os
@@ -162,7 +163,7 @@ def add_reference(
 
     The reference file can be a LEF, a SPICE model or a HAADIC json file.
 
-    
+
     :param pdk_name: Name of the PDK to which the reference file is added.
     :param ref_name: Name of the reference file (e.g., 'techlef', 'haadic', 'spice').
     :param path_file: Path to the reference file.

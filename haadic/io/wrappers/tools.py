@@ -1,4 +1,5 @@
 """Tools for nix-shell wrappers."""
+
 import functools
 import logging
 import os
@@ -41,7 +42,9 @@ def to_wsl(path: (Path | str)) -> str:
     return str(path)
 
 
-def nix_run(cmd: list[str], shell_path: Path = Path(dirname(__file__) + "/shell.nix")) -> CompletedProcess:
+def nix_run(
+    cmd: list[str], shell_path: Path = Path(dirname(__file__) + "/shell.nix")
+) -> CompletedProcess:
     """
     Run a command in a nix-shell.
 

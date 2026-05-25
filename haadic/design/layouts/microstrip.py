@@ -1,4 +1,5 @@
 """Functions to generate micro-strip lines and couplers. These functions can be used to create cells that can be exported as gds files."""
+
 from typing import Sequence
 import klayout.db as db
 
@@ -69,7 +70,7 @@ def coupled_lines(
 ) -> db.Cell:
     """
     Generate a cell with two micro-strip lines coupled by a gap. Can be exported as a gds files.
-    
+
     :param width1: width of the first line.
     :param length: length of the two lines.
     :param gap: gap between the two lines.
@@ -176,7 +177,7 @@ def lange_coupler(
 ) -> db.Cell:
     """
     Generate a flat symmetrical lange coupler with two strips per track.
-    
+
     :param layout: Layout object.
     :param width: track width (in µm)
     :param length: total length of the lines.

@@ -1,4 +1,5 @@
 """OpenEMS wrapper for haadic."""
+
 # -*- coding: utf-8 -*-
 ### Import Libraries
 import logging
@@ -181,7 +182,7 @@ def make_geometry(
 ):
     """
     Create a geometry in OpenEMS from a gds and a technology.
-    
+
     :param cell_name: Name of the cell to simulate (default value: top cell of the layout).
     :param gds_file: The input gds file (the top cell is used by default).
     :param tech: Name of the technology (*haadic pdk list* for a list of available techno).

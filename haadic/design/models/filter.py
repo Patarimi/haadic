@@ -14,7 +14,7 @@ import numpy as np
 def prototype(order: int, style: str, ripple: float = 0.2):
     """
     Compute a low pass filter prototype.
-    
+
     The equations are from [source](https://ia803103.us.archive.org/15/items/MicrowaveFiltersImpedanceMatchingNetworksAndCouplingStructures/Microwave%20Filters%2C%20Impedance-Matching%20Networks%2C%20and%20Coupling%20Structures.pdf).
 
     :param order: order of the filter
@@ -64,9 +64,9 @@ def to_stepped_impedance(
 ):
     """
     Convert a low-pass prototype to a stepped_impedance line filter.
-    
+
     The exact function is implemented instead of the approximation presented in Pozar 2012 chapter. 8.6.
-    
+
     :param proto: prototype of the filter
     :param z_high: impedance of the high impedance section
     :param z_low: impedance of the low impedance section

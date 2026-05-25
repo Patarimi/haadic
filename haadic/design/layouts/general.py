@@ -197,7 +197,7 @@ def enclose(
 ) -> db.DBox:
     """
     Enclose the cell with a box on the given layer.
-    
+
     :param cell: The cell to enclose.
     :param layer: The layer to use for the enclosure.
     :param extension: The amount of extension around the cell.

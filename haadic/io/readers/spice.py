@@ -1,4 +1,5 @@
 """Lark transformer for SPICE grammar tokens."""
+
 from lark import Transformer
 
 

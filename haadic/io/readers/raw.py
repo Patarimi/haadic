@@ -1,4 +1,5 @@
 """Functions to parse raw (results) ngspice output files."""
+
 import logging
 
 import pandas as pd
@@ -34,7 +35,7 @@ def parse_raw(results: Path) -> pd.DataFrame:
 def parse_out(results: Path) -> pd.DataFrame:
     """
     Read ngspice output (in multiline output format) and load it in a dataframe.
-    
+
     :param results: file to be loaded.
     :return: dataframe with loaded data
     """

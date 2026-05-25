@@ -1,4 +1,5 @@
 """Tools to handle layers and ports in the layout generation process."""
+
 import logging
 import json
 from dataclasses import dataclass, field
@@ -60,7 +61,7 @@ class Layer:
 class ViaLayer(Layer):
     """
     ViaLayer class to store via layer information. Inherits from Layer.
-    
+
     :param between: tuple of the two metal layers between which the via is located. The metal layers are represented by their index in the LayerStack (starting from 1 for the first metal layer, 0 for the gate layer).
     :param enclosure: enclosure of the via layer (can be a single value or a tuple of the enclosure on the lower and upper metal layers).
     """
@@ -131,7 +132,7 @@ class LayerStack:
     def get_metal_layer(self, num: int) -> Layer:
         """
         Get the Layer object corresponding to the metal layer level.
-        
+
         :param num: metal layer level (starting from 1 for the first metal layer, 0 for the gate layer, and negative values for counting from the top layer).
         :return: the Layer object corresponding to the requested metal layer level.
         """
@@ -334,7 +335,7 @@ class Port:
 def check_diff(gds1: str | Path, gds2: str | Path) -> bool:
     """
     Test if the 2 gds files are the same. Raise error if they differ.
-    
+
     :param gds1: path of the first gds
     :param gds2: path of the second gds
     :return: None

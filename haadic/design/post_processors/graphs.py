@@ -1,4 +1,5 @@
 """Graph generator."""
+
 from typing import Sequence, Literal
 from dataclasses import dataclass
 from pathlib import Path
