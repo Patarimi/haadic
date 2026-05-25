@@ -1,3 +1,4 @@
+"""Script to generate the layout of an active device, run simulations and post-process the results to extract model parameters."""
 from haadic.design.layouts.tools import LayerStack
 from pathlib import Path
 from klayout.db import Cell
@@ -28,10 +29,12 @@ dimensions = Dim(
 
 
 def layout(cell: Cell, layerstack: LayerStack, shape: Dim):
+    """Generate a source grounded NMOS transistor layout with the given dimensions."""
     return cs_layout(cell, layerstack, shape)
 
 
 def extract_dc(bench_data: SimRes, geo: Dim, base_dir: Path) -> Dim:
+    """Post-process the DC simulation results to extract the DC parameters of the EKV model."""
     dim = extract_big_l(bench_data, geo, base_dir, show_graph=False)
     return extract_small_l(
         bench_data, dim, base_dir, show_graph=False, i_spec_square=dim["i_spec_square"]

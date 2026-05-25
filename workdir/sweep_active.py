@@ -1,3 +1,4 @@
+"""Sweep script for active device parameters extraction and analysis."""
 from itertools import product
 
 from rich import print
