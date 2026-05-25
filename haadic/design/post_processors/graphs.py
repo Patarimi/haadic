@@ -1,3 +1,4 @@
+"""Graph generator."""
 from typing import Sequence, Literal
 from dataclasses import dataclass
 from pathlib import Path
@@ -8,12 +9,15 @@ import numpy as np
 
 @dataclass
 class Data:
+    """Container for data to be plotted on a graph."""
+
     values: float | np.ndarray | Sequence[float]
     name: str = ""
     unit: str = "-"
 
     @property
     def label(self):
+        """Label for the graph axis."""
         return f"{self.name} ({self.unit})"
 
 
@@ -25,6 +29,7 @@ def export_graph(
     x_scale: Literal["lin", "log"] = "log",
 ):
     """Export a graph for the selected datas.
+
     The datas can be an array or a tuple of array and label.
 
     :param x_data: data for the x axis.

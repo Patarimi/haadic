@@ -1,3 +1,4 @@
+"""Module for extracting EKV model parameters from bench simulation results."""
 from pathlib import Path
 
 import numpy as np
@@ -13,6 +14,17 @@ from haadic.design.post_processors.graphs import export_graph, Data
 def extract_small_l(
     bench_data: SimRes, geo: Dim, base_dir: Path, show_graph: bool, i_spec_square: float
 ) -> Dim:
+    """Extract the EKV model parameters from the bench data for a short channel transistor.
+
+    The parameters extracted are n, i_spec and l_c.
+
+    :param bench_data: the simulation results of the bench, containing the I-V curve of the transistor.
+    :param geo: the dimensions of the transistor, containing the length, width and number of fingers.
+    :param base_dir: the directory where the extracted parameters and graphs will be saved, defaults to the current directory.
+    :param show_graph: whether to display the graphs after saving them, defaults to False.
+    :param i_spec_square: the subthreshold square current factor (in A) to use for the extraction. It can be extracted from a long channel transistor of the same design.
+    :return: a Dim object containing the extracted EKV parameters.
+    """
     ekv = Dim(
         dct={
             "length": geo["length"],
@@ -62,6 +74,11 @@ def extract_big_l(
     """Extract the EKV model parameters from the bench data for a long channel transistor.
 
     The parameters extracted are n and i_spec. (lambda_c is assumed to be 0).
+
+    :param bench_data: the simulation results of the bench, containing the I-V curve of the transistor.
+    :param dimensions: the dimensions of the transistor, containing the length, width and number of fingers.
+    :param base_dir: the directory where the extracted parameters and graphs will be saved, defaults to the current directory.
+    :param show_graph: whether to display the graphs after saving them, defaults to False.
     """
     ekv = Dim(
         dct={
@@ -100,6 +117,18 @@ def extract_rf(
     base_dir: Path = Path("."),
     show_graph: bool = False,
 ) -> Dim:
+    """Extract the EKV model parameters from the bench data for a RF transistor.
+
+    The parameters extracted are cgd, cbd, cgs_gb, gds, rg and gm.
+    The extraction is based on the Y-parameters of the transistor, which are computed from the S-parameters measured on the bench.
+    The EKV parameters are then extracted from the Y-parameters using the formulas derived from the EKV model.
+
+    :param bench_data: the simulation results of the bench, containing the Y-parameters of the transistor.
+    :param dimensions: the dimensions of the transistor, containing the length, width and number of fingers.
+    :param base_dir: the directory where the extracted parameters and graphs will be saved, defaults to the current directory.
+    :param show_graph: whether to display the graphs after saving them, defaults to False.
+    :return: a Dim object containing the extracted EKV parameters.
+    """
     ekv = Dim(
         dct={
             "length": dimensions["length"],
