@@ -223,10 +223,6 @@ class LayerStack:
         """Apply a patch file to the techno.yml file.
 
         The patch file is a json file that contains the modifications to be applied to the techno.yml file.
-
-        :param pdk_name: Name of the PDK to which the patch file is applied.
-        :param patch_file: Path to the patch file.
-
         """
         patch_file = DATA_DIR / "patches" / f"{self.techno}.json"
         if not Path(patch_file).is_file():

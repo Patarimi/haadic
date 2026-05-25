@@ -89,7 +89,6 @@ class Netlist:
 
         Use by higher level such as add_lib and add_include functions.
 
-        :param command: the command to add (e.g., '.lib' or '.include').
         :param other: the element to add.
         :return: None.
         """

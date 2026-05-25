@@ -34,10 +34,6 @@ class Step(Protocol):
     """Class storing information for a step.
 
     Each step of a Flow should be implemented as a class inheriting from Step and implementing the run method, which takes an input file and produces an output file.
-    
-    :param input_suffixes: list of accepted suffixes for the input file.
-    :param output_suffix: suffix for the output file.
-    :param config: configuration dictionary for the step.
     """
 
     input_suffixes: Sequence[str]
@@ -48,12 +44,13 @@ class Step(Protocol):
         """Return the expected output file path for a given input file."""
         return input_file.with_suffix(self.output_suffix)
 
-    def run(self, input_file: Path) -> Path: ... 
-    """Meta-method to be implemented by each step.
-    
-    :param input_file: path to the input file for the step.
-    :return: path to the output file produced by the step.
-    """
+    def run(self, input_file: Path) -> Path:
+        """Meta-method to be implemented by each step.
+        
+        :param input_file: path to the input file for the step.
+        :return: path to the output file produced by the step.
+        """
+        pass
 
 
 def init_step(dimensions: Dim, base_dir: Path, sweep_folder: bool = False) -> Path:
