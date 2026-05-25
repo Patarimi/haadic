@@ -7,6 +7,7 @@ from os.path import join, dirname
 
 
 def parse(file: str | Path, template: str = "spice") -> Tree:
+    """Parse a file with a lark template."""
     tpt_file = join(dirname(__file__), template + ".lark")
     with open(tpt_file, "r") as f:
         spice_parser = Lark(f)

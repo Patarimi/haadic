@@ -14,6 +14,12 @@ from lark import Discard, Transformer
 
 @dataclasses.dataclass
 class Enclosure:
+    """Class representing the enclosure rules for a layer.
+
+    :param below: tuple of two floats representing the enclosure for the layer below it.
+    :param above: tuple of two floats representing the enclosure for the layer above it.
+    """
+
     below: tuple[float, float] = (0, 0)
     above: tuple[float, float] = (0, 0)
 
@@ -23,53 +29,76 @@ Type = Literal["ROUTING", "CUT", "MASTERSLICE", "NWELL", "PWELL"]
 
 @dataclasses.dataclass
 class Layer:
+    """Class representing a layer in the technology stack.
+
+    :param name: name of the layer, as specified in the TLEF file.
+    :param type: type of the layer, as specified in the TLEF file. It can be "ROUTING", "CUT", "MASTERSLICE", "NWELL" or "PWELL".
+    :param width: minimum width of the layer, if specified in the TLEF file.
+    :param enclosure: enclosure rules for the layer, if specified in the TLEF file.
+    :param spacing: minimum spacing of two objects of the layer, if specified in the TLEF file.
+    """
+
     name: str
     type: Type
     width: float = 0
-    enclosure: float = 0
+    enclosure: Enclosure = dataclasses.field(default_factory=Enclosure)
     spacing: float = 0
 
 
 @dataclasses.dataclass
 class TechStack:
+    """Class representing the technology stack.
+
+    :param unit: grid for the technology stack, as specified in the TLEF file.
+    :param layers: list of layers in the technology stack.
+    """
+
     unit: float = 1e-3  # default unit is 1/1000 of a micron
     layers: list[Layer] = dataclasses.field(default_factory=list)
 
 
 class TechLef(Transformer):
+    """Lark transformer for parsed TLEF grammar tokens."""
+
     NAME = str
     FLOAT = float
     WORD = str
     BLOCKNAME = str
     KEYWORD = str
 
-    def item(self, item):
+    def item(self, item) -> Layer | list[str]:
+        """Transform an item of the TLEF file into a Layer object if it is a layer definition, or discard it otherwise."""
         if item is None or len(item) == 0:
-            return Discard
+            return Discard # ty:ignore[invalid-return-type]
         if item[0] in ("WIDTH", "TYPE", "SPACING", "ENCLOSURE"):
             return list(item)
         if item[0] in ("MANUFACTURINGGRID",):
             return list(item)
         logging.debug(f"Discarding item: {item}")
-        return Discard
+        return Discard # ty:ignore[invalid-return-type]
 
     def table(self, _):
+        """Discard tables."""
         return Discard
 
     def list(self, _):
+        """Discard lists."""
         return Discard
 
     def setting(self, setting):
+        """Transform a setting into a string or a float, depending on the type of the value."""
         return setting[0] if len(setting) == 1 else setting
 
-    def lef58_property(self, prop):
+    def lef58_property(self, prop) -> tuple[str, str]: #type: ignore[return]
+        """Transform a lef58_property into a Layer object if it is a layer definition, or discard it otherwise."""
         if prop[0] in ("EOLENCLOSURE",):
-            return Discard
+            return Discard # ty:ignore[invalid-return-type]
         if prop[3] in ("PWELL", "NWELL"):
             return ("WELL", prop[3])
         raise ValueError(f"expecting PWELL or NWELL, {prop[3]} provided. {prop[0]}")
 
     def block(self, block):
+        """Transform a block of the TLEF file into a Layer object if it is a layer definition, or discard it otherwise."""
         if block[0] != "LAYER":
             logging.debug(f"Discarding block: {block}")
             return Discard
@@ -90,6 +119,7 @@ class TechLef(Transformer):
         return Layer(**layer)
 
     def start(self, start) -> TechStack:
+        """Transform the parsed TLEF tree into a TechStack object."""
         ss = TechStack()
         for layer in start:
             if isinstance(layer, Layer):

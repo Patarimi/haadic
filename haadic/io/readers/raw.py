@@ -1,3 +1,4 @@
+"""Functions to parse raw (results) ngspice output files."""
 import logging
 
 import pandas as pd

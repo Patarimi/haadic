@@ -1,3 +1,4 @@
+"""Lark transformer for SPICE grammar tokens."""
 from lark import Transformer
 
 
@@ -9,7 +10,9 @@ class SpiceTransformer(Transformer):
     """
 
     def NAME(self, d):
+        """Convert a NAME token to a string."""
         return str(d)
 
     def NET(self, d):
+        """Convert a NET token to a string."""
         return str(d)
