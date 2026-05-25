@@ -1,3 +1,4 @@
+"""Module defining the Step protocol and related utilities for managing steps in the haadic flow."""
 import json
 from functools import reduce
 import sys
@@ -21,12 +22,18 @@ class Dim:
     dct: dict[str, float] = pydantic.Field(default_factory=dict)
 
     def __getitem__(self, key: str) -> float:
+        """Get the value corresponding to the given key."""
         return self.dct[key]
 
     def __setitem__(self, key: str, value: float) -> None:
+        """Set the value corresponding to the given key."""
         self.dct[key] = float(value)
 
     def __str__(self) -> str:
+        """Get a string representation of the dimensions, in the format "key1_value1__key2_value2".
+        
+        This format is used for naming files and folders corresponding to specific dimension values.
+        """
         return "__".join([f"{key}_{value:g}" for key, value in self.dct.items()])
 
 
@@ -213,12 +220,10 @@ def import_or_default(
 ) -> dict[str, Any]:
     """Dynamically import symbols from a Python source file if present.
 
-    Args:
-        source: path to the Python module (a file) to import from.
-        to_be_loaded: iterable of symbol names (or a single string) to attempt to import.
+    :param source: path to the Python module (a file) to import from.
+    :param to_be_loaded: iterable of symbol names (or a single string) to attempt to import.
 
-    Returns:
-        A dict mapping symbol names to the imported objects for symbols found in the module.
+    :return: A dict mapping symbol names to the imported objects for symbols found in the module.
 
     """
     if isinstance(to_be_loaded, str):

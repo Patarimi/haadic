@@ -1,3 +1,4 @@
+"""Module defining the Flow class, which composes multiple steps (layout generation, extraction, simulation, post-processing) into a complete design flow."""
 import logging
 from pathlib import Path
 from klayout.db import Cell
@@ -68,7 +69,7 @@ class Flow:
                 dimensions, self.config.run_dir, self.config.sweep_folder
             )
             flow = step.compose(
-                Layout(ConfigLayout(self.config.techno, self.layout)),
+                Layout(ConfigLayout(self.layout, self.config.techno)),
                 Extract(ConfigExtract(self.config.techno, self.config.extract_level)),
                 BenchSim(ConfigSim(bench, self.config.techno)),
                 reload=self.config.reload,
