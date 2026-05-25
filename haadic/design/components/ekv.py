@@ -56,6 +56,7 @@ class EKV:
     gds_r: float = 0
 
     def __post_init__(self):
+        """Load the model parameters from the pdk install directory if the techno is not mock."""
         if self.techno != "mock":
             model_file = get_file(self.techno, "ekv_model")
             if model_file.is_file():
@@ -129,6 +130,7 @@ class EKV:
         return self
 
     def update(self, other: dict[str, float] | Dim) -> Self:
+        """Update the model parameters with the values from another dictionary or Dim object."""
         if isinstance(other, Dim):
             other = other.dct
         for key in other:
