@@ -1,11 +1,12 @@
 """
-Haadic: A Python framework for analog IC design automation.
+A Python framework for analog IC design automation.
 
-Haadic structure:
+# Haadic structure:
+
  - core
-   - flow: for defining and running design flows
-   - steps: for defining the core steps in the design flow, such as layout generation, extraction, simulation, etc.
-   - techno: for handling technology-specific information and operations.
+    - flow: for defining and running design flows
+    - steps: for defining the core steps in the design flow, such as layout generation, extraction, simulation, etc.
+    - techno: for handling technology-specific information and operations.
  - io
     - readers: files readers (spice, raw, etc.)
     - writers: files writers (spice)
