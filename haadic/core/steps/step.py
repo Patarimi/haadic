@@ -12,6 +12,12 @@ import pydantic
 
 @pydantic.dataclasses.dataclass
 class Dim:
+    """Simple container for named dimension/performance values.
+
+    Stores a mapping of string keys to float values and provides convenient
+    accessors used throughout the flow (indexing, stringification).
+    """
+
     dct: dict[str, float] = pydantic.Field(default_factory=dict)
 
     def __getitem__(self, key: str) -> float:
@@ -40,6 +46,20 @@ class Step(Protocol):
 
 
 def init_step(dimensions: Dim, base_dir: Path, sweep_folder: bool = False) -> Path:
+    """Create or locate the JSON file representing the initial step for a run.
+
+    The function writes `top.json` in `base_dir` (or in a subfolder named after
+    `dimensions` when `sweep_folder` is True). If an existing file contains the
+    same dimensions it is returned directly.
+
+    Args:
+        dimensions: a `Dim` instance with the design parameters.
+        base_dir: base run directory where `top.json` will be written.
+        sweep_folder: whether to place `top.json` in a subfolder named after `dimensions`.
+
+    Returns:
+        Path to the created or existing `top.json` file.
+    """
     if sweep_folder:
         output_file = base_dir / dimensions.__str__() / "top.json"
     else:
@@ -57,11 +77,21 @@ def init_step(dimensions: Dim, base_dir: Path, sweep_folder: bool = False) -> Pa
 
 
 def validate_input(input_file: Path, valid_suffixes: Sequence[str]) -> None:
+    """Raise a ValueError if `input_file` does not have an allowed suffix.
+
+    Args:
+        input_file: file to validate.
+        valid_suffixes: sequence of accepted suffix strings (including leading dot).
+    """
     if input_file.suffix not in valid_suffixes:
         raise ValueError(f"{input_file} suffix is not in {valid_suffixes}")
 
 
 def can_skip(input_file: Path, output_file: Path):
+    """Return True if the step can be skipped based on file modification times.
+
+    A step can be skipped when `output_file` exists and is newer than `input_file`.
+    """
     if not output_file.is_file():
         return False
     if input_file.stat().st_mtime >= output_file.stat().st_mtime:
@@ -70,6 +100,13 @@ def can_skip(input_file: Path, output_file: Path):
 
 
 def compose(*steps: Step, reload: bool = True) -> Step:
+    """Compose multiple Step implementations into a single Step instance.
+
+    The returned object implements the `run(input_file: Path) -> Path` method
+    which will execute each step in order, validating inputs and optionally
+    skipping steps when outputs are up-to-date (controlled by `reload`).
+    """
+
     class Compose(Step):
         input_suffixes: Sequence[str]
         output_suffix: str
@@ -81,6 +118,15 @@ def compose(*steps: Step, reload: bool = True) -> Step:
             self.config = config
 
         def run(self, input_file: Path) -> Path:
+            """Execute the composed steps sequentially starting from `input_file`.
+
+            Args:
+                input_file: initial input file for the first step.
+
+            Returns:
+                Path to the final step's output file.
+            """
+
             def fun(path: Path, step: Step) -> Path:
                 validate_input(path, step.input_suffixes)
                 excepted_output = step.output_file(path)
@@ -129,6 +175,17 @@ def cleanup(folder: str = "", dry_run: bool = False):
 
 
 def compare_to(perf: dict, target: dict):
+    """Compute a simple squared-error cost between `perf` and `target`.
+
+    Missing keys in `perf` are treated as zero and a warning is emitted.
+
+    Args:
+        perf: dictionary of obtained performance values.
+        target: dictionary of target performance values.
+
+    Returns:
+        Numeric cost (sum of squared errors).
+    """
     cost = 0
     for key in target:
         if perf is None or key not in perf:
@@ -143,6 +200,15 @@ def compare_to(perf: dict, target: dict):
 def import_or_default(
     source: Path, to_be_loaded: Iterable[str] | str
 ) -> dict[str, Any]:
+    """Dynamically import symbols from a Python source file if present.
+
+    Args:
+        source: path to the Python module (a file) to import from.
+        to_be_loaded: iterable of symbol names (or a single string) to attempt to import.
+
+    Returns:
+        A dict mapping symbol names to the imported objects for symbols found in the module.
+    """
     if isinstance(to_be_loaded, str):
         to_be_loaded = set(to_be_loaded)
 

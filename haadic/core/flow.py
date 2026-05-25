@@ -22,6 +22,15 @@ class ConfigFlow:
     run_dir: Path = Path("./results")
     extract_level: ExtractLevels = "RC"
     sweep_folder: bool = True
+    """Configuration for a Flow execution.
+
+    Attributes:
+        techno: Selected PDK name.
+        reload: Whether to reload intermediate files when available (e.g., layout, spice netlist) or to recompute them.
+        run_dir: Base directory where results are written.
+        extract_level: Extraction level used by the Extract step.
+        sweep_folder: If True, create a separate folder per sweep value when using the run_from_* methods.
+    """
 
 
 @dataclass
@@ -43,6 +52,14 @@ class Flow:
     config: ConfigFlow = field(default_factory=ConfigFlow)
 
     def run_from_dim(self, dimensions: step.Dim) -> step.Dim:
+        """Run the composed flow starting from explicit dimensions.
+
+        Args:
+            dimensions: a `Dim` instance describing layout dimensions/parameters.
+
+        Returns:
+            A `Dim`-like object containing aggregated performance metrics produced by the postprocess steps.
+        """
         datas = step.Dim()
         d_benches = [f.resolve() for f in self.benches]
         for bench, eval in zip(d_benches, self.postprocess):
@@ -66,7 +83,16 @@ class Flow:
         self,
         target: step.Dim,
         local_model: Callable[[step.Dim], step.Dim],
-    ):
+    ) -> step.Dim:
+        """Run the flow from a target specification using a local model.
+
+        Args:
+            target: A `Dim` describing desired target values.
+            local_model: Callable that maps the `target` to actual layout `Dim` parameters.
+
+        Returns:
+            A `Dim`-like object containing aggregated performance metrics produced by the postprocess steps.
+        """
         perf = self.run_from_dim(local_model(target))
         res = [(key, perf.dct[key], target.dct.get(key, "N/A")) for key in perf.dct]
         logging.info(
@@ -76,3 +102,4 @@ class Flow:
         logging.info("compare performances to targets")
         cost = step.compare_to(perf.dct, target.dct)
         logging.info(f"current cost: {cost}")
+        return perf
