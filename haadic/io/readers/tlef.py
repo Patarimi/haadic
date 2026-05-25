@@ -41,7 +41,7 @@ class Layer:
     name: str
     type: Type
     width: float = 0
-    enclosure: Enclosure = dataclasses.field(default_factory=Enclosure)
+    enclosure: float = 0 #TODO: use the Enclosure class to store the enclosure rules for the layer
     spacing: float = 0
 
 
