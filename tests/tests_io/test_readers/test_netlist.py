@@ -1,3 +1,4 @@
+import pytest
 from difflib import unified_diff
 from haadic.io.wrappers.tools import to_wsl
 
@@ -11,6 +12,9 @@ def test_component():
     assert str(c5) == "C5 gnd 5 5.000 pF"
     assert str(r_mid) == "Rmid 5 6 5.000 kΩ"
 
+    with pytest.raises(ValueError):
+        Component("Q5", "gnd", "5", "5e-12")
+
 
 def test_netlist(tmp_path):
     net = Netlist("test")
@@ -18,6 +22,8 @@ def test_netlist(tmp_path):
     assert net.name == "test"
     assert net.spice() == "* test\nC5 gnd 5 5.000 pF\n"
     net.add_control("run")
+    net.add_lib("test.lib")
+    # add a second time to check that it is not duplicated in the spice output
     net.add_lib("test.lib")
     expected_spice = f"""* test
 C5 gnd 5 5.000 pF
