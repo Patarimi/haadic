@@ -115,7 +115,7 @@ class LayerStack:
             path_json = get_file(self.techno, "base_dir") / f"{self.techno}.json"
             with open(path_json, "w") as f:
                 json.dump(self, fp=f, default=lambda dc: dc.__dict__, indent=2)
-            add_reference(self.techno, "haadic", f"{self.techno}.json")
+            add_reference(self.techno, "haadic", Path(f"{self.techno}.json"))
         self.apply_patch()
 
     def __len__(self):

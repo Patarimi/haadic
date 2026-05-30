@@ -10,7 +10,7 @@ import skrf as rf
 from haadic.design.layouts.tools import Port
 from subprocess import run
 from dotenv import load_dotenv
-from haadic.core.techno import get_file
+from haadic.core.techno import get_file, Available_PDK
 import glob
 from typing import Optional
 
@@ -25,11 +25,11 @@ class Emx:
 
     proc: Path
 
-    def prepare(self, techno: str):
+    def prepare(self, techno: Available_PDK):
         """
         Automatically set the process file for the given technology.
 
-        :param techno: name of technology to be used in the simulation.
+        :param techno: name of the technology to be used in the simulation.
         :return: None
         """
         load_dotenv()
