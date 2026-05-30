@@ -3,7 +3,7 @@
 from typing import Self, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from haadic.io.writers.netlist import Netlist
+from haadic.io.handlers.netlist import Netlist
 from haadic.io.wrappers.ngspice import compute
 from haadic.io.wrappers.tools import to_wsl
 from haadic.core.techno import get_file, load_pdk, Available_PDK
