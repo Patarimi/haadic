@@ -30,6 +30,7 @@ run
 """
     assert net.spice() == expected_spice
 
+
 def test_netlist_load(tmp_path):
     ref_spice = REF_PATH / "ref_netlist.spice"
     res_path = tmp_path / "test_output.spice"

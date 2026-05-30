@@ -1,4 +1,5 @@
 """Spice netlist writer."""
+
 import logging
 from pathlib import Path
 from dataclasses import dataclass, field
@@ -8,7 +9,17 @@ from haadic.io.wrappers.tools import to_wsl
 from haadic.core.tools import eng
 
 
-Unit = {"L": "H", "C": "F", "V": "", "I": "A", "R": "Ω", "T": "rad", "K": "", "M": ""}
+Unit = {
+    "L": "H",
+    "C": "F",
+    "V": "",
+    "I": "A",
+    "R": "Ω",
+    "T": "rad",
+    "K": "",
+    "M": "",
+    "X": "",
+}
 ComponentList = Unit.keys()
 type ComponentType = Literal["L", "C", "V", "I", "R", "T", "K"]
 
@@ -22,7 +33,7 @@ class Component:
     value: float | str
     node: tuple[str, str]
 
-    def __init__(self, name: str, node1: str, node2: str, *value: str):
+    def __init__(self, name: str, node1: str, node2: str, *value: str | float):
         """
         Initialize a component from its name, its nodes and its value.
 
@@ -34,16 +45,22 @@ class Component:
         :param value: the value of the component, as a string (e.g., "1k", "10u", etc.). It can be split in several parts if it contains spaces (e.g., "1 k" will be parsed as 1k).
         """
         if name[0].upper() not in ComponentList:
-            logging.error(f"Could not initialize component {name} between nodes {node1} and {node2} with value: {' '.join(value)}")
-            raise ValueError(f"Component type {name[0].upper()} not recognized. Supported types are: {ComponentList}")
-        self.type = name[0].upper() # type: ignore
+            logging.error(
+                f"Could not initialize component {name} between nodes {node1} and {node2} with value: {' '.join(str(v) for v in value)}"
+            )
+            raise ValueError(
+                f"Component type {name[0].upper()} not recognized. Supported types are: {ComponentList}"
+            )
+        self.type = name[0].upper()  # type: ignore
         self.name = name[1:]
         self.node = (node1, node2)
-        logging.debug(f"Initializing component {name} between nodes {node1} and {node2} with value: {value}")
+        logging.debug(
+            f"Initializing component {name} between nodes {node1} and {node2} with value: {value}"
+        )
         if len(value) == 1:
             self.value = float(value[0])
         else:
-            self.value = " ".join(value)
+            self.value = " ".join(str(v) for v in value)
 
     def __repr__(self) -> str:
         """
@@ -70,7 +87,7 @@ class Component:
 
 
 OtherList = (".lib", ".include", ".model", ".save", ".tran", ".end")
-type OtherComponent = Literal[".lib", ".include", ".model", ".endc"]
+type OtherComponent = Literal[".lib", ".include", ".model", ".save", ".tran", ".end"]
 
 
 @dataclass
@@ -190,7 +207,9 @@ class Netlist:
             spice += f"{comp}\n"
         if self.others:
             spice += (
-                "\n" + "\n".join([f"{cmd} {args}".strip() for cmd, args in self.others]) + "\n"
+                "\n"
+                + "\n".join([f"{cmd} {args}".strip() for cmd, args in self.others])
+                + "\n"
             )
         if self.controls:
             spice += "\n.control\n"
