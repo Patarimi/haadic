@@ -5,7 +5,7 @@ import numpy as np
 from skrf.media import Media
 from skrf import Network
 
-from haadic.io.writers.netlist import Component
+from haadic.io.handlers.netlist import Component
 
 
 def db20(x_lin: Sequence[complex] | complex, /) -> float:

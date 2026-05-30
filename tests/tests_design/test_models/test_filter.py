@@ -10,6 +10,9 @@ def test_prototype():
     proto = flr.prototype(3, "ripple", 0.5)
     assert proto == approx(array([1.5963, 1.0967, 1.5963, 1]), 5)
 
+    proto = flr.prototype(4, "ripple", 0.5)
+    assert proto == approx(array([1.5963, 1.0967, 1.5963, 1.0967, 1]), 5)
+
 
 def test_scaling():
     proto1 = array([0.6180, 1.6180, 2, 1.618, 0.618])

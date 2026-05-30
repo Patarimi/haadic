@@ -7,11 +7,15 @@ S[Filter Specifications] --> L[Low-Pass Prototype] --> C["Conversion\nScaling"] 
 ```
 """
 
+from typing import Literal
+
 import scipy.signal as si
 import numpy as np
 
+Filter_Styles = Literal["flat", "ripple"]
 
-def prototype(order: int, style: str, ripple: float = 0.2):
+
+def prototype(order: int, style: Filter_Styles, ripple: float = 0.2):
     """
     Compute a low pass filter prototype.
 
@@ -39,7 +43,6 @@ def prototype(order: int, style: str, ripple: float = 0.2):
         if order % 2 == 0:
             g[order] = 1 / np.tanh(beta / 4) ** 2
         return g
-    raise ValueError(f"Unknown filter type {style}, available are flat, ripple")
 
 
 def scaling(proto: np.ndarray, f: float, r_0: float):

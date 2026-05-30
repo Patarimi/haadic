@@ -34,7 +34,7 @@ def extract_spice(
     :return: A spice schematic to be used by ngspice.
     """
     if output_path is Path():
-        output_path = Path(f"{dirname(gds_file)}/{gds_file.stem}.cir")
+        output_path = gds_file.with_suffix(".cir")
     root_path = dirname(output_path) if dirname(output_path) != "/" else "."
     if root_path == "":
         root_path = "."

@@ -24,6 +24,19 @@ pkd_app = App("pdk", help="Manage the PDKs")
 # define search paths for techno.yml and design.yml
 PATHS = [DATA_DIR / "techno.yml", Path(os.getcwd()) / "design.yml"]
 Available_PDK = Literal["sky130", "gf180mcu", "asap7"]
+Handled_key = Literal[
+    "base_dir",
+    "techlef",
+    "haadic",
+    "lib_spice",
+    "layermap",
+    "magic_rc",
+    "magic_tech",
+    "ekv_model",
+    "source_url",
+    "version",
+    "process",
+]
 PDK_INSTALL_DIR = Path(
     os.getenv("PDK_ROOT") or os.path.join(os.path.expanduser("~"), ".ciel")
 )
@@ -122,13 +135,13 @@ def list_pdk():
     return process_l
 
 
-def is_installed(pdk_name: str) -> bool:
+def is_installed(pdk_name: Available_PDK | Literal["mock"]) -> bool:
     """Check if a PDK is installed."""
     return isdir(get_file(pdk_name, "base_dir"))
 
 
 @functools.cache
-def load_pdk(pdk_name: str, path: Optional[str] = None) -> dict[str, str]:
+def load_pdk(pdk_name: Available_PDK, path: Optional[str] = None) -> dict[str, str]:
     """
     Load the metadata dictionary for a PDK by name.
 
@@ -156,7 +169,10 @@ def load_pdk(pdk_name: str, path: Optional[str] = None) -> dict[str, str]:
 
 
 def add_reference(
-    pdk_name: str, ref_name: str, path_file: str, path_tech: Optional[Path] = None
+    pdk_name: Available_PDK,
+    ref_name: Handled_key,
+    path_file: Path,
+    path_tech: Optional[Path] = None,
 ) -> None:
     """
     Add a reference file to the techno.yml file.
@@ -174,17 +190,17 @@ def add_reference(
     process_d = _read_tech(path_tech)
     if pdk_name not in process_d:
         raise KeyError(f"{pdk_name} not found in techno.yml")
-    process_d[pdk_name][ref_name] = path_file
+    process_d[pdk_name][ref_name] = str(path_file)
     with open(path_tech, "w") as f:
         yaml.dump(process_d, f)
 
 
-def get_file(pdk_name: str, file_type: str) -> Path:
+def get_file(pdk_name: Available_PDK | Literal["mock"], file_type: Handled_key) -> Path:
     """
     Get a configuration file for a given technologie.
 
-    :param str pdk_name: selected technologie (from Available_PDK).
-    :param str file_type: software configuration files.
+    :param Available_PDK pdk_name: selected technologie (from Available_PDK).
+    :param Handled_key file_type: software configuration files.
     :return Path: path to the requested files.
     """
     pdk = load_pdk(pdk_name)
@@ -195,7 +211,7 @@ def get_file(pdk_name: str, file_type: str) -> Path:
     return get_file(pdk_name, "base_dir") / Path(pdk[file_type])
 
 
-def _read_tech(tech_file: str | Path) -> dict[str, dict[str, str]]:
+def _read_tech(tech_file: Path) -> dict[str, dict[str, str]]:
     """
     Read a YAML technology description file and return it as a dict.
 

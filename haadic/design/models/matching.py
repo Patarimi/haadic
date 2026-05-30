@@ -2,7 +2,7 @@
 
 from math import sqrt, pi, atan
 import numpy as np
-from haadic.io.writers.netlist import Component
+from haadic.io.handlers.netlist import Component
 from haadic.design.models.tools import quality
 from enum import Enum
 
@@ -83,10 +83,10 @@ def denorm(x: float, f: float, pos: Pos = Pos.series, name: str = "") -> Compone
     else:
         value = abs(1 / (x * 2 * pi * f))
     return Component(
-        comp,
-        str(pos) if name == "" else name,
+        comp + str(pos) if name == "" else name,
+        "in",
+        "out" if pos == Pos.series else "0",
         value,
-        ("in", "out" if pos == Pos.series else "0"),
     )
 
 

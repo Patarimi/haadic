@@ -39,7 +39,7 @@ def test_print_pdk(capsys):
 
 def test_add_reference(tmp_path):
     pdk_name = "sky130"
-    ref_name = "test_ref"
+    ref_name = "techlef"
     path_file = "test_file.lef"
     path_tech = tmp_path / "techno.yml"
     (tmp_path / path_file).touch()
@@ -48,7 +48,7 @@ def test_add_reference(tmp_path):
     base_dir: {tmp_path}
 """
     )
-    techno.add_reference(pdk_name, ref_name, str(path_file), path_tech)
+    techno.add_reference(pdk_name, ref_name, Path(path_file), path_tech)
     pdk = techno.load_pdk(pdk_name, str(path_tech))
     assert ref_name in pdk
     assert pdk[ref_name] == str(path_file)

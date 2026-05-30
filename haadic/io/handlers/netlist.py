@@ -1,23 +1,66 @@
 """Spice netlist writer."""
 
-from haadic.io.wrappers.tools import to_wsl
-from dataclasses import dataclass, field
+import logging
 from pathlib import Path
+from dataclasses import dataclass, field
 from typing import Literal, Optional, Self
+
+from haadic.io.wrappers.tools import to_wsl
 from haadic.core.tools import eng
 
 
-Unit = {"L": "H", "C": "F", "V": "V", "I": "A", "R": "Ω", "T": "rad", "K": ""}
+Unit = {
+    "L": "H",
+    "C": "F",
+    "V": "",
+    "I": "A",
+    "R": "Ω",
+    "T": "rad",
+    "K": "",
+    "M": "",
+    "X": "",
+}
+ComponentList = Unit.keys()
+type ComponentType = Literal["L", "C", "V", "I", "R", "T", "K"]
 
 
 @dataclass
 class Component:
     """Represents a component."""
 
-    type: Literal["L", "C", "V", "I", "R", "T", "K"]
+    type: ComponentType
     name: str
-    value: float
+    value: float | str
     node: tuple[str, str]
+
+    def __init__(self, name: str, node1: str, node2: str, *value: str | float):
+        """
+        Initialize a component from its name, its nodes and its value.
+
+        The type of the component is deduced from the first letter of its name (e.g., "R" for resistor, "C" for capacitor, etc.).
+
+        :param name: the name of the component (e.g., "R1", "C2", etc.).
+        :param node1: the first node of the component.
+        :param node2: the second node of the component.
+        :param value: the value of the component, as a string (e.g., "1k", "10u", etc.). It can be split in several parts if it contains spaces (e.g., "1 k" will be parsed as 1k).
+        """
+        if name[0].upper() not in ComponentList:
+            logging.error(
+                f"Could not initialize component {name} between nodes {node1} and {node2} with value: {' '.join(str(v) for v in value)}"
+            )
+            raise ValueError(
+                f"Component type {name[0].upper()} not recognized. Supported types are: {ComponentList}"
+            )
+        self.type = name[0].upper()  # type: ignore
+        self.name = name[1:]
+        self.node = (node1, node2)
+        logging.debug(
+            f"Initializing component {name} between nodes {node1} and {node2} with value: {value}"
+        )
+        if len(value) == 1:
+            self.value = float(value[0])
+        else:
+            self.value = " ".join(str(v) for v in value)
 
     def __repr__(self) -> str:
         """
@@ -34,11 +77,17 @@ class Component:
 
         For example, a resistor with a value of 1000 will be represented as "1kΩ".
         """
-        return f"{eng(self.value)}{Unit[self.type]}"
+        if isinstance(self.value, str):
+            return self.value
+        return f"{eng(self.value)}{Unit[self.type]}".strip()
 
     def full_name(self):
         """Get the full name of the component, which is the concatenation of its type and its name."""
         return str(self.type) + self.name
+
+
+OtherList = (".lib", ".include", ".model", ".save", ".tran", ".end")
+type OtherComponent = Literal[".lib", ".include", ".model", ".save", ".tran", ".end"]
 
 
 @dataclass
@@ -52,7 +101,7 @@ class Netlist:
     name: str = ""
     circuit: list[Component] = field(default_factory=list)
     controls: list[str] = field(default_factory=list)
-    others: list[str] = field(default_factory=list)
+    others: list[tuple[OtherComponent, str]] = field(default_factory=list)
 
     def load(self, spice_file: Path | str) -> Self:
         """
@@ -61,24 +110,36 @@ class Netlist:
         :param spice_file: path of the spice file to load.
         :return: the Netlist instance with the content of the spice file.
         """
-        block: Literal["circuit", "control", "other"] = "other"
+        block: Literal["circuit", "control", "other", "comment"] = "comment"
         with open(spice_file, "r") as f:
             lines = f.readlines()
         self.name = lines.pop(0).strip("*").strip()
         for line in lines:
-            if line.startswith("*") or line.lstrip() == "":
+            if line.startswith("*") or line.lstrip() == "" or line.startswith(".endc"):
+                block = "comment"
                 # comment or empty line, ignore
                 continue
             if line.startswith(".control"):
                 block = "control"
                 continue
-            if line.startswith(".endc"):
-                block = "other"
-                continue
-            if block == "other":
-                self.others.append(line.rstrip())
-            else:
-                self.controls.append(line.rstrip())
+            for command in OtherList:
+                if line.startswith(command) and not line.startswith(".endc"):
+                    block = "other"
+                    break
+            for component in ComponentList:
+                if line.startswith(component):
+                    block = "circuit"
+                    break
+            match block:
+                case "circuit":
+                    logging.debug(f"Parsing component line: {line.strip()}")
+                    self.circuit.append(Component(*line.split()))
+                case "control":
+                    self.controls.append(line.rstrip())
+                case "other":
+                    self.add_other(command, line.rstrip().lstrip(command).strip())
+                    if command.startswith(".end"):
+                        block = "comment"
         return self
 
     def add_component(self, component: Component):
@@ -89,7 +150,7 @@ class Netlist:
         """Add an element to the netlist in the control section."""
         self.controls.append(control)
 
-    def add_other(self, other: str):
+    def add_other(self, command: OtherComponent, other: str) -> None:
         """
         Add an 'other' element to the netlist (not a component and not in the control section).
 
@@ -98,9 +159,9 @@ class Netlist:
         :param other: the element to add.
         :return: None.
         """
-        self.others.append(other)
+        self.others.append((command, other))
 
-    def add_lib(self, lib_path: Path | str, section: Optional[str] = None):
+    def add_lib(self, lib_path: Path | str, section: Optional[str] = None) -> None:
         """
         Add a library definition in the netlist.
 
@@ -110,10 +171,10 @@ class Netlist:
         """
         if self.is_in_other(".lib", Path(lib_path)):
             return None
-        item = [".lib", "'" + to_wsl(lib_path) + "'"]
+        item = ["'" + to_wsl(lib_path) + "'"]
         if section is not None:
             item.append(section)
-        self.add_other(" ".join(item))
+        self.add_other(".lib", " ".join(item))
 
     def add_include(self, include_path: Path | str) -> None:
         """
@@ -124,7 +185,7 @@ class Netlist:
         """
         if self.is_in_other(".include", Path(include_path)):
             return None
-        self.add_other(".include " + to_wsl(include_path))
+        self.add_other(".include", to_wsl(include_path))
 
     def is_in_other(self, key: str, file: Path) -> bool:
         """
@@ -135,7 +196,7 @@ class Netlist:
         :return: True if the command is already in the 'other' section, False otherwise
         """
         for oth in self.others:
-            if oth.startswith(key) and str(Path(file).stem) in oth:
+            if oth[0] == key and str(Path(file).stem) in oth[1]:
                 return True
         return False
 
@@ -145,7 +206,11 @@ class Netlist:
         for comp in self.circuit:
             spice += f"{comp}\n"
         if self.others:
-            spice += "\n" + "\n".join(self.others) + "\n"
+            spice += (
+                "\n"
+                + "\n".join([f"{cmd} {args}".strip() for cmd, args in self.others])
+                + "\n"
+            )
         if self.controls:
             spice += "\n.control\n"
             spice += "\n".join(self.controls) + "\n.endc\n"

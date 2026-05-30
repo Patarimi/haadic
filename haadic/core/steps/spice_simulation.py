@@ -1,9 +1,9 @@
 """Spice simulation step for the haadic design flow."""
 
-from typing import Self, Sequence
+from typing import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from haadic.io.writers.netlist import Netlist
+from haadic.io.handlers.netlist import Netlist
 from haadic.io.wrappers.ngspice import compute
 from haadic.io.wrappers.tools import to_wsl
 from haadic.core.techno import get_file, load_pdk, Available_PDK
@@ -21,12 +21,6 @@ class ConfigSim:
 
     bench: Path = Path("bench.cir")
     techno: Available_PDK = "sky130"
-
-    def __post_init__(self) -> Self:
-        """Post-initialization processing to ensure that the bench attribute is a Path object."""
-        if isinstance(self.bench, str):
-            self.bench = Path(self.bench)
-        return self
 
 
 @dataclass
