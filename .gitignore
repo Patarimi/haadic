@@ -12,7 +12,7 @@
 /workdir/*/
 */__pycache__/*
 *.vhdx
-*.pyc
+*.pyc*
 .coverage
 
 *.csv
