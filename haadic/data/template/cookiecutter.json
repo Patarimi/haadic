@@ -1,4 +1,5 @@
 {
     "project_name": "working_dir",
-    "techno_name": "sky130"
+    "techno_name": "sky130",
+    "flow_type": ["geometry based", "model based"]
 }
