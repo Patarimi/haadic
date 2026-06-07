@@ -6,7 +6,7 @@ from typing import Literal, Sequence
 import klayout.db as db
 
 from .tools import LayerStack, Layer
-from .general import via, get_dtext, get_shape, enclose
+import haadic.design.layouts.general as gen
 
 
 def mosfet(
@@ -54,7 +54,7 @@ def mosfet(
     mos.insert(gates)
     dr_con = layout.create_cell("dr_con")
     dr_con.shapes(m1_layer.drawing).insert(db.DBox(0, 0, m1_width, width))
-    con = via(layout, via_layer, (m1_width, width))
+    con = gen.via(layout, via_layer, (m1_width, width))
     dr_con.insert(db.DCellInstArray(con, db.DVector(0, 0)))
     dr_cons = db.DCellInstArray(
         dr_con.cell_index(),
@@ -68,9 +68,9 @@ def mosfet(
     mos.shapes(layers._active.drawing).insert(
         db.DBox(0, 0, diff_space + nf * pitch, width)
     )
-    enclose(mos, doping_layer, doping_ext, filter=layers._active)
+    gen.enclose(mos, doping_layer, doping_ext, filter=layers._active)
     if doping == "P":
-        enclose(mos, layers._nwell, doping_ext, filter=doping_layer)
+        gen.enclose(mos, layers._nwell, doping_ext, filter=doping_layer)
     for i in range(nf):
         mos.shapes(poly_layer.pin).insert(
             db.DText(f"g{i}", i * pitch + diff_space + length / 2, -gate_ext)
@@ -107,21 +107,11 @@ def line(
     horz = layout.create_cell(f"h_{name}")
     bbox = layout.top_cells()[0].dbbox()
     if not below:
-        horz.shapes(layer.drawing).insert(
-            db.DBox(
-                bbox.left, bbox.top + spacing, bbox.right, bbox.top + spacing + width
-            )
-        )
+        origin_y = bbox.top + spacing
     else:
-        horz.shapes(layer.drawing).insert(
-            db.DBox(
-                bbox.left,
-                bbox.bottom - spacing,
-                bbox.right,
-                bbox.bottom - spacing - width,
-            )
-        )
-    horz.shapes(layer.pin).insert(db.DText(name, bbox.left, horz.dbbox().center().y))
+        origin_y = bbox.bottom - spacing - width
+    gen.add_rectangle(horz, layer, (bbox.width(), width), (bbox.left, origin_y))
+    gen.add_port(horz, layer, name, (bbox.left, origin_y + width / 2))
     cell.insert(db.DCellInstArray(horz, db.DVector(0, 0)))
     return horz
 
@@ -139,10 +129,10 @@ def connect(
     :return: the cell containing the connection.
     """
     layout = cell.layout()
-    lbl_h, lyr_hp = get_dtext(layout, label_line)[0]
-    lbl_v, lyr_vp = get_dtext(layout, label_mos)[0]
-    box_v, lyr_v = get_shape(layout, lbl_v.position(), lyr_vp)
-    box_h, lbl_h = get_shape(layout, lbl_h.position(), lyr_hp)
+    lbl_h, lyr_hp = gen.get_dtext(layout, label_line)[0]
+    lbl_v, lyr_vp = gen.get_dtext(layout, label_mos)[0]
+    box_v, lyr_v = gen.get_shape(layout, lbl_v.position(), lyr_vp)
+    box_h, lbl_h = gen.get_shape(layout, lbl_h.position(), lyr_hp)
     if box_h.center().y > box_v.center().y:
         top, bottom = box_v.top, box_h.top
     else:
@@ -166,7 +156,7 @@ def pattern_connect(
     :return: _cell_ with_ the added connections.
     """
     layout = cell.layout()
-    labels = get_dtext(layout, cell=device_name)
+    labels = gen.get_dtext(layout, cell=device_name)
     for lbl, lyr in labels:
         i = 2 * int(lbl.string.lstrip("gdr"))
         if lbl.string.startswith("g"):
