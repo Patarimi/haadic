@@ -14,23 +14,26 @@ from pathlib import Path
 from klayout.db import Cell
 
 from haadic.design.layouts.tools import LayerStack
-from haadic.design.layouts.general import add_rectangle
+from haadic.design.layouts import general as gen
 from haadic.core.steps.step import Dim
 from haadic.core.steps.post_process import SimRes
 from haadic.core.flow import ConfigFlow, Flow
 
+# Class storing the configuration of the flow. You can add any additional configuration parameters you need here.
+# See https://patarimi.github.io/haadic/reference/haadic/core/flow/#haadic.core.flow.ConfigFlow for more details on how to use it.
 conf = ConfigFlow()
 conf.techno = "{{ cookiecutter.techno_name }}"
 
 benches = (Path("bench.cir"),)
 
 {% if cookiecutter.flow_type == "geometry based" -%}
-# dimensions of the layout to generate. You can also provide a local_model and a target instead (see below).
+# Dimensions of the layout to generate. You can also provide a local_model and a target instead ("model based" option in `new` command).
 dimensions: Dim = Dim({"width": 1.0, "length": 1.0})
 {% elif cookiecutter.flow_type == "model based" -%}
+# Target performance metrics to optimize. You can also provide dimensions instead and a local_model ("geometry based" option in `new` command).
 target: Dim = Dim({})
 
-
+# Local model to use in the "model based" flow option. It should take a target Dim as input and return a Dim with the design parameters to use for the layout generation.
 def local_model(target: Dim) -> Dim:
     return Dim({})
 {%- endif %}
@@ -47,7 +50,9 @@ def layout(cell: Cell, layerstack: LayerStack, dimensions: Dim) -> Cell:
     :return: klayout Cell with the generated layout.
     """
     #: Example of a simple layout generation code that creates a rectangle on the first metal layer with the dimensions specified in the `dimensions` argument.
-    cell = add_rectangle(cell, layerstack.get_metal_layer(0), (dimensions["width"], dimensions["length"]))
+    first_metal = layerstack.get_metal_layer(0)
+    cell = gen.add_rectangle(cell, first_metal, (dimensions["width"], dimensions["length"]))
+    cell = gen.add_port(cell, first_metal, "input", (0, dimensions["length"] / 2))
     return cell
 
 

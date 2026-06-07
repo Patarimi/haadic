@@ -167,6 +167,25 @@ def set_as_port(cell: db.Cell, label: str) -> db.Cell:
     return cell
 
 
+def add_port(
+    cell: db.Cell,
+    layer: Layer,
+    name: str,
+    position: tuple[float, float],
+) -> db.Cell:
+    """
+    Add a port to the cell.
+
+    :param cell: The cell to which the port will be added.
+    :param layer: The layer to use for the port.
+    :param name: The name of the port.
+    :param position: The reference point of the port (x, y).
+    :return: The cell with the added port.
+    """
+    cell.shapes(layer.pin).insert(db.DText(name, position[0], position[1]))
+    return cell
+
+
 def add_rectangle(
     cell: db.Cell,
     layer: Layer,
