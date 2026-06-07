@@ -1,3 +1,12 @@
+# /// script
+# requires-python = ">=3.13"
+# dependencies = [
+#     "haadic",
+# ]
+#
+# [tool.uv.sources]
+# haadic = { git = "https://github.com/Patarimi/haadic" }
+# ///
 """Template for the flow module of a haadic project."""
 
 from pathlib import Path
@@ -5,6 +14,7 @@ from pathlib import Path
 from klayout.db import Cell
 
 from haadic.design.layouts.tools import LayerStack
+from haadic.design.layouts.general import add_rectangle
 from haadic.core.steps.step import Dim
 from haadic.core.steps.post_process import SimRes
 from haadic.core.flow import ConfigFlow, Flow
@@ -16,7 +26,7 @@ benches = (Path("bench.cir"),)
 
 {% if cookiecutter.flow_type == "geometry based" -%}
 # dimensions of the layout to generate. You can also provide a local_model and a target instead (see below).
-dimensions: Dim = Dim({})
+dimensions: Dim = Dim({"width": 1.0, "length": 1.0})
 {% elif cookiecutter.flow_type == "model based" -%}
 target: Dim = Dim({})
 
@@ -36,6 +46,8 @@ def layout(cell: Cell, layerstack: LayerStack, dimensions: Dim) -> Cell:
     :param dimensions: Dim instance with the design parameters.
     :return: klayout Cell with the generated layout.
     """
+    #: Example of a simple layout generation code that creates a rectangle on the first metal layer with the dimensions specified in the `dimensions` argument.
+    cell = add_rectangle(cell, layerstack.get_metal_layer(0), (dimensions["width"], dimensions["length"]))
     return cell
 
 

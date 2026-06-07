@@ -148,13 +148,13 @@ def get_shape(layout: db.Layout, point: db.DPoint, layer: int) -> tuple[db.DBox,
     raise ValueError(f"no shape found at {point} on layer {layer}")
 
 
-def set_as_port(cell: db.Cell, label: str):
+def set_as_port(cell: db.Cell, label: str) -> db.Cell:
     """
-    Retrieve label in subcells and copy to cell.
+    Retrieve label in subcells and copy in the top cell. The label can then be used as a port in the layout during the extraction step.
 
-    :param cell:
-    :param label:
-    :return:
+    :param cell: Top cell to be modified.
+    :param label: The label to be retrieved and copied.
+    :return: The cell with the copied label.
     """
     lay = cell.layout()
     for subcell in cell.each_child_cell():
@@ -164,6 +164,27 @@ def set_as_port(cell: db.Cell, label: str):
             continue
         txt, lyr = res[0] if isinstance(res, list) else res
         cell.shapes(lyr).insert(txt)
+    return cell
+
+
+def add_rectangle(
+    cell: db.Cell,
+    layer: Layer,
+    size: tuple[float, float],
+    origin: tuple[float, float] = (0, 0),
+) -> db.Cell:
+    """
+    Add a rectangle to the cell.
+
+    :param cell: The cell to which the rectangle will be added.
+    :param layer: The layer to use for the rectangle.
+    :param size: tuple of the size (length and width) of the rectangle.
+    :param origin: tuple of the origin (x, y) of the rectangle.
+    :return: The cell with the added rectangle.
+    """
+    rec = db.DBox(origin[0], origin[1], origin[0] + size[0], origin[1] + size[1])
+    cell.shapes(layer.drawing).insert(rec)
+    return cell
 
 
 def ground_plane(

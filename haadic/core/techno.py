@@ -21,9 +21,11 @@ from haadic._config import DATA_DIR
 console = Console(stderr=True)
 pkd_app = App("pdk", help="Manage the PDKs")
 
-# define search paths for techno.yml and design.yml
+"""PATHS: define search paths for techno.yml and design.yml"""
 PATHS = [DATA_DIR / "techno.yml", Path(os.getcwd()) / "design.yml"]
+"""Available_PDK: Define the list of supported PDKs. This can be extended by adding entries in techno.yml and design.yml files."""
 Available_PDK = Literal["sky130", "gf180mcu", "asap7"]
+"""Handled_key: Define the keys that are handled in the PDK configuration."""
 Handled_key = Literal[
     "base_dir",
     "techlef",
