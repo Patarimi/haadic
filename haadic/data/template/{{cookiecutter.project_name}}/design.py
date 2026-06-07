@@ -14,15 +14,16 @@ conf.techno = "{{ cookiecutter.techno_name }}"
 
 benches = (Path("bench.cir"),)
 
-{%- if cookiecutter.flow_type == "geometry based" -%} 
+{% if cookiecutter.flow_type == "geometry based" -%}
 # dimensions of the layout to generate. You can also provide a local_model and a target instead (see below).
 dimensions: Dim = Dim({})
-{%- elif cookiecutter.flow_type == "model based" -%}
+{% elif cookiecutter.flow_type == "model based" -%}
 target: Dim = Dim({})
+
+
 def local_model(target: Dim) -> Dim:
     return Dim({})
-{%- endif -%}
-
+{%- endif %}
 
 def layout(cell: Cell, layerstack: LayerStack, dimensions: Dim) -> Cell:
     """
