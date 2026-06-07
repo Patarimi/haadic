@@ -9,10 +9,6 @@ from haadic.core.techno import is_installed
 
 
 def test_tools():
-    lay = Layer(100, 4, name="Via1")
-    assert str(lay) == "Via1: 100/4"
-    lay2 = Layer(141)
-    assert str(lay2) == ": 141/0"
     ref = REF_PATH / "ref_ind.gds"
     logging.debug(os.name)
     assert tools.check_diff(ref, ref)

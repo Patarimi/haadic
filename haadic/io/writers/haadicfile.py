@@ -7,7 +7,7 @@ from pathlib import Path
 import json
 import logging
 from haadic.core.techno import Available_PDK, load_pdk, get_file, add_reference
-from typing import Self
+from typing import Self, Sequence
 from dataclasses import dataclass, field
 from klayout.db import LayerInfo
 
@@ -287,22 +287,24 @@ class LayerStack:
         self._stack = stack
         self._via_list = via_list
 
-    def load_from_layermap(self, path: Path | str):
-        """Load the layer stack information from a layer map file."""
-        map_path = get_file(self.techno, "layermap")
-        layer_map = load_map(map_path)
-        logging.debug(f"Layer map loaded from {map_path} with layers {list(layer_map.keys())}.")
-        return layer_map
 
-    def apply_patch(self):
-        """
-        Apply a patch file to the techno.yml file.
+def load_from_layermap(layer_name: str, valid_types: Sequence[str], path: Path) -> Layer:
+    """
+    Load the layer stack information from a layer map file.
 
-        The patch file is a json file that contains the modifications to be applied to the techno.yml file.
-        """
-        patch_file = DATA_DIR / "patches" / f"{self.techno}.json"
-        if not Path(patch_file).is_file():
-            logging.info(f"No patch file found at {patch_file}.")
-            return
-        self.load_from_json(patch_file)
-        logging.info(f"Patch file {patch_file} applied to LayerStack.")
+    :param layer_name: name of the layer to load from the layer map file.
+    :param valid_types: list of valid layer types (e.g., "drawing", "pin", "net", "lefpin", "via").
+    :param path: path to the layer map file.
+    :return: Layer object corresponding to the requested layer name.
+    """
+    layers_map = load_map(path)
+    keys  = [k.lower() for k in layers_map.keys()]
+    if layer_name not in keys:
+        raise KeyError(f"Layer {layer_name} not found in layer map file. Available layers are: {keys}.")
+    dtypes = layers_map[layer_name].types
+    for dtype in valid_types:
+        for key in dtypes.keys():
+            if dtype in dtypes[key]:
+                return Layer(layer=layers_map[layer_name].layer, datatype=key, name=layer_name)
+    raise KeyError(f"No valid type found for layer {layer_name}. Available types are: {dtypes}.")
+
