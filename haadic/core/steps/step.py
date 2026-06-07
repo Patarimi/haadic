@@ -2,8 +2,7 @@
 
 import json
 from functools import reduce
-import sys
-from typing import Any, Iterable, Protocol, Sequence
+from typing import Any, Protocol, Sequence
 import logging
 import os
 from pathlib import Path
@@ -225,33 +224,3 @@ def compare_to(perf: dict, target: dict):
             cost += (target[key] - perf[key]) ** 2
 
     return cost
-
-
-def import_or_default(
-    source: Path, to_be_loaded: Iterable[str] | str
-) -> dict[str, Any]:
-    """
-    Dynamically import symbols from a Python source file if present.
-
-    :param source: path to the Python module (a file) to import from.
-    :param to_be_loaded: iterable of symbol names (or a single string) to attempt to import.
-
-    :return: A dict mapping symbol names to the imported objects for symbols found in the module.
-
-    """
-    if isinstance(to_be_loaded, str):
-        to_be_loaded = {to_be_loaded}
-
-    if not source.is_file():
-        raise FileNotFoundError(f"Source file {source} not found for import")
-
-    imp_d = dict()
-    for name in to_be_loaded:
-        if str(source.parent.resolve()) not in sys.path:
-            sys.path.append(str(source.parent.resolve()))
-        src_name = str(source.stem)
-        imp = __import__(src_name, fromlist=name).__dict__
-        if imp.get(name, None) is not None:
-            imp_d[name] = imp[name]
-    logging.debug(f"Imported design from {source}: {imp_d.keys()}")
-    return imp_d
