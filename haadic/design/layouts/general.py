@@ -165,6 +165,20 @@ def set_as_port(cell: db.Cell, label: str):
         txt, lyr = res[0] if isinstance(res, list) else res
         cell.shapes(lyr).insert(txt)
 
+def add_rectangle(cell: db.Cell, layer: Layer, size: tuple[float, float], origin: tuple[float, float] = (0, 0)) -> db.Cell:
+    """
+    Add a rectangle to the cell.
+
+    :param cell: The cell to which the rectangle will be added.
+    :param layer: The layer to use for the rectangle.
+    :param size: tuple of the size (length and width) of the rectangle.
+    :param origin: tuple of the origin (x, y) of the rectangle.
+    :return: The cell with the added rectangle.
+    """
+    rec = db.DBox(origin[0], origin[1], origin[0] + size[0], origin[1] + size[1])
+    cell.shapes(layer.drawing).insert(rec)
+    return cell
+
 
 def ground_plane(
     layout: db.Layout, layers: LayerStack, size: tuple[float, float], id_gnd: int = 1
