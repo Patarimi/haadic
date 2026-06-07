@@ -1,6 +1,9 @@
 # Circuit name
 
+Vdc input 0
+
 
 .control
+dc Vdc 0 1
 write {bench} all
 .endc
