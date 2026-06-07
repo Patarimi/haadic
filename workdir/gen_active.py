@@ -1,6 +1,6 @@
 """Script to generate the layout of an active device, run simulations and post-process the results to extract model parameters."""
 
-from haadic.design.layouts.tools import LayerStack
+from haadic.io.writers.haadicfile import LayerStack
 from pathlib import Path
 from klayout.db import Cell
 from haadic.design.layouts.commun_source import layout as cs_layout

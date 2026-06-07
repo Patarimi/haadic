@@ -8,7 +8,7 @@ from dataclasses import field, dataclass
 import json
 
 import klayout.db as db
-from haadic.design.layouts.tools import LayerStack
+from haadic.io.writers.haadicfile import LayerStack
 from haadic.core.steps.step import Dim, Step
 
 

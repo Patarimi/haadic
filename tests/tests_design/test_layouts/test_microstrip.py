@@ -7,7 +7,8 @@ from haadic.design.layouts.microstrip import (
     lange_coupler,
     marchand_balun,
 )
-from haadic.design.layouts.tools import LayerStack, Port, check_diff
+from haadic.design.layouts.tools import Port, check_diff
+from haadic.io.writers.haadicfile import LayerStack
 
 layerstack = LayerStack("mock")  # ty:ignore[invalid-argument-type]
 

@@ -12,9 +12,9 @@ from haadic.core.steps.extraction import Extract, ConfigExtract
 from haadic.core.steps.layout_generation import Layout, ConfigLayout
 from haadic.core.steps.spice_simulation import BenchSim, ConfigSim
 from haadic.core.steps.post_process import PostProcess, ConfigPostProc, PostProcessFunc
-from haadic.io.wrappers.magic import ExtractLevels
 from haadic.core.techno import Available_PDK
-from haadic.design.layouts.tools import LayerStack
+from haadic.io.wrappers.magic import ExtractLevels
+from haadic.io.writers.haadicfile import LayerStack
 
 
 @dataclass

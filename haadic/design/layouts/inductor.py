@@ -6,7 +6,7 @@ import logging
 
 import klayout.db as db
 
-from .tools import LayerStack
+from haadic.io.writers.haadicfile import LayerStack
 from .general import via
 
 
