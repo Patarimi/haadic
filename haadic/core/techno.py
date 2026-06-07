@@ -211,6 +211,7 @@ def get_file(pdk_name: Available_PDK | Literal["mock"], file_type: Handled_key) 
     return get_file(pdk_name, "base_dir") / Path(pdk[file_type])
 
 
+@functools.cache
 def _read_tech(tech_file: Path) -> dict[str, dict[str, str]]:
     """
     Read a YAML technology description file and return it as a dict.
