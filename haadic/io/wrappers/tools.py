@@ -8,9 +8,9 @@ from pathlib import Path
 from subprocess import run, CompletedProcess
 
 
-@functools.lru_cache(maxsize=1)
+@functools.cache
 def nix_check():
-    """Check if nix is available on the system."""
+    """Check if nix is available on the system and correctly configured."""
     if os.name == "nt":
         proc = run(["wsl", "-l"], capture_output=True, text=True)
         list_of_wsl = proc.stdout.replace("\0", "")
