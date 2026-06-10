@@ -71,8 +71,10 @@ class ViaLayer(Layer):
 
     def __post_init__(self) -> Self:
         """Ensure that the between attribute is a tuple of two integers and the enclosure attribute is a tuple of two floats."""
-        if isinstance(self.between, float):
+        if isinstance(self.between, int):
             object.__setattr__(self, "between", (self.between, self.between))
+        if isinstance(self.between, list):
+            object.__setattr__(self, "between", tuple(self.between))
         return self
 
 
