@@ -186,6 +186,19 @@ class LayerStack:
             end = len(self._stack) + end + 1
         return list(range(start, end + 1))
 
+    def apply_patch(self):
+        """
+        Apply a patch file to the techno.yml file.
+
+        The patch file is a json file that contains the modifications to be applied to the techno.yml file.
+        """
+        patch_file = DATA_DIR / "patches" / f"{self.techno}.json"
+        if not Path(patch_file).is_file():
+            logging.info(f"No patch file found at {patch_file}.")
+            return
+        self.load_from_json(patch_file)
+        logging.info(f"Patch file {patch_file} applied to LayerStack.")
+
     def load_from_json(self, path_json: Path | str):
         """Load the layer stack information from a JSON file."""
         with open(path_json, "r") as f:
@@ -288,7 +301,9 @@ class LayerStack:
         self._via_list = via_list
 
 
-def load_from_layermap(layer_name: str, valid_types: Sequence[str], path: Path) -> Layer:
+def load_from_layermap(
+    layer_name: str, valid_types: Sequence[str], path: Path
+) -> Layer:
     """
     Load the layer stack information from a layer map file.
 
@@ -298,13 +313,18 @@ def load_from_layermap(layer_name: str, valid_types: Sequence[str], path: Path) 
     :return: Layer object corresponding to the requested layer name.
     """
     layers_map = load_map(path)
-    keys  = [k.lower() for k in layers_map.keys()]
+    keys = [k.lower() for k in layers_map.keys()]
     if layer_name not in keys:
-        raise KeyError(f"Layer {layer_name} not found in layer map file. Available layers are: {keys}.")
+        raise KeyError(
+            f"Layer {layer_name} not found in layer map file. Available layers are: {keys}."
+        )
     dtypes = layers_map[layer_name].types
     for dtype in valid_types:
         for key in dtypes.keys():
             if dtype in dtypes[key]:
-                return Layer(layer=layers_map[layer_name].layer, datatype=key, name=layer_name)
-    raise KeyError(f"No valid type found for layer {layer_name}. Available types are: {dtypes}.")
-
+                return Layer(
+                    layer=layers_map[layer_name].layer, datatype=key, name=layer_name
+                )
+    raise KeyError(
+        f"No valid type found for layer {layer_name}. Available types are: {dtypes}."
+    )
