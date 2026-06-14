@@ -44,9 +44,11 @@ def test_add_reference(tmp_path):
     path_tech = tmp_path / "techno.json"
     (tmp_path / path_file).touch()
     path_tech.write_text(
-        f"""sky130:
-    base_dir: {tmp_path}
-"""
+        f"""{{
+    "sky130": {{
+        "base_dir": "{tmp_path.as_posix()}"
+    }}
+}}"""
     )
     techno.add_reference(pdk_name, ref_name, Path(path_file), path_tech)
     pdk = techno.load_pdk(pdk_name, str(path_tech))
