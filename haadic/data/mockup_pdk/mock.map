@@ -1,12 +1,13 @@
 # this is a comment
 Poly    Drawing 30  0
-Metal1  NET     34  0
+Metal1  NET     34  5
+Metal1  Pin     34  16
 Metal2  drawing 2   0
 Metal4  net     46  0
 Metal5  net     81  0 # inline comment
 Pad     net     1   0
 CON     VIA     33  0
 Via1    VIA     35  0   cut
-Via2    VIA     12  0 cut
+Via2    VIA     12  8 cut
 Vi_4    VIA     41  0
 Opening VIA     35  0

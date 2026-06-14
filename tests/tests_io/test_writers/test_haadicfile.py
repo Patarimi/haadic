@@ -15,11 +15,11 @@ def test_haadicfile():
     process = hf.LayerStack("mock", use_json=False)  # ty:ignore[invalid-argument-type]
     assert process.grid == 5e-9
     assert process.get_metal_layer(1) == hf.Layer(
-        34, 0, _pin=0, name="Metal1", width=0.4
+        34, 5, _pin=16, name="Metal1", width=0.4
     )
     assert process.get_via_layer(2) == hf.ViaLayer(
         12,
-        0,
+        8,
         _pin=0,
         name="Via2",
         width=0.4,
@@ -36,7 +36,7 @@ def test_haadicfile_layermap():
     layer_map = hf.get_info_from_layermap(
         "Metal1", valid_types, lm_file, valid_pin_types
     )
-    assert layer_map == hf.Layer(34, 0, _pin=0, name="Metal1")
+    assert layer_map == hf.Layer(34, 5, _pin=16, name="Metal1")
 
 
 @pytest.mark.skipif(
