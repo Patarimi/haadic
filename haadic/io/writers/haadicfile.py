@@ -34,7 +34,8 @@ class Layer:
 
     def __str__(self):
         r"""Get a string representation of the layer, in the format \"name: layer/datatype\"."""
-        return f"{self.name}: {self.layer}/{self.datatype}"
+        pin_info = f" (pin: {self._pin})" if self._pin != 0 else ""
+        return f"{self.name}: {self.layer}/{self.datatype}" + pin_info
 
     @property
     def map(self):
