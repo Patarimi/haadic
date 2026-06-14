@@ -9,12 +9,28 @@ def test_layer():
 
 
 def test_haadicfile():
-    process = hf.LayerStack("sky130")
+    process = hf.LayerStack("mock", use_json=False)  # ty:ignore[invalid-argument-type]
     assert process.grid == 5e-9
+    assert process.get_metal_layer(1) == hf.Layer(
+        34, 0, _pin=0, name="Metal1", width=0.4
+    )
+    assert process.get_via_layer(2) == hf.ViaLayer(
+        12,
+        0,
+        _pin=0,
+        name="Via2",
+        width=0.4,
+        spacing=0.26,
+        enclosure=0.2,
+        between=(2, 3),
+    )
 
 
 def test_haadicfile_layermap():
-    lm_file = hf.get_file("sky130", "layermap")
-    valid_types = ["drawing", "pin", "net", "lefpin", "via"]
-    layer_map = hf.load_from_layermap("nwell", valid_types, lm_file)
-    assert layer_map == hf.Layer(64, 16, name="nwell")
+    lm_file = hf.get_file("mock", "layermap")
+    valid_types = ["drawing", "net", "via"]
+    valid_pin_types = ["pin", "lefpin"]
+    layer_map = hf.get_info_from_layermap(
+        "Metal1", valid_types, lm_file, valid_pin_types
+    )
+    assert layer_map == hf.Layer(34, 0, _pin=0, name="Metal1")

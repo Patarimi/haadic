@@ -91,10 +91,12 @@ class LayerStack:
 
     :param techno: name of the PDK technology (e.g., "sky130").
     :param grid: grid size of the technology (in meters).
+    :param use_json: if True, load the layer stack from a JSON file.
     """
 
     techno: Available_PDK
     grid: float = 1e-9
+    use_json: bool = True
 
     _stack: list[Layer] = field(default_factory=list)
     _via_list: list[ViaLayer] = field(default_factory=list)
@@ -107,8 +109,7 @@ class LayerStack:
 
     def __post_init__(self):
         """Initialize the LayerStack by loading the technology information from the techno.yml file."""
-        pdk = load_pdk(self.techno)
-        if "haadic" in pdk.keys() and get_file(self.techno, "haadic").is_file():
+        if self.use_json and get_file(self.techno, "haadic").is_file():
             path_json = get_file(self.techno, "haadic")
             self.load_from_json(path_json)
             logging.info(f"LayerStack loaded from {path_json}")
