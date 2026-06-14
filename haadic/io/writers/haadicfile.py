@@ -2,11 +2,11 @@
 
 from haadic._config import DATA_DIR
 from haadic.io.readers.tlef import load_tlef
-from haadic.io.readers.layermap import load_map, get_number
+from haadic.io.readers.layermap import load_map
 from pathlib import Path
 import json
 import logging
-from haadic.core.techno import Available_PDK, load_pdk, get_file, add_reference
+from haadic.core.techno import Available_PDK, get_file, add_reference
 from typing import Self, Sequence
 from dataclasses import dataclass, field
 from klayout.db import LayerInfo
@@ -116,11 +116,14 @@ class LayerStack:
         else:
             path = get_file(self.techno, "techlef")
             self.load_from_tlef(path)
-            logging.info(f"LayerStack loaded from {path}")
-            path_json = get_file(self.techno, "base_dir") / f"{self.techno}.json"
-            with open(path_json, "w") as f:
-                json.dump(self, fp=f, default=lambda dc: dc.__dict__, indent=2)
-            add_reference(self.techno, "haadic", Path(f"{self.techno}.json"))
+            path_map = get_file(self.techno, "layermap")
+            if path_map.is_file():
+                self.load_from_layermap(path_map)
+            if self.use_json:
+                path_json = get_file(self.techno, "base_dir") / f"{self.techno}.json"
+                self.export_to_json(path_json)
+                logging.info(f"LayerStack exported to {path_json}")
+                add_reference(self.techno, "haadic", Path(f"{self.techno}.json"))
         self.apply_patch()
 
     def __len__(self):
@@ -287,13 +290,11 @@ class LayerStack:
                 logging.warning(f"{e}")
             self._via_list[i].layer = layer_info.layer
             self._via_list[i].datatype = layer_info.datatype
-        logging.info("".join("\t" + lyr.name for lyr in stack))
-        self._stack = stack
-        self._via_list = via_list
 
-
-def load_from_layermap(
-    layer_name: str, valid_types: Sequence[str], path: Path
+    def export_to_json(self, path_json: Path) -> None:
+        """Export the layer stack information to a JSON file."""
+        with open(path_json, "w") as f:
+            json.dump(self, fp=f, default=lambda dc: dc.__dict__, indent=2)
 
 
 def get_info_from_layermap(
