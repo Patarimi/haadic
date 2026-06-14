@@ -223,83 +223,70 @@ class LayerStack:
                 for i, lyr in enumerate(data.get("_via_list", [])):
                     self._via_list.append(ViaLayer(**lyr))
 
-    def load_from_tlef(self, path: Path | str):
+    def load_from_tlef(self, path: Path):
         """Load the layer stack information from a TLEF file."""
         t_stack = load_tlef(path)
         self.grid = t_stack.unit
-        map_path = get_file(self.techno, "layermap")
-        layer_map = load_map(map_path)
-        stack = []
-        via_list = []
         for layer in t_stack.layers:
-            if layer.name not in layer_map.keys():
-                logging.error(f"{layer.name} not found in layer map file.")
-                continue
-            for dtype in ("VIA", "drawing", "pin", "net", "lefpin"):
-                try:
-                    dt = get_number(layer_map, layer.name, dtype)
-                    logging.debug(f"Found {dt} for {layer.name}.")
-                    break
-                except KeyError:
-                    continue
-            if "dt" not in locals():
-                raise KeyError(
-                    f"Type not found for layer {layer.name}. Available type are {layer_map[layer.name]}."
-                )
             if layer.type == "ROUTING":
-                try:
-                    pin = get_number(layer_map, layer.name, "pin")
-                except KeyError:
-                    pin = dt
-                    logging.error(
-                        f"No 'pin' layer found for {layer.name}. Using {dt} instead."
-                    )
-                logging.debug(f"{pin=}")
                 lyr = Layer(
-                    layer=dt[0],
-                    datatype=dt[1],
-                    _pin=pin[1],
+                    layer=0,
                     name=layer.name,
                     width=layer.width,
                     spacing=layer.spacing,
                 )
-                stack.append(lyr)
+                self._stack.append(lyr)
             elif layer.type == "CUT":
                 lyr = ViaLayer(
-                    layer=dt[0],
-                    datatype=dt[1],
+                    layer=0,
                     name=layer.name,
                     width=layer.width,
                     spacing=layer.spacing,
                     enclosure=layer.enclosure,
-                    between=(len(stack), len(stack) + 1),
+                    between=(len(self._stack), len(self._stack) + 1),
                 )
-                via_list.append(lyr)
+                self._via_list.append(lyr)
             elif layer.type == "MASTERSLICE":
-                try:
-                    pin = get_number(layer_map, layer.name, "pin")
-                except KeyError:
-                    pin = dt
-                    logging.error(
-                        f"No 'pin' layer found for {layer.name}. Using {dt} instead."
-                    )
-                self._gate = Layer(
-                    layer=dt[0], datatype=dt[1], _pin=dt[1], name=layer.name
-                )
+                self._gate = Layer(layer=0, name=layer.name)
             elif layer.type == "PWELL":
-                self._pplus = Layer(layer=dt[0], datatype=dt[1], name=layer.name)
+                self._pplus = Layer(layer=0, name=layer.name)
             elif layer.type == "NWELL":
-                self._nplus = Layer(layer=dt[0], datatype=dt[1], name=layer.name)
+                self._nplus = Layer(layer=0, name=layer.name)
             else:
                 raise ValueError(f"Unknown layer type: {layer.type}")
 
-        if stack[-1].name[0].lower() in ("m", "v") or isinstance(stack[-1], ViaLayer):
+        if self._stack[-1].name[0].lower() in ("m", "v") or isinstance(
+            self._stack[-1], ViaLayer
+        ):
             logging.warning("No Pad layer detected")
-            logging.debug("".join("\t" + lyr.name for lyr in stack))
+            logging.debug("".join("\t" + lyr.name for lyr in self._stack))
             self._pad = Layer(0, name="NotFound")
         else:
-            self._pad = stack.pop(-1)
+            self._pad = self._stack.pop(-1)
             logging.debug(f"{self._pad.name} set as Pad layer")
+        logging.info("".join("\t" + lyr.name for lyr in self._stack))
+
+    def load_from_layermap(self, path: Path):
+        """Load the layer numbers for GDSSI export from a layer map file."""
+        for i in range(len(self._stack)):
+            try:
+                layer_info = get_info_from_layermap(
+                    self._stack[i].name, ["drawing", "net"], path, ["pin", "lefpin"]
+                )
+            except KeyError as e:
+                logging.warning(f"{e}")
+            self._stack[i].layer = layer_info.layer
+            self._stack[i].datatype = layer_info.datatype
+            self._stack[i]._pin = layer_info._pin
+        for i in range(len(self._via_list)):
+            try:
+                layer_info = get_info_from_layermap(
+                    self._via_list[i].name, ["drawing", "net", "via"], path
+                )
+            except KeyError as e:
+                logging.warning(f"{e}")
+            self._via_list[i].layer = layer_info.layer
+            self._via_list[i].datatype = layer_info.datatype
         logging.info("".join("\t" + lyr.name for lyr in stack))
         self._stack = stack
         self._via_list = via_list
@@ -307,28 +294,54 @@ class LayerStack:
 
 def load_from_layermap(
     layer_name: str, valid_types: Sequence[str], path: Path
+
+
+def get_info_from_layermap(
+    layer_name: str,
+    valid_drawing_types: Sequence[str],
+    path: Path,
+    valid_pin_types: Sequence[str] = [],
 ) -> Layer:
     """
     Load the layer stack information from a layer map file.
 
     :param layer_name: name of the layer to load from the layer map file.
-    :param valid_types: list of valid layer types (e.g., "drawing", "pin", "net", "lefpin", "via").
+    :param valid_drawing_types: list of valid drawing types (e.g., "drawing", "pin", "net", "lefpin", "via").
     :param path: path to the layer map file.
+    :param valid_pin_types: list of valid pin types (e.g., "pin", "lefpin").
     :return: Layer object corresponding to the requested layer name.
     """
     layers_map = load_map(path)
     keys = [k.lower() for k in layers_map.keys()]
-    if layer_name not in keys:
+    if layer_name.lower() not in keys:
         raise KeyError(
             f"Layer {layer_name} not found in layer map file. Available layers are: {keys}."
         )
+    lyr = Layer(layer=0, name=layer_name)
     dtypes = layers_map[layer_name].types
-    for dtype in valid_types:
+    for dtype in valid_drawing_types:
         for key in dtypes.keys():
             if dtype in dtypes[key]:
-                return Layer(
-                    layer=layers_map[layer_name].layer, datatype=key, name=layer_name
-                )
-    raise KeyError(
-        f"No valid type found for layer {layer_name}. Available types are: {dtypes}."
-    )
+                lyr.layer = layers_map[layer_name].layer
+                lyr.datatype = key
+    for dtype in valid_pin_types:
+        for key in dtypes.keys():
+            if dtype in dtypes[key]:
+                lyr._pin = key
+    if lyr.layer == 0:
+        raise KeyError(
+            f"No valid type found for layer {layer_name}. Available types are: {dtypes}."
+        )
+    return lyr
+
+
+if __name__ == "__main__":
+    # Example usage of the LayerStack class
+    stack = LayerStack(techno="sky130")
+    print(f"Grid size: {stack.grid}")
+    print(f"Gate layer: {stack.get_gate_layer()}")
+    print(f"Pad layer: {stack.get_pad_layer()}")
+    for i in range(len(stack)):
+        print(f"Metal layer {i + 1}: {stack.get_metal_layer(i + 1)}")
+    for i in range(len(stack._via_list)):
+        print(f"Via layer {i}: {stack.get_via_layer(i)}")
