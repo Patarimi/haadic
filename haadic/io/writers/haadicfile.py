@@ -78,6 +78,11 @@ class ViaLayer(Layer):
             object.__setattr__(self, "between", tuple(self.between))
         return self
 
+    def __str__(self):
+        r"""Get a string representation of the via layer, in the format \"name: layer/datatype between metal layers\"."""
+        metal_layers = f"{self.between[0]}-{self.between[1]}"
+        return Layer.__str__(self) + f" (between {metal_layers})"
+
 
 def default_layer():
     """Return a default layer with layer number 0 and name 'NotFound'."""
@@ -249,14 +254,14 @@ class LayerStack:
                     between=(len(self._stack), len(self._stack) + 1),
                 )
                 self._via_list.append(lyr)
-            elif layer.type == "MASTERSLICE":
+            elif layer.type == "MASTERSLICE" and self._gate.name == "":
                 self._gate = Layer(layer=0, name=layer.name)
             elif layer.type == "PWELL":
                 self._pplus = Layer(layer=0, name=layer.name)
             elif layer.type == "NWELL":
                 self._nplus = Layer(layer=0, name=layer.name)
             else:
-                raise ValueError(f"Unknown layer type: {layer.type}")
+                logging.error(f"Unknown layer type: {layer.type}")
 
         if self._stack[-1].name[0].lower() in ("m", "v") or isinstance(
             self._stack[-1], ViaLayer
@@ -322,12 +327,13 @@ def get_info_from_layermap(
     dtypes = layers_map[layer_name].types
     for dtype in valid_drawing_types:
         for key in dtypes.keys():
-            if dtype in dtypes[key]:
+            if dtype.lower() in dtypes[key]:
                 lyr.layer = layers_map[layer_name].layer
                 lyr.datatype = key
+                continue
     for dtype in valid_pin_types:
         for key in dtypes.keys():
-            if dtype in dtypes[key]:
+            if dtype.lower() in dtypes[key]:
                 lyr._pin = key
     if lyr.layer == 0:
         raise KeyError(
@@ -338,7 +344,7 @@ def get_info_from_layermap(
 
 if __name__ == "__main__":
     # Example usage of the LayerStack class
-    stack = LayerStack(techno="sky130")
+    stack = LayerStack(techno="gf180mcu", use_json=False)
     print(f"Grid size: {stack.grid}")
     print(f"Gate layer: {stack.get_gate_layer()}")
     print(f"Pad layer: {stack.get_pad_layer()}")
