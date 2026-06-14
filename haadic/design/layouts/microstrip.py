@@ -3,8 +3,9 @@
 from typing import Sequence
 import klayout.db as db
 
-from .tools import LayerStack, Port
+from .tools import Port
 from .general import via_stack, via
+from haadic.io.writers.haadicfile import LayerStack
 
 
 def straight_line(

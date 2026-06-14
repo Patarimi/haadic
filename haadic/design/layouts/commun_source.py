@@ -5,7 +5,7 @@ from klayout import db
 from haadic.core.steps.step import Dim
 from haadic.design.layouts.active import connect, line, mosfet
 from haadic.design.layouts.general import set_as_port
-from haadic.design.layouts.tools import LayerStack
+from haadic.io.writers.haadicfile import LayerStack
 
 
 def layout(

@@ -4,7 +4,8 @@ import klayout.db as db
 from haadic._config import REF_PATH
 from haadic.core.techno import is_installed
 from haadic.design.layouts.inductor import octagonal_inductor
-from haadic.design.layouts.tools import LayerStack, check_diff
+from haadic.design.layouts.tools import check_diff
+from haadic.io.writers.haadicfile import LayerStack
 
 pytestmark = pytest.mark.skipif(not is_installed("mock"), reason="PDK not installed.")
 

@@ -7,7 +7,8 @@ from haadic.design.layouts.general import (
     get_dtext,
     get_shape,
 )
-from haadic.design.layouts.tools import LayerStack, check_diff
+from haadic.design.layouts.tools import check_diff
+from haadic.io.writers.haadicfile import LayerStack
 from haadic._config import REF_PATH
 
 stack = LayerStack("mock")  # ty:ignore[invalid-argument-type]

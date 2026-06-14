@@ -1,5 +1,7 @@
 """Lark transformer for layermap (gds map files) grammar tokens."""
 
+import functools
+
 from pathlib import Path
 from dataclasses import dataclass
 from haadic.io.readers.tools import parse
@@ -62,6 +64,7 @@ class LayerMap(Transformer):
         return map_d
 
 
+@functools.cache
 def load_map(map_path: Path) -> dict[str, Map]:
     """Load a layermap file and return a dictionary mapping layer names to Map objects."""
     t = parse(map_path, "layermap")

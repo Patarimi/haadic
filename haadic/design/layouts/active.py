@@ -5,7 +5,7 @@ from typing import Literal, Sequence
 
 import klayout.db as db
 
-from .tools import LayerStack, Layer
+from haadic.io.writers.haadicfile import LayerStack, Layer
 import haadic.design.layouts.general as gen
 
 

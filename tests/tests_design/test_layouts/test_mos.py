@@ -2,7 +2,8 @@ from klayout import db
 
 from haadic._config import REF_PATH
 from haadic.design.layouts.active import mosfet, line, connect
-from haadic.design.layouts.tools import check_diff, LayerStack, Layer
+from haadic.io.writers.haadicfile import LayerStack, Layer
+from haadic.design.layouts.tools import check_diff
 
 
 stack = LayerStack("mock")  # ty:ignore[invalid-argument-type]
