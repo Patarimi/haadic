@@ -11,7 +11,8 @@ def test_load_map():
     layers = load_map(map_file)
 
     assert layers["Via1"]["VIA"] == (35, 0)
-    assert layers["Via2"]["VIA"] == (12, 0)
+    assert layers["Via2"]["VIA"] == (12, 8)
+    assert str(layers["Metal1"]) == "34 - {5: ['net'], 16: ['pin']}"
 
 
 def test_get_number():
@@ -23,7 +24,7 @@ def test_get_number():
 
     layer, datatype = get_number(layers, "Metal1", "NET")
     assert layer == 34
-    assert datatype == 0
+    assert datatype == 5
 
     with pytest.raises(KeyError):
-        get_number(layers, "Via1", "NET")
+        get_number(layers, "Via3", "NET")
