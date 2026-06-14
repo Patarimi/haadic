@@ -113,7 +113,7 @@ class LayerStack:
     _active: Layer = field(default_factory=default_layer)
 
     def __post_init__(self):
-        """Initialize the LayerStack by loading the technology information from the techno.yml file."""
+        """Initialize the LayerStack by loading the technology information from the techno.json file."""
         if self.use_json and get_file(self.techno, "haadic").is_file():
             path_json = get_file(self.techno, "haadic")
             self.load_from_json(path_json)
@@ -200,9 +200,9 @@ class LayerStack:
 
     def apply_patch(self):
         """
-        Apply a patch file to the techno.yml file.
+        Apply a patch file to the techno.json file.
 
-        The patch file is a json file that contains the modifications to be applied to the techno.yml file.
+        The patch file is a json file that contains the modifications to be applied to the techno.json file.
         """
         patch_file = DATA_DIR / "patches" / f"{self.techno}.json"
         if not Path(patch_file).is_file():
