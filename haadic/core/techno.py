@@ -9,7 +9,7 @@ import tarfile
 import urllib.request
 import zipfile
 from os.path import isdir
-import yaml
+import json
 from cyclopts import App
 from typing import Literal, Optional
 from rich.console import Console
@@ -21,9 +21,9 @@ from haadic._config import DATA_DIR
 console = Console(stderr=True)
 pkd_app = App("pdk", help="Manage the PDKs")
 
-"""PATHS: define search paths for techno.yml and design.yml"""
-PATHS = [DATA_DIR / "techno.yml", Path(os.getcwd()) / "design.yml"]
-"""Available_PDK: Define the list of supported PDKs. This can be extended by adding entries in techno.yml and design.yml files."""
+"""PATHS: define search paths for techno.json and design.json"""
+PATHS = [DATA_DIR / "techno.json", Path(os.getcwd()) / "design.json"]
+"""Available_PDK: Define the list of supported PDKs. This can be extended by adding entries in techno.json and design.json files."""
 Available_PDK = Literal["sky130", "gf180mcu", "asap7"]
 """Handled_key: Define the keys that are handled in the PDK configuration."""
 Handled_key = Literal[
@@ -127,7 +127,7 @@ def list_pdk():
     """
     Return a list of PDK names discovered in configured PATHS.
 
-    Scans `PATHS` for YAML entries and aggregates available PDK keys.
+    Scans `PATHS` for JSON entries and aggregates available PDK keys.
     """
     process_l = list()
     for path in PATHS:
@@ -149,10 +149,10 @@ def load_pdk(pdk_name: Available_PDK, path: Optional[str] = None) -> dict[str, s
 
     Args:
         pdk_name: the PDK name to load (one of `Available_PDK`).
-        path: optional path to a YAML file or directory to prioritize when searching.
+        path: optional path to a JSON file or directory to prioritize when searching.
 
     Returns:
-        A dict containing the PDK metadata as parsed from techno.yml / design.yml.
+        A dict containing the PDK metadata as parsed from techno.json / design.json.
 
     Raises:
         KeyError: if the PDK name cannot be found.
@@ -167,7 +167,7 @@ def load_pdk(pdk_name: Available_PDK, path: Optional[str] = None) -> dict[str, s
         tech = _read_tech(file)
         if pdk_name in tech:
             return tech[pdk_name]
-    raise KeyError(f"{pdk_name} not found in {path} or local design.yml")
+    raise KeyError(f"{pdk_name} not found in {path} or local design.json")
 
 
 def add_reference(
@@ -177,7 +177,7 @@ def add_reference(
     path_tech: Optional[Path] = None,
 ) -> None:
     """
-    Add a reference file to the techno.yml file.
+    Add a reference file to the techno.json file.
 
     The reference file can be a LEF, a SPICE model or a HAADIC json file.
 
@@ -185,16 +185,16 @@ def add_reference(
     :param pdk_name: Name of the PDK to which the reference file is added.
     :param ref_name: Name of the reference file (e.g., 'techlef', 'haadic', 'spice').
     :param path_file: Path to the reference file.
-    :param path_tech: Optional path to the techno.yml file to update. If None, it will look for techno.yml in the current directory and then in the data directory.
+    :param path_tech: Optional path to the techno.json file to update. If None, it will look for techno.json in the current directory and then in the data directory.
     """
     if path_tech is None:
-        path_tech = DATA_DIR / "techno.yml"
+        path_tech = DATA_DIR / "techno.json"
     process_d = _read_tech(path_tech)
     if pdk_name not in process_d:
-        raise KeyError(f"{pdk_name} not found in techno.yml")
+        raise KeyError(f"{pdk_name} not found in techno.json")
     process_d[pdk_name][ref_name] = str(path_file)
     with open(path_tech, "w") as f:
-        yaml.dump(process_d, f)
+        json.dump(process_d, f)
 
 
 def get_file(pdk_name: Available_PDK | Literal["mock"], file_type: Handled_key) -> Path:
@@ -216,15 +216,15 @@ def get_file(pdk_name: Available_PDK | Literal["mock"], file_type: Handled_key) 
 @functools.cache
 def _read_tech(tech_file: Path) -> dict[str, dict[str, str]]:
     """
-    Read a YAML technology description file and return it as a dict.
+    Read a JSON technology description file and return it as a dict.
 
     Args:
-        tech_file: path to a YAML file describing one or more PDKs.
+        tech_file: path to a JSON file describing one or more PDKs.
 
     Returns:
-        Parsed YAML content as a Python dict.
+        Parsed JSON content as a Python dict.
 
     """
     with open(tech_file, "r") as f:
-        process_d = yaml.load(f, Loader=yaml.Loader)
+        process_d = json.load(f)
     return process_d

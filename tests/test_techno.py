@@ -41,7 +41,7 @@ def test_add_reference(tmp_path):
     pdk_name = "sky130"
     ref_name = "techlef"
     path_file = "test_file.lef"
-    path_tech = tmp_path / "techno.yml"
+    path_tech = tmp_path / "techno.json"
     (tmp_path / path_file).touch()
     path_tech.write_text(
         f"""sky130:
