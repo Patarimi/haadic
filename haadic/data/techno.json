@@ -1,0 +1,38 @@
+{
+  "asap7": {
+    "base_dir": "asap7",
+    "layermap": "asap7_pdk_r1p7-main/cdslib/asap7_TechLib_10/asap7_fromAPR_08b.layermap",
+    "source_url": "https://github.com/The-OpenROAD-Project/asap7_pdk_r1p7/archive/refs/heads/master.zip"
+  },
+  "gf180mcu": {
+    "base_dir": "gf180mcuD",
+    "haadic": "gf180mcu.json",
+    "layermap": "libs.tech/klayout/tech/gf180mcu.map",
+    "lib_spice": "libs.tech/ngspice/sm141064.ngspice",
+    "magic_rc": "libs.tech/magic/gf180mcuD.magicrc",
+    "section": "typical",
+    "source_url": "ciel",
+    "techlef": "libs.ref/gf180mcu_fd_sc_mcu9t5v0/techlef/gf180mcu_fd_sc_mcu9t5v0__nom.tlef",
+    "version": "8f2d1529c86235d726979eb9ecb7e9628108590b"
+  },
+  "mock": {
+    "base_dir": "mock",
+    "haadic": "mock.json",
+    "layermap": "mock.map",
+    "process": "mock.proc",
+    "techlef": "mock.tlef",
+    "ekv_model": "ekv_mock.json"
+  },
+  "sky130": {
+    "base_dir": "sky130A",
+    "haadic": "sky130.json",
+    "layermap": "libs.tech/klayout/tech/sky130A.map",
+    "lib_spice": "libs.tech/combined/sky130.lib.spice",
+    "magic_rc": "libs.tech/magic/sky130A.magicrc",
+    "magic_tech": "libs.tech/magic/sky130A-GDS.tech",
+    "ekv_model": "libs.tech/haadic/ekv_model_sky130.json",
+    "source_url": "ciel",
+    "techlef": "libs.ref/sky130_fd_sc_hvl/techlef/sky130_fd_sc_hvl__nom.tlef",
+    "version": "0fe599b2afb6708d281543108caf8310912f54af"
+  }
+}

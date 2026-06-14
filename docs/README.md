@@ -74,21 +74,24 @@ When finished, a _.gds_ file is available for further design and a _.csv_ file w
 
 ## PDKs configuration
 
-A techno.yml file can be created in the working dir or the haadic root with the following structure:
+A techno.json file can be created in the working dir or the haadic root with the following structure:
 
-```yaml
-techno_name:
-  base_dir: path to the pdk directory root
-  layermap: path to the layermap (relative to the base_dir)
-  techlef: path to the tlef file
-  magic_rc: path to the configuration file of magic
-  lib_spice: path to the spice model library
-  section: name of the section to import in the spice library typical
-  source_url: url to be use for download (set to "ciel" for ciel installation)
-  version: version id (only required if source_url is set to "ciel")
+```json
+{
+"techno_name": {
+  "base_dir": "path to the pdk directory root",
+  "layermap": "path to the layermap (relative to the base_dir)",
+  "techlef": "path to the tlef file",
+  "magic_rc": "path to the configuration file of magic",
+  "lib_spice": "path to the spice model library",
+  "section": "name of the section to import in the spice library typical",
+  "source_url": "url to be use for download (set to "ciel" for ciel installation)",
+  "version": "version id (only required if source_url is set to "ciel")"
+}
+}
 ```
 
-A techno.yml file with three open source PDK and a mock PDK are already supplied.
+A techno.json file with three open source PDK and a mock PDK are already supplied.
 
 ## For developpers
 

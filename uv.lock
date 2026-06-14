@@ -364,7 +364,6 @@ dependencies = [
     { name = "pydantic" },
     { name = "pyqt6", marker = "sys_platform == 'linux'" },
     { name = "python-dotenv" },
-    { name = "pyyaml" },
     { name = "rich" },
     { name = "scikit-rf" },
     { name = "scipy" },
@@ -397,7 +396,6 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.13.4" },
     { name = "pyqt6", marker = "sys_platform == 'linux'", specifier = ">=6.11.0" },
     { name = "python-dotenv", specifier = ">=1.1.1" },
-    { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "rich", specifier = ">=13.9.4" },
     { name = "scikit-rf", specifier = ">=1.12.0" },
     { name = "scipy", specifier = ">=1.16.1" },
@@ -1103,8 +1101,8 @@ name = "pyqt6"
 version = "6.11.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "pyqt6-qt6" },
-    { name = "pyqt6-sip" },
+    { name = "pyqt6-qt6", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "pyqt6-sip", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/8b/47/b25c13eca5bebc6505394d0223e46d7ebf0c57dcac2ed908d7d19b18ab6b/pyqt6-6.11.0.tar.gz", hash = "sha256:45dd60aa69976de1918b5ced6b4e7b6a25abd2a919ecef5fd5826ecc76718889", size = 1087430, upload-time = "2026-03-30T09:16:13.543Z" }
 wheels = [
