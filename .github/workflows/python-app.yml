@@ -20,7 +20,7 @@ jobs:
   check-format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: astral-sh/ruff-action@v3
         with:
           args: 'check'        
@@ -31,7 +31,7 @@ jobs:
   doc-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install uv
         uses: astral-sh/setup-uv@v7
       - uses: actions/setup-python@v6
@@ -60,7 +60,7 @@ jobs:
     needs: [check-format, doc-build]
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: Vampire/setup-wsl@v7
       if: ${{runner.os == 'Windows' }}
     - name: Install Nix for windows
