@@ -11,7 +11,7 @@ dependencies = [
     "klayout>=0.30.2",
     "lark>=1.2.2",
     "matplotlib>=3.10.3",
-    "numpy>=2.4.5",
+    "numpy>=2.5.0",
     "pandas>=2.3.1",
     "pydantic>=2.13.4",
     "pyqt6>=6.11.0 ; sys_platform == 'linux'",
