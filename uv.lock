@@ -111,7 +111,7 @@ wheels = [
 
 [[package]]
 name = "ciel"
-version = "2.5.0"
+version = "2.5.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -121,9 +121,9 @@ dependencies = [
     { name = "rich" },
     { name = "zstandard" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a6/02/f91e7fc1b6ece6a869d0727ec5c72cb4736f34cf5f5ce1e36b5d424e56d3/ciel-2.5.0.tar.gz", hash = "sha256:c0f3bc47702ea7961c664912d27eec8a78d6adfd35d467a204e6766be2e6e22f", size = 26609, upload-time = "2026-06-08T15:32:51.718Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/85/04/541c62567d1aac1a95044acae8183b072bc55a89a4cc11c23287462194df/ciel-2.5.1.tar.gz", hash = "sha256:7b6c00f2b15e7b0bb28198cdc325a953f34aeaa8b3c39db86a9049a177ad1e5b", size = 26628, upload-time = "2026-06-15T14:47:46.52Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/67/ec/b400a3e5c197547309d8f22573fcbe4b80d113deb4e0938fa0116af5d01f/ciel-2.5.0-py3-none-any.whl", hash = "sha256:03f0e75fda4d12ee936b9fd50c0c4f0eb2fdc242d937ae2b5930189eac2e4103", size = 38629, upload-time = "2026-06-08T15:32:50.539Z" },
+    { url = "https://files.pythonhosted.org/packages/a8/0e/47d86dfe7a6f3b501c65c8061007e6e750134d46a17f6cadadef628e562e/ciel-2.5.1-py3-none-any.whl", hash = "sha256:967c5b6902c018b26f0c7ba06b22eb721af200806524fc241a4849d58c32f106", size = 38637, upload-time = "2026-06-15T14:47:45.393Z" },
 ]
 
 [[package]]
@@ -386,7 +386,7 @@ doc = [
 
 [package.metadata]
 requires-dist = [
-    { name = "ciel", specifier = ">=2.2.0" },
+    { name = "ciel", specifier = ">=2.5.1" },
     { name = "cyclopts", specifier = ">=4.14.0" },
     { name = "klayout", specifier = ">=0.30.2" },
     { name = "lark", specifier = ">=1.2.2" },
