@@ -1,5 +1,7 @@
 """Magic tech file reader. Only support the GDSII section for now."""
 
+import logging
+
 from typing import Any
 
 from dataclasses import dataclass
@@ -36,17 +38,18 @@ class MagicTech:
                 match line.split():
                     case ["style", "gdsii"]:
                         block = "gdsii"
-                    case [
-                        "end",
-                    ] if block == "gdsii":
+                    case ["end"] if block == "gdsii":
                         break
                     case ["layer", name, alias]:
                         layerinfo = {"name": name, "alias": alias.split(",")}
+                    case ["layer", name]:
+                        layerinfo = {"name": name, "alias": []}
                     case ["labels", _, isport]:
                         layerinfo["isport"] = isport == "port"
                     case ["calma", layer, dtype] if block == "gdsii":
-                        print(layerinfo["name"])
                         if "isport" not in layerinfo:
                             layerinfo["isport"] = False
                         layerinfo["gdsii_layer"] = (int(layer), int(dtype))
                         self.gdsii.append(MagicTechLayer(**layerinfo))
+                        layerinfo = {}
+        logging.info(self.gdsii)
