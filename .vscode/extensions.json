@@ -1,6 +1,8 @@
 {
     "recommendations": [
         "allegromorphic.gds-preview",
-        "mermaidchart.vscode-mermaid-chart"
+        "mermaidchart.vscode-mermaid-chart",
+        "charliermarsh.ruff",
+        "njpwerner.autodocstring"
     ]
 }
