@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 
 @dataclass
@@ -30,6 +31,7 @@ class MagicTech:
         with open(tech_file, "r") as f:
             block = None
             for line in f:
+                layerinfo: dict[str, Any] = {}
                 match line.split():
                     case ["style", "gdsii"]:
                         block = "gdsii"

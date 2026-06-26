@@ -1,6 +1,6 @@
 from haadic._config import REF_PATH
 import pytest
-from typing import Sequence, Any
+from typing import Sequence, Any, override
 import dataclasses
 from pathlib import Path
 from haadic.core.steps import step
@@ -12,6 +12,7 @@ class MockStep(step.Step):
     output_suffix: str = ".csv"
     config: dict[str, Any] = dataclasses.field(default_factory=dict)
 
+    @override
     def run(self, input_file: Path) -> Path:
         output_file = input_file.with_suffix(self.output_suffix)
         output_file.write_text(self.config.get("text", "default !!"))
