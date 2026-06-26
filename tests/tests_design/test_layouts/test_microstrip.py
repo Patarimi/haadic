@@ -7,7 +7,8 @@ from haadic.design.layouts.microstrip import (
     lange_coupler,
     marchand_balun,
 )
-from haadic.design.layouts.tools import Port, check_diff
+from haadic.design.layouts.tools import Port
+from haadic.core.tools import diff_gds
 from haadic.io.writers.haadicfile import LayerStack
 
 layerstack = LayerStack("mock")  # ty:ignore[invalid-argument-type]
@@ -18,7 +19,7 @@ def test_straight_line(tmp_path):
     lib.dbu = layerstack.grid * 1e6
     straight_line(lib, 10e-6, 50e-6, layerstack, (Port("S1"), Port("")))
     lib.write(tmp_path / "ms.gds")
-    assert check_diff(tmp_path / "ms.gds", REF_PATH / "ref_ms.gds")
+    assert diff_gds(tmp_path / "ms.gds", REF_PATH / "ref_ms.gds")
 
 
 def test_coupler(tmp_path):
@@ -26,7 +27,7 @@ def test_coupler(tmp_path):
     lib.dbu = layerstack.grid * 1e6
     coupled_lines(lib, 10e-6, 50e-6, 20e-6, layerstack)
     lib.write(tmp_path / "cpl.gds")
-    assert check_diff(tmp_path / "cpl.gds", REF_PATH / "ref_cpl.gds")
+    assert diff_gds(tmp_path / "cpl.gds", REF_PATH / "ref_cpl.gds")
 
 
 def test_lange(tmp_path):
@@ -34,7 +35,7 @@ def test_lange(tmp_path):
     lib.dbu = layerstack.grid * 1e6
     lange_coupler(lib, 1.3e-6, 405e-6, 3.7e-6, layerstack)
     lib.write(tmp_path / "lange.gds")
-    assert check_diff(tmp_path / "lange.gds", REF_PATH / "ref_lange.gds")
+    assert diff_gds(tmp_path / "lange.gds", REF_PATH / "ref_lange.gds")
 
 
 def test_marchand(tmp_path):
@@ -42,4 +43,4 @@ def test_marchand(tmp_path):
     lib.dbu = layerstack.grid * 1e6
     marchand_balun(lib, 2e-6, 400e-6, 4e-6, 66e-6, layerstack, widths=25e-6)
     lib.write(tmp_path / "marchand.gds")
-    assert check_diff(tmp_path / "marchand.gds", REF_PATH / "ref_marchand.gds")
+    assert diff_gds(tmp_path / "marchand.gds", REF_PATH / "ref_marchand.gds")
