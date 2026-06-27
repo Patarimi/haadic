@@ -2,10 +2,9 @@
 
 import logging
 
-from typing import Any
-
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 
 @dataclass
@@ -34,6 +33,7 @@ class MagicTech:
         layerinfo: dict[str, Any] = {}
         with open(tech_file, "r") as f:
             block = None
+            layerinfo: dict[str, Any] = {}
             for line in f:
                 match line.split():
                     case ["style", "gdsii"]:

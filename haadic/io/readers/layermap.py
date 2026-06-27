@@ -4,6 +4,7 @@ import functools
 
 from pathlib import Path
 from dataclasses import dataclass
+from typing import override
 from haadic.io.readers.tools import parse
 from lark import Transformer
 
@@ -20,6 +21,7 @@ class Map:
     types: dict[int, list[str]]
     layer: int
 
+    @override
     def __str__(self):
         """Return a string representation of the Map object."""
         return f"{self.layer} - {self.types}"

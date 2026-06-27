@@ -134,7 +134,12 @@ class EKV:
         if isinstance(other, Dim):
             other = other.dct
         for key in other:
-            setattr(self, key, other[key])
+            if key not in self.__dataclass_fields__:
+                logging.warning(
+                    f"{key} not a field of EKV. Available fields : {self.__dataclass_fields__}."
+                )
+            else:
+                setattr(self, key, other[key])
         return self
 
     def dump(self, filename: str | Path) -> None:

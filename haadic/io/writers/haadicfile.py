@@ -7,7 +7,7 @@ from pathlib import Path
 import json
 import logging
 from haadic.core.techno import Available_PDK, get_file, add_reference
-from typing import Self, Sequence
+from typing import Self, Sequence, override
 from dataclasses import dataclass, field
 from klayout.db import LayerInfo
 
@@ -32,6 +32,7 @@ class Layer:
     spacing: float = 0
     _pin: int = 0
 
+    @override
     def __str__(self):
         r"""Get a string representation of the layer, in the format \"name: layer/datatype\"."""
         pin_info = f" (pin: {self._pin})" if self._pin != 0 else ""
@@ -78,6 +79,7 @@ class ViaLayer(Layer):
             object.__setattr__(self, "between", tuple(self.between))
         return self
 
+    @override
     def __str__(self):
         r"""Get a string representation of the via layer, in the format \"name: layer/datatype between metal layers\"."""
         metal_layers = f"{self.between[0]}-{self.between[1]}"
@@ -276,6 +278,7 @@ class LayerStack:
 
     def load_from_layermap(self, path: Path):
         """Load the layer numbers for GDSSI export from a layer map file."""
+        layer_info = Layer(0)
         for i in range(len(self._stack)):
             try:
                 layer_info = get_info_from_layermap(
