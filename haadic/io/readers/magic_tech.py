@@ -1,5 +1,9 @@
 """Magic tech file reader. Only support the GDSII section for now."""
 
+import logging
+
+from typing import Any
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -28,6 +32,7 @@ class MagicTech:
         :param tech_file: Path to the Magic tech file.
         """
         self.gdsii = []
+        layerinfo: dict[str, Any] = {}
         with open(tech_file, "r") as f:
             block = None
             layerinfo: dict[str, Any] = {}
