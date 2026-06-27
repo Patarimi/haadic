@@ -27,8 +27,6 @@ jobs:
       - uses: astral-sh/ruff-action@v3
         with:
           args: 'format --check'
-      - name: ty Action
-        uses: JacobCoffee/ty-action@v0.0.1
 
   doc-build:
     runs-on: ubuntu-latest
