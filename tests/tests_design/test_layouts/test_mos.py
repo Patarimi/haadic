@@ -3,7 +3,7 @@ from klayout import db
 from haadic._config import REF_PATH
 from haadic.design.layouts.active import mosfet, line, connect
 from haadic.io.writers.haadicfile import LayerStack, Layer
-from haadic.design.layouts.tools import check_diff
+from haadic.core.tools import diff_gds
 
 
 stack = LayerStack("mock")  # ty:ignore[invalid-argument-type]
@@ -17,13 +17,13 @@ def test_mos(tmp_path):
     test = lib.create_cell("mos")
     mosfet(test, stack, nf=1)
     lib.write(tmp_path / "mos.gds")
-    assert check_diff(tmp_path / "mos.gds", REF_PATH / "ref_mos.gds")
+    assert diff_gds(tmp_path / "mos.gds", REF_PATH / "ref_mos.gds")
 
     lib = db.Layout()
     test = lib.create_cell("pmos")
     mosfet(test, stack, nf=3, doping="P")
     lib.write(tmp_path / "pmos.gds")
-    assert check_diff(tmp_path / "pmos.gds", REF_PATH / "ref_pmos.gds")
+    assert diff_gds(tmp_path / "pmos.gds", REF_PATH / "ref_pmos.gds")
 
 
 def test_line(tmp_path):
@@ -35,7 +35,7 @@ def test_line(tmp_path):
     line(top, "vdd", lyr)
     line(top, "gnd", lyr, below=True)
     lib.write(tmp_path / "h_line.gds")
-    assert check_diff(tmp_path / "h_line.gds", REF_PATH / "ref_line.gds")
+    assert diff_gds(tmp_path / "h_line.gds", REF_PATH / "ref_line.gds")
 
 
 def test_connect(tmp_path):
