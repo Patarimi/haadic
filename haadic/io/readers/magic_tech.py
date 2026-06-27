@@ -30,22 +30,22 @@ class MagicTech:
         self.gdsii = []
         with open(tech_file, "r") as f:
             block = None
+            layerinfo: dict[str, Any] = {}
             for line in f:
-                layerinfo: dict[str, Any] = {}
                 match line.split():
                     case ["style", "gdsii"]:
                         block = "gdsii"
-                    case [
-                        "end",
-                    ] if block == "gdsii":
+                    case ["end"] if block == "gdsii":
                         break
                     case ["layer", name, alias]:
                         layerinfo = {"name": name, "alias": alias.split(",")}
+                    case ["layer", name]:
+                        layerinfo = {"name": name, "alias": []}
                     case ["labels", _, isport]:
                         layerinfo["isport"] = isport == "port"
                     case ["calma", layer, dtype] if block == "gdsii":
-                        print(layerinfo["name"])
                         if "isport" not in layerinfo:
                             layerinfo["isport"] = False
                         layerinfo["gdsii_layer"] = (int(layer), int(dtype))
                         self.gdsii.append(MagicTechLayer(**layerinfo))
+                        layerinfo = {}
