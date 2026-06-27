@@ -2,8 +2,6 @@
 
 import logging
 
-from typing import Any
-
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -54,3 +52,4 @@ class MagicTech:
                         layerinfo["gdsii_layer"] = (int(layer), int(dtype))
                         self.gdsii.append(MagicTechLayer(**layerinfo))
                         layerinfo = {}
+        logging.info(self.gdsii)
