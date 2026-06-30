@@ -1,17 +1,18 @@
 """Functions to generate mos transistor layouts. This fonction are based on a standard grid design."""
 
+from haadic.design.layouts.base_cell import BaseCell
+
 import logging
 from typing import Literal, Sequence
 
 import klayout.db as db
 
-from haadic.io.writers.haadicfile import LayerStack, Layer
+from haadic.io.writers.haadicfile import LayerStack
 import haadic.design.layouts.general as gen
 
 
 def mosfet(
-    cell: db.Cell,
-    layers: LayerStack,
+    cell: BaseCell,
     nf: int = 5,
     width: float = 2,
     length: float = 0.13,
@@ -21,22 +22,21 @@ def mosfet(
     Create and insert a mosfet in the given cell.
 
     :param cell: top cell in which the mosfet is inserted
-    :param layers: LayerStack to use
     :param nf: number of finger
     :param width: width of each finger in µm
     :param length: length of each finger in µm
     :param doping: mos type (P or N).
     :return:
     """
-    layout = cell.layout()
-    poly_layer = layers.get_gate_layer()
+    layout = cell._layout
+    poly_layer = cell.gate
     gate_ext = poly_layer.spacing
-    doping_layer = layers._pplus if doping == "P" else layers._nplus
+    doping_layer = cell.implant(doping)
     doping_ext = doping_layer.spacing
-    m1_layer = layers.get_metal_layer(1)
+    m1_layer = cell.metal(1)
     m1_width = m1_layer.width
-    diff_space = layers._active.spacing
-    via_layer = layers.get_via_layer(0)
+    diff_space = cell.active.spacing
+    via_layer = cell.via(0)
     logging.debug(f"via layer : {via_layer}")
 
     mos = layout.create_cell(f"{doping.lower()}mos_{nf}")
@@ -65,12 +65,12 @@ def mosfet(
         1,
     )
     mos.insert(dr_cons)
-    mos.shapes(layers._active.drawing).insert(
+    mos.shapes(cell.active.drawing).insert(
         db.DBox(0, 0, diff_space + nf * pitch, width)
     )
-    gen.enclose(mos, doping_layer, doping_ext, filter=layers._active)
+    gen.enclose(mos, doping_layer, doping_ext, filter=cell.active)
     if doping == "P":
-        gen.enclose(mos, layers._nwell, doping_ext, filter=doping_layer)
+        gen.enclose(mos, cell.nwell(), doping_ext, filter=doping_layer)
     for i in range(nf):
         mos.shapes(poly_layer.pin).insert(
             db.DText(f"g{i}", i * pitch + diff_space + length / 2, -gate_ext)
@@ -82,28 +82,24 @@ def mosfet(
         db.DText(f"dr{nf}", nf * pitch + diff_space / 2, width / 2)
     )
     mos.flatten(-1, True)
-    cell.insert(db.DCellInstArray(mos, db.DVector(0, 0)))
+    cell.top.insert(db.DCellInstArray(mos, db.DVector(0, 0)))
     return mos
 
 
-def line(
-    cell: db.Cell,
-    name: str,
-    layer: Layer = Layer(1, 0, "M2", 1, 0.5),
-    below=False,
-):
+def line(cell: BaseCell, name: str, level: int = 0, below=False):
     """
     Draw a horizontal line above (or below if _below_ = True) the content of the cell.
 
     :param cell: cell to be used.
     :param name: name of the line, a label will be added.
-    :param layer: layer to be used. Width and Space are use for drawing.
+    :param level: metal layer level to be used. Width and Space are use for drawing.
     :param below: if True, draw below the cell instead of above.
     :return:
     """
+    layer = cell.metal(level)
     spacing = layer.spacing
     width = layer.width
-    layout = cell.layout()
+    layout = cell._layout
     horz = layout.create_cell(f"h_{name}")
     bbox = layout.top_cells()[0].dbbox()
     if not below:
@@ -112,23 +108,20 @@ def line(
         origin_y = bbox.bottom - spacing - width
     gen.add_rectangle(horz, layer, (bbox.width(), width), (bbox.left, origin_y))
     gen.add_port(horz, layer, name, (bbox.left, origin_y + width / 2))
-    cell.insert(db.DCellInstArray(horz, db.DVector(0, 0)))
+    cell.top.insert(db.DCellInstArray(horz, db.DVector(0, 0)))
     return horz
 
 
-def connect(
-    cell: db.Cell, layers: LayerStack, label_line: str, label_mos: str
-) -> db.Cell:
+def connect(cell: BaseCell, label_line: str, label_mos: str) -> BaseCell:
     """
     Connect a horizontal line to a label using a vertical line.
 
     :param cell: top cell to be used.
-    :param layers: LayerStack to be used (for via generation).
     :param label_line: label of the horizontal line to be connected.
     :param label_mos: label of the mosfet pin to be connected.
     :return: the cell containing the connection.
     """
-    layout = cell.layout()
+    layout = cell._layout
     lbl_h, lyr_hp = gen.get_dtext(layout, label_line)[0]
     lbl_v, lyr_vp = gen.get_dtext(layout, label_mos)[0]
     box_v, lyr_v = gen.get_shape(layout, lbl_v.position(), lyr_vp)
@@ -137,13 +130,13 @@ def connect(
         top, bottom = box_v.top, box_h.top
     else:
         top, bottom = box_v.bottom, box_h.bottom
-    cell.shapes(lyr_v).insert(db.DBox(box_v.left, bottom, box_v.right, top))
+    cell.top.shapes(lyr_v).insert(db.DBox(box_v.left, bottom, box_v.right, top))
     return cell
 
 
 def pattern_connect(
-    cell: db.Cell, layers: LayerStack, device_name: str, pattern: Sequence[str]
-) -> db.Cell:
+    cell: BaseCell, layers: LayerStack, device_name: str, pattern: Sequence[str]
+) -> BaseCell:
     """
     Connect the ports of a device to lines following the given pattern.
 
@@ -155,12 +148,12 @@ def pattern_connect(
     :param pattern: labels of the connections lines.
     :return: _cell_ with_ the added connections.
     """
-    layout = cell.layout()
+    layout = cell._layout
     labels = gen.get_dtext(layout, cell=device_name)
     for lbl, lyr in labels:
         i = 2 * int(lbl.string.lstrip("gdr"))
         if lbl.string.startswith("g"):
             i += 1
         i = i % len(pattern)
-        connect(cell, layers, pattern[i], lbl.string)
+        connect(cell, pattern[i], lbl.string)
     return cell
