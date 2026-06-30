@@ -2,7 +2,6 @@
 
 import logging
 from pathlib import Path
-from klayout.db import Cell
 from typing import Callable, Iterable
 from dataclasses import dataclass, field
 from tabulate import tabulate
@@ -14,7 +13,7 @@ from haadic.core.steps.spice_simulation import BenchSim, ConfigSim
 from haadic.core.steps.post_process import PostProcess, ConfigPostProc, PostProcessFunc
 from haadic.core.techno import Available_PDK
 from haadic.io.wrappers.magic import ExtractLevels
-from haadic.io.writers.haadicfile import LayerStack
+from haadic.design.layouts.base_cell import BaseCell
 
 
 @dataclass
@@ -50,7 +49,7 @@ class Flow:
     :param config: flow options, such as the technology to use, whether to reload the layout if it already exists, and the folder to run the flow in.
     """
 
-    layout: Callable[[Cell, LayerStack, step.Dim], Cell]
+    layout: Callable[[BaseCell, step.Dim], BaseCell]
     benches: Iterable[Path]
     postprocess: Iterable[PostProcessFunc]
     config: ConfigFlow = field(default_factory=ConfigFlow)

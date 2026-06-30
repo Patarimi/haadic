@@ -11,7 +11,7 @@
 
 from pathlib import Path
 
-from klayout.db import Cell
+from haadic.design.layouts.base_cell import BaseCell
 
 from haadic.io.writers.haadicfile import LayerStack
 from haadic.design.layouts import general as gen
@@ -38,19 +38,19 @@ def local_model(target: Dim) -> Dim:
     return Dim({})
 {%- endif %}
 
-def layout(cell: Cell, layerstack: LayerStack, dimensions: Dim) -> Cell:
+def layout(cell: BaseCell, dimensions: Dim) -> BaseCell:
     """
     Insert the layout generation code here.
 
-    It should return a klayout Cell with the generated layout.
+    It should return a BaseCell with the generated layout.
 
-    :param cell: klayout Cell to use as base for the layout generation.
+    :param cell: BaseCell to use as base for the layout generation.
     :param layerstack: LayerStack instance containing the layer information.
     :param dimensions: Dim instance with the design parameters.
-    :return: klayout Cell with the generated layout.
+    :return: BaseCell with the generated layout.
     """
     #: Example of a simple layout generation code that creates a rectangle on the first metal layer with the dimensions specified in the `dimensions` argument.
-    first_metal = layerstack.get_metal_layer(0)
+    first_metal = cell.metal(0)
     cell = gen.add_rectangle(cell, first_metal, (dimensions["width"], dimensions["length"]))
     cell = gen.add_port(cell, first_metal, "input", (0, dimensions["length"] / 2))
     return cell
