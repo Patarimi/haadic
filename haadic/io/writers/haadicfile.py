@@ -8,7 +8,7 @@ import json
 import logging
 from haadic.core.techno import Available_PDK, get_file, add_reference
 from typing import Self, Sequence, override
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from klayout.db import LayerInfo
 
 
@@ -217,13 +217,12 @@ class LayerStack:
         """Load the layer stack information from a JSON file."""
         with open(path_json, "r") as f:
             data = json.load(f)
-            self.grid = data.get("grid", 1e-9)
-            self._gate = Layer(**data.get("_gate", {}))
-            self._nplus = Layer(**data.get("_nplus", {}))
-            self._pplus = Layer(**data.get("_pplus", {}))
-            self._nwell = Layer(**data.get("_nwell", {}))
-            self._active = Layer(**data.get("_active", {}))
-            self._pad = Layer(**data.get("pad", default_layer().__dict__))
+            for key in fields(self):
+                if key.name in data:
+                    if key.type is Layer:
+                        self.__setattr__(key.name, Layer(**data.get(key.name)))
+                    else:
+                        self.__setattr__(key.name, data.get(key.name))
             if data.get("_stack") is not None:
                 self._stack = []
                 for i, lyr in enumerate(data.get("_stack")):
