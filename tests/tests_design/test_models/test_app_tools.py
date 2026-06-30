@@ -2,7 +2,7 @@ import numpy as np
 from haadic.design.models import tools
 from haadic.io.handlers.netlist import Component
 from skrf import Frequency
-from skrf.io.touchstone import DefinedGammaZ0
+from skrf.media import DefinedGammaZ0
 from skrf.constants import c
 
 from pytest import approx
