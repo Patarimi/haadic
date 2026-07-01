@@ -13,7 +13,6 @@ from pathlib import Path
 
 from haadic.design.layouts.base_cell import BaseCell
 
-from haadic.io.writers.haadicfile import LayerStack
 from haadic.design.layouts import general as gen
 from haadic.core.steps.step import Dim
 from haadic.core.steps.post_process import SimRes

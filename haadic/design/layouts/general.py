@@ -170,11 +170,11 @@ def set_as_port(cell: BaseCell, label: str) -> BaseCell:
 
 
 def add_port(
-    cell: db.Cell,
+    cell: BaseCell,
     layer: Layer,
     name: str,
     position: tuple[float, float],
-) -> db.Cell:
+) -> BaseCell:
     """
     Add a port to the cell.
 
@@ -184,16 +184,16 @@ def add_port(
     :param position: The reference point of the port (x, y).
     :return: The cell with the added port.
     """
-    cell.shapes(layer.pin).insert(db.DText(name, position[0], position[1]))
+    cell.top.shapes(layer.pin).insert(db.DText(name, position[0], position[1]))
     return cell
 
 
 def add_rectangle(
-    cell: db.Cell,
+    cell: BaseCell,
     layer: Layer,
     size: tuple[float, float],
     origin: tuple[float, float] = (0, 0),
-) -> db.Cell:
+) -> BaseCell:
     """
     Add a rectangle to the cell.
 
@@ -204,7 +204,7 @@ def add_rectangle(
     :return: The cell with the added rectangle.
     """
     rec = db.DBox(origin[0], origin[1], origin[0] + size[0], origin[1] + size[1])
-    cell.shapes(layer.drawing).insert(rec)
+    cell.top.shapes(layer.drawing).insert(rec)
     return cell
 
 
