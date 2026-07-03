@@ -7,7 +7,6 @@ from typing import Literal, Sequence
 
 import klayout.db as db
 
-from haadic.io.writers.haadicfile import LayerStack
 import haadic.design.layouts.general as gen
 
 
@@ -142,7 +141,6 @@ def pattern_connect(
     Pattern is replicated until all ports are connected.
 
     :param cell: klayout cell in which the connection is inserted.
-    :param layers: layer stack to be used.
     :param device_name: device to be connected.
     :param pattern: labels of the connections lines.
     :return: _cell_ with_ the added connections.

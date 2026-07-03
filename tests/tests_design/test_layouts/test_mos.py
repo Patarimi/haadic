@@ -19,6 +19,8 @@ def test_mos(tmp_path):
 
 def test_line(tmp_path):
     top = BaseCell("top", "mock")  # ty:ignore[invalid-argument-type]
+    # change the gate layer to match the reference GDS
+    top._layer_stack._gate.layer = 5
     mosfet(top, nf=5, doping="N")
     line(top, "vdd", 2)
     line(top, "gnd", 2, below=True)

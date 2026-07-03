@@ -1,0 +1,26 @@
+{
+    "_gate": {
+        "layer": 2,
+        "datatype": 0,
+        "name": "gate",
+        "width": 0,
+        "spacing": 0.5,
+        "_pin": 0
+    },
+    "_active": {
+        "layer": 22,
+        "datatype": 0,
+        "name": "active",
+        "width": 0,
+        "spacing": 0.5,
+        "_pin": 0
+    },
+    "_nplus": {
+        "layer": 1,
+        "datatype": 0,
+        "name": "nplus",
+        "width": 0,
+        "spacing": 0,
+        "_pin": 0
+    }
+}
