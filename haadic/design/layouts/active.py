@@ -99,16 +99,15 @@ def line(cell: BaseCell, name: str, level: int = 0, below=False):
     layer = cell.metal(level)
     spacing = layer.spacing
     width = layer.width
-    layout = cell._layout
-    horz = layout.create_cell(f"h_{name}")
-    bbox = layout.top_cells()[0].dbbox()
+    horz = cell.create_cell(f"h_{name}")
+    bbox = cell.top.dbbox()
     if not below:
         origin_y = bbox.top + spacing
     else:
         origin_y = bbox.bottom - spacing - width
     gen.add_rectangle(horz, layer, (bbox.width(), width), (bbox.left, origin_y))
     gen.add_port(horz, layer, name, (bbox.left, origin_y + width / 2))
-    cell.top.insert(db.DCellInstArray(horz, db.DVector(0, 0)))
+    cell.insert_cell(horz)
     return horz
 
 
@@ -135,7 +134,7 @@ def connect(cell: BaseCell, label_line: str, label_mos: str) -> BaseCell:
 
 
 def pattern_connect(
-    cell: BaseCell, layers: LayerStack, device_name: str, pattern: Sequence[str]
+    cell: BaseCell, device_name: str, pattern: Sequence[str]
 ) -> BaseCell:
     """
     Connect the ports of a device to lines following the given pattern.

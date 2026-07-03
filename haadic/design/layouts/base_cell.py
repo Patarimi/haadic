@@ -89,3 +89,29 @@ class BaseCell:
         :param input_gds: Path to the input GDS file to read into the layout.
         """
         self._layout.read(str(input_gds))
+
+    def insert_cell(
+        self, cell: "BaseCell", origin: tuple[float, float] = (0, 0)
+    ) -> None:
+        """
+        Insert another BaseCell into this cell.
+
+        :param cell: The BaseCell to insert.
+        :param origin: The origin point for the cell insertion.
+        """
+        if cell.techno != self.techno:
+            raise ValueError(
+                f"Cannot insert cell with different technology: {cell.techno} vs {self.techno}"
+            )
+        dest_cell = self._layout.create_cell(cell.name)
+        dest_cell.copy_tree(cell._top)
+        self._top.insert(kdb.DCellInstArray(dest_cell, kdb.DVector(*origin)))
+
+    def create_cell(self, name: str) -> "BaseCell":
+        """
+        Create a new BaseCell with the same technology.
+
+        :param name: Name of the new cell.
+        :return: A new BaseCell instance.
+        """
+        return BaseCell(name, self.techno)
