@@ -85,6 +85,6 @@ def get_number(
     :param datatype: type of the data (drawing, pin, etc.)
     :return: layer number and datatype
     """
-    if name not in layer_data:
+    if name.lower() not in layer_data:
         raise KeyError(f"Layer {name} not found in layer data")
-    return layer_data[name][datatype]
+    return layer_data[name.lower()][datatype]

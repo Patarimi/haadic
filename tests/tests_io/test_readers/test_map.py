@@ -10,9 +10,9 @@ def test_load_map():
     map_file = get_file("mock", "layermap")
     layers = load_map(map_file)
 
-    assert layers["Via1"]["VIA"] == (35, 0)
-    assert layers["Via2"]["VIA"] == (12, 8)
-    assert str(layers["Metal1"]) == "34 - {5: ['net'], 16: ['pin']}"
+    assert layers["via1"]["VIA"] == (35, 0)
+    assert layers["via2"]["VIA"] == (12, 8)
+    assert str(layers["metal1"]) == "34 - {5: ['net'], 16: ['pin']}"
 
 
 def test_get_number():
