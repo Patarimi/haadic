@@ -15,13 +15,13 @@ def test_haadicfile():
     process = hf.LayerStack("mock", use_json=False)  # ty:ignore[invalid-argument-type]
     assert process.grid == 5e-9
     assert process.get_metal_layer(1) == hf.Layer(
-        34, 5, _pin=16, name="Metal1", width=0.4
+        34, 5, _pin=16, name="metal1", width=0.4
     )
     assert process.get_via_layer(2) == hf.ViaLayer(
         12,
         8,
         _pin=0,
-        name="Via2",
+        name="via2",
         width=0.4,
         spacing=0.26,
         enclosure=0.2,
@@ -36,7 +36,7 @@ def test_haadicfile_layermap():
     layer_map = hf.get_info_from_layermap(
         "Metal1", valid_types, lm_file, valid_pin_types
     )
-    assert layer_map == hf.Layer(34, 5, _pin=16, name="Metal1")
+    assert layer_map == hf.Layer(34, 5, _pin=16, name="metal1")
 
 
 @pytest.mark.skipif(
@@ -46,23 +46,23 @@ def test_layer_stack_gf():
     layer_stack = hf.LayerStack("gf180mcu", use_json=False)
     logging.debug(layer_stack)
     assert layer_stack.get_metal_layer(1) == hf.Layer(
-        34, 0, name="Metal1", width=0.23, spacing=0.3, _pin=10
+        34, 0, name="metal1", width=0.23, spacing=0.3, _pin=10
     )
     assert layer_stack.get_metal_layer(2) == hf.Layer(
-        36, 0, name="Metal2", width=0.28, spacing=0.3
+        36, 0, name="metal2", width=0.28, spacing=0.3
     )
     assert layer_stack.get_metal_layer(-1) == hf.Layer(
-        81, 0, name="Metal5", width=0.44, spacing=0.6
+        81, 0, name="metal5", width=0.44, spacing=0.6
     )
 
     assert layer_stack.get_via_layer(1) == hf.ViaLayer(
-        35, 0, "Via1", 0.26, 0.26, enclosure=0.01, between=(1, 2)
+        35, 0, "via1", 0.26, 0.26, enclosure=0.01, between=(1, 2)
     )
     assert layer_stack.get_via_layer(2) == hf.ViaLayer(
-        38, 0, "Via2", 0.26, 0.26, enclosure=0.01, between=(2, 3)
+        38, 0, "via2", 0.26, 0.26, enclosure=0.01, between=(2, 3)
     )
     assert layer_stack.get_via_layer(-2) == hf.ViaLayer(
-        41, 0, "Via4", 0.26, 0.26, enclosure=0.01, between=(4, 5)
+        41, 0, "via4", 0.26, 0.26, enclosure=0.01, between=(4, 5)
     )
     assert layer_stack.get_layer_index(34, 0) == 1
     assert layer_stack.get_layer_index(35, 0) == 2

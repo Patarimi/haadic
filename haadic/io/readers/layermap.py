@@ -58,7 +58,7 @@ class LayerMap(Transformer):
         """Convert the start token to a dictionary mapping layer names to Map objects."""
         map_d: dict[str, Map] = dict()
         for layer in start:
-            name = layer[0]
+            name = layer[0].lower()
             if name in map_d.keys():
                 map_d[name].types.update({layer[-1]: layer[1]})
             else:
@@ -85,6 +85,6 @@ def get_number(
     :param datatype: type of the data (drawing, pin, etc.)
     :return: layer number and datatype
     """
-    if name not in layer_data:
+    if name.lower() not in layer_data:
         raise KeyError(f"Layer {name} not found in layer data")
-    return layer_data[name][datatype]
+    return layer_data[name.lower()][datatype]

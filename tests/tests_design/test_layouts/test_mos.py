@@ -1,49 +1,38 @@
-from klayout import db
+from haadic.design.layouts.base_cell import BaseCell
 
 from haadic._config import REF_PATH
 from haadic.design.layouts.active import mosfet, line, connect
-from haadic.io.writers.haadicfile import LayerStack, Layer
 from haadic.core.tools import diff_gds
 
 
-stack = LayerStack("mock")  # ty:ignore[invalid-argument-type]
-stack._nplus = Layer(1, 0, "Nwell")
-stack._gate = Layer(2, 0, spacing=0.5)
-stack._active = Layer(22, 0, "active", spacing=0.5)
-
-
 def test_mos(tmp_path):
-    lib = db.Layout()
-    test = lib.create_cell("mos")
-    mosfet(test, stack, nf=1)
-    lib.write(tmp_path / "mos.gds")
+    test = BaseCell("mos", "mock")  # ty:ignore[invalid-argument-type]
+    mosfet(test, nf=1)
+    test.write(tmp_path / "mos.gds")
     assert diff_gds(tmp_path / "mos.gds", REF_PATH / "ref_mos.gds")
 
-    lib = db.Layout()
-    test = lib.create_cell("pmos")
-    mosfet(test, stack, nf=3, doping="P")
-    lib.write(tmp_path / "pmos.gds")
+    test = BaseCell("pmos", "mock")  # ty:ignore[invalid-argument-type]
+    mosfet(test, nf=3, doping="P")
+    test.write(tmp_path / "pmos.gds")
     assert diff_gds(tmp_path / "pmos.gds", REF_PATH / "ref_pmos.gds")
 
 
 def test_line(tmp_path):
-    lib = db.Layout()
-    lyr = stack.get_metal_layer(2)
-    stack._gate = Layer(5, 0, spacing=0.5)
-    top = lib.create_cell("top")
-    mosfet(top, stack, nf=5, doping="N")
-    line(top, "vdd", lyr)
-    line(top, "gnd", lyr, below=True)
-    lib.write(tmp_path / "h_line.gds")
+    top = BaseCell("top", "mock")  # ty:ignore[invalid-argument-type]
+    # change the gate layer to match the reference GDS
+    top._layer_stack._gate.layer = 5
+    mosfet(top, nf=5, doping="N")
+    line(top, "vdd", 2)
+    line(top, "gnd", 2, below=True)
+    top.write(tmp_path / "h_line.gds")
     assert diff_gds(tmp_path / "h_line.gds", REF_PATH / "ref_line.gds")
 
 
 def test_connect(tmp_path):
-    lib = db.Layout()
-    lib.read(str(REF_PATH / "ref_line.gds"))
-    top_cell = lib.cell("top")
-    line(top_cell, "vout", stack.get_metal_layer(2))
-    connect(top_cell, stack, "vdd", "dr0")
-    connect(top_cell, stack, "vout", "g0")
-    connect(top_cell, stack, "gnd", "dr1")
-    lib.write(tmp_path / "connect.gds")
+    top_cell = BaseCell("top", "mock")  # ty:ignore[invalid-argument-type]
+    top_cell.read(REF_PATH / "ref_line.gds")
+    line(top_cell, "vout", 2)
+    connect(top_cell, "vdd", "dr0")
+    connect(top_cell, "vout", "g0")
+    connect(top_cell, "gnd", "dr1")
+    top_cell.write(tmp_path / "connect.gds")

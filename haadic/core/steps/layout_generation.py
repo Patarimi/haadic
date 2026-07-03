@@ -7,8 +7,7 @@ from typing import Callable, Sequence
 from dataclasses import field, dataclass
 import json
 
-import klayout.db as db
-from haadic.io.writers.haadicfile import LayerStack
+from haadic.design.layouts.base_cell import BaseCell
 from haadic.core.steps.step import Dim, Step
 
 
@@ -21,7 +20,7 @@ class ConfigLayout:
     :param techno: technology to be used.
     """
 
-    layout: Callable[[db.Cell, LayerStack, Dim], db.Cell]
+    layout: Callable[[BaseCell, Dim], BaseCell]
     techno: Available_PDK = "sky130"
 
 
@@ -48,12 +47,10 @@ class Layout(Step):
         with input_file.open() as f:
             dimensions = json.load(f)
         top_cell_name = input_file.stem
-        layerstack = LayerStack(self.config.techno)
         output_file = self.output_file(input_file)
         logging.info("layout generation with geometry: " + str(dimensions))
 
-        lib = db.Layout()
-        lib.dbu = layerstack.grid * 1e6
-        self.config.layout(lib.create_cell(top_cell_name), layerstack, dimensions)
-        lib.write(str(output_file))
+        cell = BaseCell(top_cell_name, self.config.techno)
+        self.config.layout(cell, dimensions)
+        cell.write(output_file)
         return output_file

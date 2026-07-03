@@ -4,6 +4,8 @@ Contains function to generate general purpose cells.
 (Via, via stack, ground plane, etc.)
 """
 
+from haadic.design.layouts.base_cell import BaseCell
+
 import logging
 import math
 import klayout.db as db
@@ -148,7 +150,7 @@ def get_shape(layout: db.Layout, point: db.DPoint, layer: int) -> tuple[db.DBox,
     raise ValueError(f"no shape found at {point} on layer {layer}")
 
 
-def set_as_port(cell: db.Cell, label: str) -> db.Cell:
+def set_as_port(cell: BaseCell, label: str) -> BaseCell:
     """
     Retrieve label in subcells and copy in the top cell. The label can then be used as a port in the layout during the extraction step.
 
@@ -156,23 +158,23 @@ def set_as_port(cell: db.Cell, label: str) -> db.Cell:
     :param label: The label to be retrieved and copied.
     :return: The cell with the copied label.
     """
-    lay = cell.layout()
-    for subcell in cell.each_child_cell():
+    lay = cell._layout
+    for subcell in cell.top.each_child_cell():
         try:
             res = get_dtext(lay.cell(subcell).layout(), label)
         except ValueError:
             continue
         txt, lyr = res[0] if isinstance(res, list) else res
-        cell.shapes(lyr).insert(txt)
+        cell.top.shapes(lyr).insert(txt)
     return cell
 
 
 def add_port(
-    cell: db.Cell,
+    cell: BaseCell,
     layer: Layer,
     name: str,
     position: tuple[float, float],
-) -> db.Cell:
+) -> BaseCell:
     """
     Add a port to the cell.
 
@@ -182,16 +184,16 @@ def add_port(
     :param position: The reference point of the port (x, y).
     :return: The cell with the added port.
     """
-    cell.shapes(layer.pin).insert(db.DText(name, position[0], position[1]))
+    cell.top.shapes(layer.pin).insert(db.DText(name, position[0], position[1]))
     return cell
 
 
 def add_rectangle(
-    cell: db.Cell,
+    cell: BaseCell,
     layer: Layer,
     size: tuple[float, float],
     origin: tuple[float, float] = (0, 0),
-) -> db.Cell:
+) -> BaseCell:
     """
     Add a rectangle to the cell.
 
@@ -202,7 +204,7 @@ def add_rectangle(
     :return: The cell with the added rectangle.
     """
     rec = db.DBox(origin[0], origin[1], origin[0] + size[0], origin[1] + size[1])
-    cell.shapes(layer.drawing).insert(rec)
+    cell.top.shapes(layer.drawing).insert(rec)
     return cell
 
 

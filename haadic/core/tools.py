@@ -47,10 +47,10 @@ def diff_gds(gds1: str | Path, gds2: str | Path) -> bool:
         lambda c1: logging.error(f"Cell {c1.name} only in file {str(gds2)}")
     )
     diff.on_layer_in_a_only(  #  ty:ignore[call-non-callable]
-        lambda c1: logging.error(f"Layer {c1.name} only in {str(gds1)}.")
+        lambda c1: logging.error(f"Layer {c1.layer}/{c1.datatype} only in {str(gds1)}.")
     )
     diff.on_layer_in_b_only(  #  ty:ignore[call-non-callable]
-        lambda c1: logging.error(f"Layer {c1.name} only in {str(gds2)}.")
+        lambda c1: logging.error(f"Layer {c1.layer}/{c1.datatype} only in {str(gds2)}.")
     )
     diff.on_text_in_a_only(  #  ty:ignore[call-non-callable]
         lambda c1: logging.error(f"Text {c1.text} only in {str(gds1)}.")
@@ -63,6 +63,9 @@ def diff_gds(gds1: str | Path, gds2: str | Path) -> bool:
     )
     diff.on_polygon_in_b_only(  #  ty:ignore[call-non-callable]
         lambda c1: logging.error(f"Polygon only in {str(gds2)}.")
+    )
+    diff.on_dbu_differs(  #  ty:ignore[call-non-callable]
+        lambda dbu1, dbu2: logging.error(f"DBU differs: {dbu1} != {dbu2}")
     )
     return diff.compare(cell1, cell2)
 

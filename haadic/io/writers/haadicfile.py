@@ -32,11 +32,16 @@ class Layer:
     spacing: float = 0
     _pin: int = 0
 
+    def __post_init__(self) -> Self:
+        """Ensure that the name is stored in lowercase."""
+        self.name = self.name.lower()
+        return self
+
     @override
     def __str__(self):
         r"""Get a string representation of the layer, in the format \"name: layer/datatype\"."""
         pin_info = f" (pin: {self._pin})" if self._pin != 0 else ""
-        return f"{self.name}: {self.layer}/{self.datatype}" + pin_info
+        return f"{self.name.capitalize()}: {self.layer}/{self.datatype}" + pin_info
 
     @property
     def map(self):
@@ -74,9 +79,10 @@ class ViaLayer(Layer):
     def __post_init__(self) -> Self:
         """Ensure that the between attribute is a tuple of two integers and the enclosure attribute is a tuple of two floats."""
         if isinstance(self.between, int):
-            object.__setattr__(self, "between", (self.between, self.between))
+            self.between = (self.between, self.between)
         if isinstance(self.between, list):
-            object.__setattr__(self, "between", tuple(self.between))
+            self.between = tuple(self.between)
+        Layer.__post_init__(self)
         return self
 
     @override
@@ -88,7 +94,7 @@ class ViaLayer(Layer):
 
 def default_layer():
     """Return a default layer with layer number 0 and name 'NotFound'."""
-    return Layer(0, name="NotFound")
+    return Layer(0, name="Not_Found")
 
 
 @dataclass
@@ -103,7 +109,7 @@ class LayerStack:
 
     techno: Available_PDK
     grid: float = 1e-9
-    use_json: bool = True
+    use_json: bool = False
 
     _stack: list[Layer] = field(default_factory=list)
     _via_list: list[ViaLayer] = field(default_factory=list)
@@ -126,12 +132,12 @@ class LayerStack:
             path_map = get_file(self.techno, "layermap")
             if path_map.is_file():
                 self.load_from_layermap(path_map)
-            if self.use_json:
-                path_json = get_file(self.techno, "base_dir") / f"{self.techno}.json"
-                self.export_to_json(path_json)
-                logging.info(f"LayerStack exported to {path_json}")
-                add_reference(self.techno, "haadic", Path(f"{self.techno}.json"))
         self.apply_patch()
+        path_json = get_file(self.techno, "base_dir") / f"{self.techno}.json"
+        if self.use_json:
+            add_reference(self.techno, "haadic", Path(f"{self.techno}.json"))
+        self.export_to_json(path_json)
+        logging.info(f"LayerStack exported to {path_json}")
 
     def __len__(self):
         """Return the number of routing layers in the stack."""
@@ -255,21 +261,21 @@ class LayerStack:
                     between=(len(self._stack), len(self._stack) + 1),
                 )
                 self._via_list.append(lyr)
-            elif layer.type == "MASTERSLICE" and self._gate.name == "":
+            elif layer.type == "MASTERSLICE":
                 self._gate = Layer(layer=0, name=layer.name)
             elif layer.type == "PWELL":
                 self._pplus = Layer(layer=0, name=layer.name)
             elif layer.type == "NWELL":
                 self._nplus = Layer(layer=0, name=layer.name)
             else:
-                logging.error(f"Unknown layer type: {layer.type}")
+                logging.error(f"Unknown layer type: {layer}")
 
-        if self._stack[-1].name[0].lower() in ("m", "v") or isinstance(
+        if self._stack[-1].name[0] in ("m", "v") or isinstance(
             self._stack[-1], ViaLayer
         ):
             logging.warning("No Pad layer detected")
             logging.debug("".join("\t" + lyr.name for lyr in self._stack))
-            self._pad = Layer(0, name="NotFound")
+            self._pad = default_layer()
         else:
             self._pad = self._stack.pop(-1)
             logging.debug(f"{self._pad.name} set as Pad layer")
@@ -281,7 +287,10 @@ class LayerStack:
         for i in range(len(self._stack)):
             try:
                 layer_info = get_info_from_layermap(
-                    self._stack[i].name, ["drawing", "net"], path, ["pin", "lefpin"]
+                    self._stack[i].name,
+                    ["drawing", "net"],
+                    path,
+                    ["pin", "lefpin"],
                 )
             except KeyError as e:
                 logging.warning(f"{e}")
@@ -320,8 +329,9 @@ def get_info_from_layermap(
     :return: Layer object corresponding to the requested layer name.
     """
     layers_map = load_map(path)
-    keys = [k.lower() for k in layers_map.keys()]
-    if layer_name.lower() not in keys:
+    keys = [k for k in layers_map.keys()]
+    layer_name = layer_name.lower()
+    if layer_name not in keys:
         raise KeyError(
             f"Layer {layer_name} not found in layer map file. Available layers are: {keys}."
         )

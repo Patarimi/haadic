@@ -1,9 +1,8 @@
 """Script to generate the layout of an active device, run simulations and post-process the results to extract model parameters."""
 
-from haadic.io.writers.haadicfile import LayerStack
 from pathlib import Path
-from klayout.db import Cell
 from haadic.design.layouts.commun_source import layout as cs_layout
+from haadic.design.layouts.base_cell import BaseCell
 from haadic.design.post_processors.ekv import extract_rf, extract_small_l, extract_big_l
 from haadic.core.steps.step import Dim
 from haadic.core.steps.post_process import SimRes
@@ -29,9 +28,9 @@ dimensions = Dim(
 )
 
 
-def layout(cell: Cell, layerstack: LayerStack, shape: Dim):
+def layout(cell: BaseCell, shape: Dim) -> BaseCell:
     """Generate a source grounded NMOS transistor layout with the given dimensions."""
-    return cs_layout(cell, layerstack, shape)
+    return cs_layout(cell, shape)
 
 
 def extract_dc(bench_data: SimRes, geo: Dim, base_dir: Path) -> Dim:
