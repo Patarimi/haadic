@@ -64,6 +64,9 @@ def diff_gds(gds1: str | Path, gds2: str | Path) -> bool:
     diff.on_polygon_in_b_only(  #  ty:ignore[call-non-callable]
         lambda c1: logging.error(f"Polygon only in {str(gds2)}.")
     )
+    diff.on_dbu_differs(  #  ty:ignore[call-non-callable]
+        lambda dbu1, dbu2: logging.error(f"DBU differs: {dbu1} != {dbu2}")
+    )
     return diff.compare(cell1, cell2)
 
 

@@ -29,7 +29,7 @@ class BaseCell:
         """Initialize BaseCell after dataclass creation."""
         self._layer_stack = LayerStack(self.techno)
         self._layout = kdb.Layout()
-        self._layout.dbu = self._layer_stack.grid
+        self._layout.dbu = self._layer_stack.grid * 1e6
         self._top = self._layout.create_cell(self.name)
         return self
 
