@@ -103,7 +103,7 @@ class LayerStack:
 
     techno: Available_PDK
     grid: float = 1e-9
-    use_json: bool = True
+    use_json: bool = False
 
     _stack: list[Layer] = field(default_factory=list)
     _via_list: list[ViaLayer] = field(default_factory=list)
@@ -126,12 +126,12 @@ class LayerStack:
             path_map = get_file(self.techno, "layermap")
             if path_map.is_file():
                 self.load_from_layermap(path_map)
-            if self.use_json:
-                path_json = get_file(self.techno, "base_dir") / f"{self.techno}.json"
-                self.export_to_json(path_json)
-                logging.info(f"LayerStack exported to {path_json}")
-                add_reference(self.techno, "haadic", Path(f"{self.techno}.json"))
         self.apply_patch()
+        path_json = get_file(self.techno, "base_dir") / f"{self.techno}.json"
+        if self.use_json:
+            add_reference(self.techno, "haadic", Path(f"{self.techno}.json"))
+        self.export_to_json(path_json)
+        logging.info(f"LayerStack exported to {path_json}")
 
     def __len__(self):
         """Return the number of routing layers in the stack."""
@@ -255,14 +255,14 @@ class LayerStack:
                     between=(len(self._stack), len(self._stack) + 1),
                 )
                 self._via_list.append(lyr)
-            elif layer.type == "MASTERSLICE" and self._gate.name == "":
+            elif layer.type == "MASTERSLICE":
                 self._gate = Layer(layer=0, name=layer.name)
             elif layer.type == "PWELL":
                 self._pplus = Layer(layer=0, name=layer.name)
             elif layer.type == "NWELL":
                 self._nplus = Layer(layer=0, name=layer.name)
             else:
-                logging.error(f"Unknown layer type: {layer.type}")
+                logging.error(f"Unknown layer type: {layer}")
 
         if self._stack[-1].name[0].lower() in ("m", "v") or isinstance(
             self._stack[-1], ViaLayer
