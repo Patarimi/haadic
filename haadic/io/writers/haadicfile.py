@@ -281,7 +281,10 @@ class LayerStack:
         for i in range(len(self._stack)):
             try:
                 layer_info = get_info_from_layermap(
-                    self._stack[i].name, ["drawing", "net"], path, ["pin", "lefpin"]
+                    self._stack[i].name.lower(),
+                    ["drawing", "net"],
+                    path,
+                    ["pin", "lefpin"],
                 )
             except KeyError as e:
                 logging.warning(f"{e}")
@@ -291,7 +294,7 @@ class LayerStack:
         for i in range(len(self._via_list)):
             try:
                 layer_info = get_info_from_layermap(
-                    self._via_list[i].name, ["drawing", "net", "via"], path
+                    self._via_list[i].name.lower(), ["drawing", "net", "via"], path
                 )
             except KeyError as e:
                 logging.warning(f"{e}")
