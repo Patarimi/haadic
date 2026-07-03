@@ -16,7 +16,7 @@ stack = LayerStack("mock")  # ty:ignore[invalid-argument-type]
 
 def test_via(tmp_path):
     opnng = stack.get_via_layer(-1)
-    assert opnng.name == "Opening"
+    assert opnng.name == "opening"
     lib = kl.Layout()
     via(lib, stack.get_via_layer(2), (3, 4))
     lib.write(tmp_path / "via.gds")
