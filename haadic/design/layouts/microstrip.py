@@ -1,11 +1,14 @@
 """Functions to generate micro-strip lines and couplers. These functions can be used to create cells that can be exported as gds files."""
 
+from haadic.design.layouts.base_cell import BaseCell
+
 from typing import Sequence
 import klayout.db as db
 
 from .tools import Port
 from .general import via_stack, via
 from haadic.io.writers.haadicfile import LayerStack
+from haadic.design.layouts import general as gen
 
 
 def straight_line(
@@ -99,16 +102,15 @@ diff_port = tuple(
 
 
 def marchand_balun(
-    layout: db.Layout,
+    layout: BaseCell,
     width: float,
     length: float,
     gap: float,
     space: float,
-    layerstack: LayerStack,
     widths: float = -1,
     ports: Sequence[Port] = diff_port,
     name: str = "marchand",
-) -> db.Cell:
+) -> BaseCell:
     """
     Implement a marchand balun, for a 50Ω balun, 2 -4.8 dB 90° coupler are required.
 
@@ -116,66 +118,53 @@ def marchand_balun(
     :param length: length of the signal line (the coupler length is twice this value).
     :param gap: gap between the two lines.
     :param space: space between the two couplers.
-    :param layerstack: LayerStack object. The highest metal layer will be used for the signal line.
-        The lowest metal layer will be used for the ground plane.
     :param widths: width of the line in-between the two couplers.
     :param ports: name of each port.
     :param name: name of the cell.
     :return: a gdstk.Cell object with the marchand balun.
     """
-    dbu = layout.dbu
-    m_top = layerstack.get_metal_layer(-1)
-    lyr_top = layout.layer(m_top.layer, m_top.datatype)
-    m_bott = layerstack.get_metal_layer(1)
-    lyr_bot = layout.layer(m_bott.layer, m_bott.datatype)
+    m_top = layout.metal(-1)
+    m_bott = layout.metal(1)
     w, le, g, s = width * 1e6, length * 1e6, gap * 1e6, space * 1e6
     ws = w if widths < 0 else widths * 1e6
     bln = layout.create_cell(name)
     emp_port = Port("")
-    cpl = lange_coupler(
-        layout, width, length, gap, layerstack, [emp_port for k in range(4)], ext=0
+    cpl = lange_coupler(layout, width, length, gap, [emp_port for k in range(4)], ext=0)
+    c1 = bln.insert_cell(cpl, (s + 4 * (w + g) + w, -le), rotation=90)
+    c2 = bln.insert_cell(cpl, (0, -le), rotation=90)
+    bbox = bln.top.bbox()
+    bot = bbox.bottom + 1.5 * w + g - ws / 2
+    c2box = c2.top.bbox()
+    gen.add_rectangle(bln, m_top, (s, ws), (c2box.right, bot))
+    gen.add_rectangle(
+        bln,
+        m_bott,
+        (bbox.left, bbox.bottom),
+        (bbox.width(), bbox.height()),
     )
-    c1 = bln.insert(
-        db.DCellInstArray(cpl, db.DCplxTrans(1, 90, False, s + 4 * (w + g) + w, -le))
-    )
-    c2 = bln.insert(db.DCellInstArray(cpl, db.DCplxTrans(1, 90, True, 0, -le)))
-    bot = bln.bbox().bottom * dbu + 1.5 * w + g - ws / 2
-    right = c2.bbox().right * dbu
-    bln.shapes(lyr_top).insert(db.DBox(right, bot, right + s, bot + ws))
-    bln.shapes(lyr_bot).insert(bln.bbox())
 
     for i in range(3):
         coord = (
-            (c2.bbox().right * dbu - 1.5 * w - g, c2.bbox().top * dbu),
-            (c2.bbox().left * dbu + 1.5 * w + g, c2.bbox().bottom * dbu),
-            (c1.bbox().right * dbu - 1.5 * w - g, c1.bbox().bottom * dbu),
+            (c2box.right - 1.5 * w - g, c2box.top),
+            (c2box.left + 1.5 * w + g, c2box.bottom),
+            (c1.top.bbox().right - 1.5 * w - g, c1.top.bbox().bottom),
         )
-        lab = db.DText(ports[i].name, coord[i][0], coord[i][1])
-        lab.valign = db.Text.VAlignCenter
-        lab.halign = db.Text.HAlignCenter
-        bln.shapes(lyr_top).insert(lab)
-    v1 = via_stack(layout, layerstack, -2, 1, (2 * g + 3 * w, w))
-    bln.insert(
-        db.DCellInstArray(v1.cell_index(), db.DVector(-1.5 * w - g, -1.5 * w - g))
-    )
-    bln.insert(
-        db.DCellInstArray(
-            v1.cell_index(), db.DVector(s + 3.5 * w + 3 * g, -1.5 * w - g)
-        )
-    )
-    return bln
+        gen.add_text(bln, m_bott, ports[i].ref, coord[i])
+    v1 = via_stack(layout, -2, 1, (2 * g + 3 * w, w))
+    bln.insert_cell(v1, (-1.5 * w - g, -1.5 * w - g))
+    bln.insert_cell(v1, (s + 3.5 * w + 3 * g, -1.5 * w - g))
+    return layout
 
 
 def lange_coupler(
-    layout: db.Layout,
+    layout: BaseCell,
     width: float,
     length: float,
     gap: float,
-    layerstack: LayerStack,
     ports: Sequence[Port] = def_port,
     name: str = "lange",
     ext: float = 5,
-) -> db.Cell:
+) -> BaseCell:
     """
     Generate a flat symmetrical lange coupler with two strips per track.
 
@@ -183,63 +172,34 @@ def lange_coupler(
     :param width: track width (in µm)
     :param length: total length of the lines.
     :param gap: space between each track.
-    :param layerstack: LayerStack object. The highest metal layer will be used for the signal line.
-    The lowest metal layer will be used for the ground plane. The second higher metal layer will be used for bridging.
     :param ports: name of each port.
     :param name: name of the returned cell.
     :param ext: extension of the ports
     :return: a cell with the lange coupler.
     """
     w, le, g = width * 1e6, length * 1e6, gap * 1e6
-    top_metal = layerstack.get_metal_layer(-1)
-    lyr_top = layout.layer(top_metal.layer, top_metal.datatype)
-    bridge = layerstack.get_metal_layer(-2)
-    lyr_brg = layout.layer(bridge.layer, bridge.datatype)
-    top_via = layerstack.get_via_layer(-2)
-    bot_metal = layerstack.get_metal_layer(1)
-    lyr_bot = layout.layer(bot_metal.layer, bot_metal.datatype)
+    top_metal = layout.metal(-1)
+    bridge = layout.metal(-2)
+    bot_metal = layout.metal(1)
     half_lange = layout.create_cell("half_lange")
-    first_met = db.DPath(
-        [
-            db.DPoint(0, 0),
-            db.DPoint(le, 0),
-            db.DPoint(le, 2 * (w + g)),
-            db.DPoint(0, 2 * (w + g)),
-            db.DPoint(0, 2 * (w + g) + ext),
-        ],
-        w,
-        bgn_ext=w / 2,
-        end_ext=w / 2,
-    )
-    half_lange.shapes(lyr_top).insert(first_met)
+    first_met = [
+        (0, 0),
+        (le, 0),
+        (le, 2 * (w + g)),
+        (0, 2 * (w + g)),
+        (0, 2 * (w + g) + ext),
+    ]
+    gen.add_path(half_lange, top_metal, first_met, w, w / 2)
     if ext > 0:
-        port = db.DPath(
-            [db.DPoint(le, 2 * (w + g)), db.DPoint(le, 2 * w + 2 * g + ext)],
-            w,
-            bgn_ext=0,
-            end_ext=w / 2,
-        )
-        half_lange.shapes(lyr_top).insert(port)
-    sec_met = db.DPath(
-        [db.DPoint(0, 0), db.DPoint(0, 2 * (w + g))],
-        w,
-        bgn_ext=w / 2,
-        end_ext=w / 2,
-    )
-    half_lange.shapes(lyr_brg).insert(sec_met)
-    v1 = via(layout, top_via, (w, w))
-    half_lange.insert(db.DCellInstArray(v1.cell_index(), db.DVector(-w / 2, -w / 2)))
-    half_lange.insert(
-        db.DCellInstArray(v1.cell_index(), db.DVector(-w / 2, 1.5 * w + 2 * g))
-    )
-    lange = layout.create_cell(name)
-    lange.insert(db.DCellInstArray(half_lange.cell_index(), db.DVector(0, 0)))
-    lange.insert(
-        db.DCellInstArray(
-            half_lange.cell_index(), db.DCplxTrans(1, 180, False, le - w - g, w + g)
-        )
-    )
-    lange.flatten(-1, True)
+        port = [(le, 2 * (w + g)), (le, 2 * w + 2 * g + ext)]
+        half_lange = gen.add_path(half_lange, top_metal, port, w, (0, w / 2))
+    sec_met = [(0, 0), (0, 2 * (w + g))]
+    half_lange = gen.add_path(half_lange, bridge, sec_met, w, w / 2)
+    v1 = via(layout, -2, (w, w))
+    half_lange.insert_cell(v1, (-w / 2, -w / 2))
+    half_lange.insert_cell(v1, (-w / 2, 1.5 * w + 2 * g))
+    layout.insert_cell(half_lange)
+    layout.insert_cell(half_lange, (le - w - g, w + g), rotation=180)
     for i in range(4):
         coord = (
             (0, ext + 2.5 * w + 2 * g),
@@ -249,14 +209,13 @@ def lange_coupler(
         )
         if ports[i].name == "":
             continue
-        lab = db.DText(ports[i].name, *coord[i])
-        ref = db.DText(ports[i].ref, *coord[i])
-        lab.valign = db.Text.VAlignCenter
-        lab.halign = db.Text.HAlignCenter
-        ref.valign = db.Text.VAlignCenter
-        ref.halign = db.Text.HAlignCenter
-        lange.shapes(lyr_top).insert(lab)
-        lange.shapes(lyr_bot).insert(ref)
-    dim = lange.bbox()
-    lange.shapes(lyr_bot).insert(dim)
-    return lange
+        gen.add_text(layout, top_metal, ports[i].name, coord[i])
+        gen.add_text(layout, bot_metal, ports[i].ref, coord[i])
+    dim = layout.top.dbbox()
+    gen.add_rectangle(
+        layout,
+        bot_metal,
+        (dim.width(), dim.height()),
+        (dim.left, dim.bottom),
+    )
+    return layout.flatten(-1, True)

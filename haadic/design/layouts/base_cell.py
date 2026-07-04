@@ -138,7 +138,7 @@ class BaseCell:
         """
         return BaseCell(name, self.techno)
 
-    def flatten(self, depth: int = -1, recursive: bool = True) -> None:
+    def flatten(self, depth: int = -1, recursive: bool = True) -> Self:
         """
         Flatten the cell hierarchy.
 
@@ -146,3 +146,4 @@ class BaseCell:
         :param recursive: Whether to flatten recursively. Default is True.
         """
         self._top.flatten(depth, recursive)
+        return self
