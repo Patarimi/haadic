@@ -91,21 +91,43 @@ class BaseCell:
         self._layout.read(str(input_gds))
 
     def insert_cell(
-        self, cell: "BaseCell", origin: tuple[float, float] = (0, 0)
-    ) -> None:
+        self,
+        cell: "BaseCell",
+        origin: tuple[float, float] = (0, 0),
+        spacing: tuple[float, float] | float = (0, 0),
+        instances: tuple[int, int] = (1, 1),
+        rotation: float = 0.0,
+    ) -> Self:
         """
         Insert another BaseCell into this cell.
 
         :param cell: The BaseCell to insert.
         :param origin: The origin point for the cell insertion.
+        :param spacing: The spacing between instances of the inserted cell.
+        :param instances: The number of instances to insert in the x and y directions.
+        :param rotation: The rotation angle for the inserted cell.
         """
         if cell.techno != self.techno:
             raise ValueError(
                 f"Cannot insert cell with different technology: {cell.techno} vs {self.techno}"
             )
+        if isinstance(spacing, float) or isinstance(spacing, int):
+            spacing = (spacing, spacing)
         dest_cell = self._layout.create_cell(cell.name)
         dest_cell.copy_tree(cell._top)
-        self._top.insert(kdb.DCellInstArray(dest_cell, kdb.DVector(*origin)))
+        if rotation != 0.0:
+            dest_cell.transform(kdb.DCplxTrans(rot=rotation))
+        self._top.insert(
+            kdb.DCellInstArray(
+                dest_cell,
+                kdb.DVector(*origin),
+                kdb.DVector(spacing[0], 0),
+                kdb.DVector(0, spacing[1]),
+                instances[0],
+                instances[1],
+            )
+        )
+        return self
 
     def create_cell(self, name: str) -> "BaseCell":
         """
@@ -115,3 +137,12 @@ class BaseCell:
         :return: A new BaseCell instance.
         """
         return BaseCell(name, self.techno)
+
+    def flatten(self, depth: int = -1, recursive: bool = True) -> None:
+        """
+        Flatten the cell hierarchy.
+
+        :param depth: The depth to which to flatten. Default is -1 (flatten all).
+        :param recursive: Whether to flatten recursively. Default is True.
+        """
+        self._top.flatten(depth, recursive)
