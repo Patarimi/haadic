@@ -4,90 +4,84 @@ Contains function to generate general purpose cells.
 (Via, via stack, ground plane, etc.)
 """
 
-from haadic.design.layouts.base_cell import BaseCell
-
 import logging
 import math
-import klayout.db as db
 from typing import Optional
 
-from haadic.io.writers.haadicfile import LayerStack, ViaLayer, Layer
+from klayout import db
+
+from haadic.design.layouts.base_cell import BaseCell
+from haadic.io.writers.haadicfile import LayerStack, Layer
 
 
-def via(layout: db.Layout, layer: ViaLayer, size: tuple[float, float]) -> db.Cell:
+type Point = tuple[float, float]
+
+
+def via(cell: BaseCell, level: int, size: tuple[float, float]) -> BaseCell:
     """
     Generate a via cell.
 
-    :param layout: The layout to use.
+    :param cell: The cell to use.
     :param layer: The Layers to use.
     :param size: tuple of the size (length and width) of the via array to be made.
     :return: a db.Cell containing the via.
     """
-    v = layout.create_cell("via")
-    lyr = layout.layer(layer.layer, layer.datatype)
+    v = cell.create_cell("via")
+    layer = cell.via(level)
     if layer.width == 0:
-        v.shapes(lyr).insert(db.DBox(0, 0, size[0], size[1]))
-    else:
-        via_w = layer.width
-        via_g = layer.spacing
-        via_s = float(
-            layer.enclosure
-            if isinstance(layer.enclosure, (float | int))
-            else layer.enclosure[1]
-        )
+        add_rectangle(v, layer, size)
+        return v
+    via_w = layer.width
+    via_g = layer.spacing
+    via_s = float(
+        layer.enclosure
+        if isinstance(layer.enclosure, (float | int))
+        else layer.enclosure[1]
+    )
 
-        def repetition(length: float) -> int:
-            return math.floor((length - 2 * via_s - via_w) / (via_w + via_g)) + 1
+    def repetition(length: float) -> int:
+        return math.floor((length - 2 * via_s - via_w) / (via_w + via_g)) + 1
 
-        rep_x, rep_y = repetition(size[0]), repetition(size[1])
-        rec = db.DBox(0, 0, via_w, via_w)
-        tmp = layout.create_cell("tmp")
-        tmp.shapes(lyr).insert(rec)
-        shift = [via_w + (r - 1) * (via_w + via_g) for r in (rep_x, rep_y)]
-        rep = db.DCellInstArray(
-            tmp.cell_index(),
-            db.DVector((size[0] - shift[0]) / 2, (size[1] - shift[1]) / 2),
-            db.DVector(via_w + via_g, 0),
-            db.DVector(0, via_w + via_g),
-            rep_x,
-            rep_y,
-        )
-        v.insert(rep)
-        v.flatten(-1, True)
+    rep_x, rep_y = repetition(size[0]), repetition(size[1])
+    tmp = cell.create_cell("tmp")
+    add_rectangle(tmp, layer, (via_w, via_w))
+    shift = [via_w + (r - 1) * (via_w + via_g) for r in (rep_x, rep_y)]
+    origin = ((size[0] - shift[0]) / 2, (size[1] - shift[1]) / 2)
+    spacing = via_w + via_g
+    instances = (rep_x, rep_y)
+    v.insert_cell(tmp, origin=origin, spacing=spacing, instances=instances)
+    v.flatten(-1, True)
     return v
 
 
 def via_stack(
-    layout: db.Layout,
-    layers: LayerStack,
+    layout: BaseCell,
     id_top: int,
     id_bot: int,
     size: tuple[float, float],
-) -> db.Cell:
+) -> BaseCell:
     """
     Generate a via stack cell.
 
     :param layout: The layout to use.
-    :param layers: The stack of layers to use.
     :param id_top: id of the top metal layer.
     :param id_bot: id of the bottom metal layer.
     :param size: tuple of the size (length and width) of the via.
     :return: a db.Cell containing the via stack.
     """
     v = layout.create_cell("via_stack")
-    route = layers.layers_from_to(id_bot, id_top)
+    route = layout._layer_stack.layers_from_to(id_bot, id_top)
     logging.info(f"Via Stack between : {id_top=}\t{id_bot=}")
     for i in route:
-        lyr = layers.get_metal_layer(i)
-        layer = layout.layer(lyr.layer, lyr.datatype)
+        lyr = layout.metal(i)
         logging.debug("Metal:\t" + lyr.name)
         # create the bottom metal plate of the vias
-        v.shapes(layer).insert(db.DBox(0, 0, size[0], size[1]))
+        add_rectangle(v, lyr, size)
         if i == max(route):
             continue  # no via above top layer
-        lyr = layers.get_via_layer(i)
+        lyr = layout.via(i)
         logging.debug("Via:\t" + lyr.name)
-        v.insert(db.DCellInstArray(via(layout, lyr, size), db.DVector(0, 0)))
+        v.insert_cell(via(layout, i, size))
     v.flatten(-1, True)
     return v
 
@@ -169,12 +163,7 @@ def set_as_port(cell: BaseCell, label: str) -> BaseCell:
     return cell
 
 
-def add_port(
-    cell: BaseCell,
-    layer: Layer,
-    name: str,
-    position: tuple[float, float],
-) -> BaseCell:
+def add_port(cell: BaseCell, layer: Layer, name: str, position: Point) -> BaseCell:
     """
     Add a port to the cell.
 
@@ -189,10 +178,7 @@ def add_port(
 
 
 def add_rectangle(
-    cell: BaseCell,
-    layer: Layer,
-    size: tuple[float, float],
-    origin: tuple[float, float] = (0, 0),
+    cell: BaseCell, layer: Layer, size: tuple[float, float], origin: Point = (0, 0)
 ) -> BaseCell:
     """
     Add a rectangle to the cell.
@@ -205,6 +191,38 @@ def add_rectangle(
     """
     rec = db.DBox(origin[0], origin[1], origin[0] + size[0], origin[1] + size[1])
     cell.top.shapes(layer.drawing).insert(rec)
+    return cell
+
+
+def add_text(cell: BaseCell, layer: Layer, text: str, position: Point) -> BaseCell:
+    """
+    Add a text to the cell.
+
+    :param cell: The cell to which the text will be added.
+    :param layer: The layer to use for the text.
+    :param text: The text string to be added.
+    :param position: tuple of the position (x, y) of the text.
+    :return: The cell with the added text.
+    """
+    cell.top.shapes(layer.pin).insert(db.DText(text, position[0], position[1]))
+    return cell
+
+
+def add_path(
+    cell: BaseCell, layer: Layer, points: list[Point], width: float
+) -> BaseCell:
+    """
+    Add a path to the cell.
+
+    :param cell: The cell to which the path will be added.
+    :param layer: The layer to use for the path.
+    :param points: list of tuples of the points (x, y) of the path.
+    :param width: The width of the path.
+    :return: The cell with the added path.
+    """
+    db_points = [db.DPoint(p[0], p[1]) for p in points]
+    path = db.DPath(db_points, width)
+    cell.top.shapes(layer.drawing).insert(path)
     return cell
 
 
@@ -232,11 +250,11 @@ def ground_plane(
 
 
 def enclose(
-    cell: db.Cell,
+    cell: BaseCell,
     layer: Layer,
     extension: float = 0.0,
     filter: Layer | None = None,
-) -> db.DBox:
+) -> BaseCell:
     """
     Enclose the cell with a box on the given layer.
 
@@ -246,17 +264,16 @@ def enclose(
     :return: The enclosing box as a db.DBox.
     """
     if filter is None:
-        bbox = cell.dbbox()
+        bbox = cell.top.dbbox()
     else:
-        shapes = cell.shapes(filter.drawing)
+        shapes = cell.top.shapes(filter.drawing)
         bbox = db.DBox()
         for shape in shapes.each():
             bbox = bbox + shape.dbbox()
-    rec = db.DBox(
-        bbox.left - extension,
-        bbox.bottom - extension,
-        bbox.right + extension,
-        bbox.top + extension,
+    add_rectangle(
+        cell,
+        layer,
+        (bbox.width() + 2 * extension, bbox.height() + 2 * extension),
+        (bbox.left - extension, bbox.bottom - extension),
     )
-    cell.shapes(layer.drawing).insert(rec)
-    return rec
+    return cell
