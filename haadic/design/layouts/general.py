@@ -6,7 +6,7 @@ Contains function to generate general purpose cells.
 
 import logging
 import math
-from typing import Optional
+from typing import Optional, Sequence
 
 from klayout import db
 
@@ -22,7 +22,7 @@ def via(cell: BaseCell, level: int, size: tuple[float, float]) -> BaseCell:
     Generate a via cell.
 
     :param cell: The cell to use.
-    :param layer: The Layers to use.
+    :param level: The layer level for the via.
     :param size: tuple of the size (length and width) of the via array to be made.
     :return: a db.Cell containing the via.
     """
@@ -209,7 +209,11 @@ def add_text(cell: BaseCell, layer: Layer, text: str, position: Point) -> BaseCe
 
 
 def add_path(
-    cell: BaseCell, layer: Layer, points: list[Point], width: float
+    cell: BaseCell,
+    layer: Layer,
+    points: Sequence[Point],
+    width: float,
+    extension: float | tuple[float, float] = 0.0,
 ) -> BaseCell:
     """
     Add a path to the cell.
@@ -218,10 +222,13 @@ def add_path(
     :param layer: The layer to use for the path.
     :param points: list of tuples of the points (x, y) of the path.
     :param width: The width of the path.
+    :param extension: The amount of extension at the ends of the path.
     :return: The cell with the added path.
     """
+    if isinstance(extension, (float | int)):
+        extension = (extension, extension)
     db_points = [db.DPoint(p[0], p[1]) for p in points]
-    path = db.DPath(db_points, width)
+    path = db.DPath(db_points, width, extension[0], extension[1])
     cell.top.shapes(layer.drawing).insert(path)
     return cell
 
