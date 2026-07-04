@@ -43,6 +43,11 @@ class BaseCell:
         """Return the gate layer from the technology layer stack."""
         return self._layer_stack.get_gate_layer()
 
+    @property
+    def pad(self) -> Layer:
+        """Return the pad layer from the technology layer stack."""
+        return self._layer_stack.get_pad_layer()
+
     def implant(self, doped: Literal["N", "P"] = "N") -> Layer:
         """
         Return the doped implant layer for the given charge type.

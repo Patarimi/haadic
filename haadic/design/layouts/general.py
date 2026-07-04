@@ -6,7 +6,7 @@ Contains function to generate general purpose cells.
 
 import logging
 import math
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Literal
 
 from klayout import db
 
@@ -194,7 +194,18 @@ def add_rectangle(
     return cell
 
 
-def add_text(cell: BaseCell, layer: Layer, text: str, position: Point) -> BaseCell:
+type VAlign = Literal["left", "center", "right"]
+type HAlign = Literal["top", "center", "bottom"]
+
+
+def add_text(
+    cell: BaseCell,
+    layer: Layer,
+    text: str,
+    position: Point,
+    valign: VAlign = "center",
+    halign: HAlign = "center",
+) -> BaseCell:
     """
     Add a text to the cell.
 
@@ -202,9 +213,26 @@ def add_text(cell: BaseCell, layer: Layer, text: str, position: Point) -> BaseCe
     :param layer: The layer to use for the text.
     :param text: The text string to be added.
     :param position: tuple of the position (x, y) of the text.
+    :param valign: The vertical alignment of the text. Options are "left", "center", "right".
+    :param halign: The horizontal alignment of the text. Options are "top", "center", "bottom".
     :return: The cell with the added text.
     """
-    cell.top.shapes(layer.pin).insert(db.DText(text, position[0], position[1]))
+    text_obj = db.DText(text, position[0], position[1])
+    match halign:
+        case "left":
+            text_obj.halign = db.DText.HAlignLeft
+        case "center":
+            text_obj.halign = db.DText.HAlignCenter
+        case "right":
+            text_obj.halign = db.DText.HAlignRight
+    match valign:
+        case "top":
+            text_obj.valign = db.DText.VAlignTop
+        case "center":
+            text_obj.valign = db.DText.VAlignCenter
+        case "bottom":
+            text_obj.valign = db.DText.VAlignBottom
+    cell.top.shapes(layer.pin).insert(text_obj)
     return cell
 
 

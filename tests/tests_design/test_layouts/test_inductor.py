@@ -1,27 +1,16 @@
-import pytest
-import klayout.db as db
-
 from haadic._config import REF_PATH
-from haadic.core.techno import is_installed
 from haadic.design.layouts.inductor import octagonal_inductor
 from haadic.core.tools import diff_gds
-from haadic.io.writers.haadicfile import LayerStack
-
-pytestmark = pytest.mark.skipif(not is_installed("mock"), reason="PDK not installed.")
+from haadic.design.layouts.base_cell import BaseCell
 
 
 def test_inductor(tmp_path):
-    layerstack = LayerStack("mock")  # ty:ignore[invalid-argument-type]
-    lib = db.Layout()
-    octagonal_inductor(
-        lib, 120e-6, 1, 5e-6, 2e-6, layerstack, port_gap=15e-6, port_ext=20e-6
-    )
+    lib = BaseCell("ind", "mock")  # ty:ignore[invalid-argument-type]
+    octagonal_inductor(lib, 120, 1, 5, 2, port_gap=15, port_ext=20)
     lib.write(tmp_path / "ind.gds")
     assert diff_gds(tmp_path / "ind.gds", REF_PATH / "ref_ind.gds")
 
-    lib = db.Layout()
-    octagonal_inductor(
-        lib, 80e-6, 2, 5e-6, 2e-6, layerstack, port_gap=10e-6, port_ext=15e-6
-    )
+    lib = BaseCell("ind", "mock")  # ty:ignore[invalid-argument-type]
+    octagonal_inductor(lib, 80, 2, 5, 2e-6, port_gap=10, port_ext=15)
     lib.write(tmp_path / "ind2.gds")
     assert diff_gds(tmp_path / "ind2.gds", REF_PATH / "ref_ind2.gds")
