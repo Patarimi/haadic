@@ -40,8 +40,8 @@ class Flow:
     """
     Flow dataclass.
 
-    :param layout: function that generates the layout. It takes as argument a klayout Cell, a LayerStack and the dimensions of the layout to generate.
-     It should return a klayout Cell with the generated layout.
+    :param layout: function that generates the layout. It takes as argument a BaseCell, a LayerStack and the dimensions of the layout to generate.
+     It should return a BaseCell with the generated layout.
     :param benches: list of bench files to run. The flow will look for these files in the current folder and run them with the extracted spice netlist.
      They can be absolute or relative to the running folder.
     :param postprocess: function that evaluates the performances of the circuit. It takes as argument the simulation results of the benches and the dimensions of the layout.

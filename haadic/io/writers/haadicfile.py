@@ -109,7 +109,7 @@ class LayerStack:
 
     techno: Available_PDK
     grid: float = 1e-9
-    use_json: bool = False
+    use_json: bool = True
 
     _stack: list[Layer] = field(default_factory=list)
     _via_list: list[ViaLayer] = field(default_factory=list)
@@ -134,10 +134,10 @@ class LayerStack:
                 self.load_from_layermap(path_map)
         self.apply_patch()
         path_json = get_file(self.techno, "base_dir") / f"{self.techno}.json"
-        if self.use_json:
+        if self.use_json and not path_json.is_file():
             add_reference(self.techno, "haadic", Path(f"{self.techno}.json"))
-        self.export_to_json(path_json)
-        logging.info(f"LayerStack exported to {path_json}")
+            self.export_to_json(path_json)
+            logging.info(f"LayerStack exported to {path_json}")
 
     def __len__(self):
         """Return the number of routing layers in the stack."""

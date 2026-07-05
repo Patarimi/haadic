@@ -9,6 +9,7 @@ from haadic.design.layouts.general import (
 )
 from haadic.core.tools import diff_gds
 from haadic.io.writers.haadicfile import LayerStack
+from haadic.design.layouts.base_cell import BaseCell
 from haadic._config import REF_PATH
 
 stack = LayerStack("mock")  # ty:ignore[invalid-argument-type]
@@ -17,20 +18,20 @@ stack = LayerStack("mock")  # ty:ignore[invalid-argument-type]
 def test_via(tmp_path):
     opnng = stack.get_via_layer(-1)
     assert opnng.name == "opening"
-    lib = kl.Layout()
-    via(lib, stack.get_via_layer(2), (3, 4))
+    lib = BaseCell("top", "mock")  # ty:ignore[invalid-argument-type]
+    via(lib, 2, (3, 4))
     lib.write(tmp_path / "via.gds")
     diff_gds(tmp_path / "via.gds", REF_PATH / "ref_via.gds")
 
 
 def test_via_stack(tmp_path):
-    lib = kl.Layout()
-    via_stack(lib, stack, 2, 1, (3, 4))
+    lib = BaseCell("top", "mock")  # ty:ignore[invalid-argument-type]
+    via_stack(lib, 2, 1, (3, 4))
     lib.write(tmp_path / "via_stack.gds")
     diff_gds(tmp_path / "via_stack.gds", REF_PATH / "ref_via_stack.gds")
 
-    lib = kl.Layout()
-    via_stack(lib, stack, -3, -4, (3, 4))
+    lib = BaseCell("top", "mock")  # ty:ignore[invalid-argument-type]
+    via_stack(lib, -3, -4, (3, 4))
     lib.write(tmp_path / "via_stack_neg.gds")
     diff_gds(tmp_path / "via_stack_neg.gds", REF_PATH / "ref_via_stack.gds")
 

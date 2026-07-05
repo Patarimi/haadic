@@ -1,12 +1,10 @@
 """Functions to generate mos transistor layouts. This fonction are based on a standard grid design."""
 
-from haadic.design.layouts.base_cell import BaseCell
-
-import logging
 from typing import Literal, Sequence
 
 import klayout.db as db
 
+from haadic.design.layouts.base_cell import BaseCell
 import haadic.design.layouts.general as gen
 
 
@@ -27,7 +25,6 @@ def mosfet(
     :param doping: mos type (P or N).
     :return:
     """
-    layout = cell._layout
     poly_layer = cell.gate
     gate_ext = poly_layer.spacing
     doping_layer = cell.implant(doping)
@@ -35,53 +32,31 @@ def mosfet(
     m1_layer = cell.metal(1)
     m1_width = m1_layer.width
     diff_space = cell.active.spacing
-    via_layer = cell.via(0)
-    logging.debug(f"via layer : {via_layer}")
 
-    mos = layout.create_cell(f"{doping.lower()}mos_{nf}")
-    gate = layout.create_cell("gate")
-    gate.shapes(poly_layer.drawing).insert(db.DBox(0, 0, length, width + 2 * gate_ext))
+    mos = cell.create_cell(f"{doping.lower()}mos_{nf}")
+    gate = cell.create_cell("gate")
+    gen.add_rectangle(gate, poly_layer, (length, width + 2 * gate_ext), (0, 0))
     pitch = length + diff_space
-    gates = db.DCellInstArray(
-        gate.cell_index(),
-        db.DTrans(diff_space, -gate_ext),
-        db.DVector(pitch, 0),
-        db.DVector(0, 1),
-        nf,
-        1,
+    mos.insert_cell(gate, (diff_space, -gate_ext), spacing=pitch, instances=(nf, 1))
+    dr_con = cell.create_cell("dr_con")
+    gen.add_rectangle(dr_con, cell.metal(1), (m1_width, width))
+    con = gen.via(cell, 0, (m1_width, width))
+    dr_con.insert_cell(con)
+    mos.insert_cell(
+        dr_con, ((diff_space - m1_width) / 2, 0), spacing=pitch, instances=(nf + 1, 1)
     )
-    mos.insert(gates)
-    dr_con = layout.create_cell("dr_con")
-    dr_con.shapes(m1_layer.drawing).insert(db.DBox(0, 0, m1_width, width))
-    con = gen.via(layout, via_layer, (m1_width, width))
-    dr_con.insert(db.DCellInstArray(con, db.DVector(0, 0)))
-    dr_cons = db.DCellInstArray(
-        dr_con.cell_index(),
-        db.DTrans((diff_space - m1_width) / 2, 0),
-        db.DVector(pitch, 0),
-        db.DVector(0, 1),
-        nf + 1,
-        1,
-    )
-    mos.insert(dr_cons)
-    mos.shapes(cell.active.drawing).insert(
-        db.DBox(0, 0, diff_space + nf * pitch, width)
-    )
+    gen.add_rectangle(mos, mos.active, (diff_space + nf * pitch, width))
     gen.enclose(mos, doping_layer, doping_ext, filter=cell.active)
     if doping == "P":
         gen.enclose(mos, cell.nwell(), doping_ext, filter=doping_layer)
     for i in range(nf):
-        mos.shapes(poly_layer.pin).insert(
-            db.DText(f"g{i}", i * pitch + diff_space + length / 2, -gate_ext)
+        gen.add_port(
+            mos, poly_layer, f"g{i}", (i * pitch + diff_space + length / 2, -gate_ext)
         )
-        mos.shapes(m1_layer.pin).insert(
-            db.DText(f"dr{i}", i * pitch + diff_space / 2, width / 2)
-        )
-    mos.shapes(m1_layer.pin).insert(
-        db.DText(f"dr{nf}", nf * pitch + diff_space / 2, width / 2)
-    )
+        gen.add_port(mos, m1_layer, f"dr{i}", (i * pitch + diff_space / 2, width / 2))
+    gen.add_port(mos, m1_layer, f"dr{nf}", (nf * pitch + diff_space / 2, width / 2))
     mos.flatten(-1, True)
-    cell.top.insert(db.DCellInstArray(mos, db.DVector(0, 0)))
+    cell.insert_cell(mos)
     return mos
 
 
