@@ -134,7 +134,7 @@ class LayerStack:
                 self.load_from_layermap(path_map)
         self.apply_patch()
         path_json = get_file(self.techno, "base_dir") / f"{self.techno}.json"
-        if self.use_json:
+        if self.use_json and not path_json.is_file():
             add_reference(self.techno, "haadic", Path(f"{self.techno}.json"))
             self.export_to_json(path_json)
             logging.info(f"LayerStack exported to {path_json}")
