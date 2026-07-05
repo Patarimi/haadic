@@ -125,34 +125,40 @@ def marchand_balun(
     """
     m_top = layout.metal(-1)
     m_bott = layout.metal(1)
-    w, le, g, s = width * 1e6, length * 1e6, gap * 1e6, space * 1e6
-    ws = w if widths < 0 else widths * 1e6
-    bln = layout.create_cell(name)
+    w, le, g, s = width, length, gap, space
+    ws = w if widths < 0 else widths
     emp_port = Port("")
-    cpl = lange_coupler(layout, width, length, gap, [emp_port for k in range(4)], ext=0)
-    c1 = bln.insert_cell(cpl, (s + 4 * (w + g) + w, -le), rotation=90)
-    c2 = bln.insert_cell(cpl, (0, -le), rotation=90)
-    bbox = bln.top.bbox()
-    bot = bbox.bottom + 1.5 * w + g - ws / 2
-    c2box = c2.top.bbox()
-    gen.add_rectangle(bln, m_top, (s, ws), (c2box.right, bot))
-    gen.add_rectangle(
-        bln,
-        m_bott,
-        (bbox.left, bbox.bottom),
-        (bbox.width(), bbox.height()),
+    cpl = lange_coupler(
+        layout.create_cell("lange"),
+        width,
+        length,
+        gap,
+        [emp_port for k in range(4)],
+        ext=0,
     )
+    cplbox = cpl.top.dbbox()
+    layout.insert_cell(cpl, (s + 4 * (w + g) + w, -le), rotation=90)
+    layout.insert_cell(cpl, (0, -le), rotation=90, mirrorx=True)
+    bbox = layout.top.dbbox()
+    bot = bbox.bottom + 1.5 * w + g - ws / 2
+    gen.add_rectangle(layout, m_top, (s, ws), (bbox.left + cplbox.height(), bot))
+    gen.enclose(layout, m_bott)
 
+    coord = (
+        (bbox.left + 2.5 * w + 2 * g, bbox.top),
+        (bbox.left + 1.5 * w + g, bbox.bottom),
+        (bbox.right - 1.5 * w - g, bbox.bottom),
+    )
     for i in range(3):
-        coord = (
-            (c2box.right - 1.5 * w - g, c2box.top),
-            (c2box.left + 1.5 * w + g, c2box.bottom),
-            (c1.top.bbox().right - 1.5 * w - g, c1.top.bbox().bottom),
-        )
-        gen.add_text(bln, m_bott, ports[i].ref, coord[i])
-    v1 = via_stack(layout, -2, 1, (2 * g + 3 * w, w))
-    bln.insert_cell(v1, (-1.5 * w - g, -1.5 * w - g))
-    bln.insert_cell(v1, (s + 3.5 * w + 3 * g, -1.5 * w - g))
+        gen.add_port(layout, m_top, ports[i].name, coord[i])
+        gen.add_port(layout, m_bott, ports[i].ref, coord[i])
+    v1 = via_stack(layout.create_cell("via"), -2, 1, (2 * g + 3 * w, w))
+    layout.insert_cell(
+        v1,
+        (-1.5 * w - g, -1.5 * w - g),
+        spacing=(s + 4 * (w + g) + w, 0),
+        instances=(2, 1),
+    )
     return layout
 
 
@@ -177,7 +183,7 @@ def lange_coupler(
     :param ext: extension of the ports
     :return: a cell with the lange coupler.
     """
-    w, le, g = width * 1e6, length * 1e6, gap * 1e6
+    w, le, g = width, length, gap
     top_metal = layout.metal(-1)
     bridge = layout.metal(-2)
     bot_metal = layout.metal(1)

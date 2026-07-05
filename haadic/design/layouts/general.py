@@ -173,7 +173,10 @@ def add_port(cell: BaseCell, layer: Layer, name: str, position: Point) -> BaseCe
     :param position: The reference point of the port (x, y).
     :return: The cell with the added port.
     """
-    cell.top.shapes(layer.pin).insert(db.DText(name, position[0], position[1]))
+    t = db.DText(name, position[0], position[1])
+    t.halign = db.Text.HAlignCenter
+    t.valign = db.Text.VAlignCenter
+    cell.top.shapes(layer.pin).insert(t)
     return cell
 
 

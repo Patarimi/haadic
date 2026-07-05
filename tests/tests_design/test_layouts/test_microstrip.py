@@ -33,13 +33,13 @@ def test_coupler(tmp_path):
 
 def test_lange(tmp_path):
     lib = BaseCell("lange", "mock")  # ty:ignore[invalid-argument-type]
-    lange_coupler(lib, 1.3e-6, 405e-6, 3.7e-6)
+    lange_coupler(lib, 1.3, 405, 3.7)
     lib.write(tmp_path / "lange.gds")
     assert diff_gds(tmp_path / "lange.gds", REF_PATH / "ref_lange.gds")
 
 
 def test_marchand(tmp_path):
     lib = BaseCell("marchand", "mock")  # ty:ignore[invalid-argument-type]
-    marchand_balun(lib, 2e-6, 400e-6, 4e-6, 66e-6, widths=25e-6)
+    marchand_balun(lib, 2, 400, 4, 66, widths=25)
     lib.write(tmp_path / "marchand.gds")
     assert diff_gds(tmp_path / "marchand.gds", REF_PATH / "ref_marchand.gds")
