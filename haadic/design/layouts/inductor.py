@@ -107,6 +107,6 @@ def octagonal_inductor(
                     )
 
     # Add port labels
-    gen.add_text(layout, m_top, pin_name[0], (-p_ext, p_gap / 2))
-    gen.add_text(layout, m_top, pin_name[1], (-p_ext, -p_gap / 2))
+    gen.add_port(layout, m_top, pin_name[0], (-p_ext, p_gap / 2))
+    gen.add_port(layout, m_top, pin_name[1], (-p_ext, -p_gap / 2))
     return layout.flatten(-1, True)

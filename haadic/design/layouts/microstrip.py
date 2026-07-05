@@ -215,8 +215,8 @@ def lange_coupler(
         )
         if ports[i].name == "":
             continue
-        gen.add_text(layout, top_metal, ports[i].name, coord[i])
-        gen.add_text(layout, bot_metal, ports[i].ref, coord[i])
+        gen.add_port(layout, top_metal, ports[i].name, coord[i])
+        gen.add_port(layout, bot_metal, ports[i].ref, coord[i])
     dim = layout.top.dbbox()
     gen.add_rectangle(
         layout,

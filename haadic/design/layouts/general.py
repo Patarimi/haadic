@@ -163,23 +163,6 @@ def set_as_port(cell: BaseCell, label: str) -> BaseCell:
     return cell
 
 
-def add_port(cell: BaseCell, layer: Layer, name: str, position: Point) -> BaseCell:
-    """
-    Add a port to the cell.
-
-    :param cell: The cell to which the port will be added.
-    :param layer: The layer to use for the port.
-    :param name: The name of the port.
-    :param position: The reference point of the port (x, y).
-    :return: The cell with the added port.
-    """
-    t = db.DText(name, position[0], position[1])
-    t.halign = db.Text.HAlignCenter
-    t.valign = db.Text.VAlignCenter
-    cell.top.shapes(layer.pin).insert(t)
-    return cell
-
-
 def add_rectangle(
     cell: BaseCell, layer: Layer, size: tuple[float, float], origin: Point = (0, 0)
 ) -> BaseCell:
@@ -201,13 +184,13 @@ type VAlign = Literal["left", "center", "right"]
 type HAlign = Literal["top", "center", "bottom"]
 
 
-def add_text(
+def add_port(
     cell: BaseCell,
     layer: Layer,
     text: str,
     position: Point,
-    valign: VAlign = "center",
-    halign: HAlign = "center",
+    valign: VAlign = "left",
+    halign: HAlign = "bottom",
 ) -> BaseCell:
     """
     Add a text to the cell.

@@ -50,11 +50,11 @@ def mosfet(
     if doping == "P":
         gen.enclose(mos, cell.nwell(), doping_ext, filter=doping_layer)
     for i in range(nf):
-        gen.add_text(
+        gen.add_port(
             mos, poly_layer, f"g{i}", (i * pitch + diff_space + length / 2, -gate_ext)
         )
-        gen.add_text(mos, m1_layer, f"dr{i}", (i * pitch + diff_space / 2, width / 2))
-    gen.add_text(mos, m1_layer, f"dr{nf}", (nf * pitch + diff_space / 2, width / 2))
+        gen.add_port(mos, m1_layer, f"dr{i}", (i * pitch + diff_space / 2, width / 2))
+    gen.add_port(mos, m1_layer, f"dr{nf}", (nf * pitch + diff_space / 2, width / 2))
     mos.flatten(-1, True)
     cell.insert_cell(mos)
     return mos
