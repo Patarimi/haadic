@@ -23,7 +23,7 @@ dependencies = [
 ]
 
 [build-system]
-requires = ["uv_build>=0.11.25,<0.12.0"]
+requires = ["uv_build>=0.11.26,<0.12.0"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
@@ -78,7 +78,7 @@ dev = [
     "pytest-xdist>=3.8.0",
 ]
 doc = [
-    "cyclopts[mkdocs]>=4.19.0",
+    "cyclopts[mkdocs]>=4.20.0",
     "mkdocs>=1.6.1",
     "mkdocs-api-autonav>=0.4.0",
     "mkdocs-material>=9.6.16",
