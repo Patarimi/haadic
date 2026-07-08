@@ -86,11 +86,11 @@ def via_stack(
     return v
 
 
-Label = tuple[db.DText, int]
+Label = tuple[db.DText, Layer]
 
 
 def get_dtext(
-    layout: db.Layout, label: Optional[str] = None, cell: Optional[str] = None
+    layout: BaseCell, label: Optional[str] = None, cell: Optional[str] = None
 ) -> list[Label]:
     """
     Return the dtext with the associated label in the layout.
@@ -103,27 +103,26 @@ def get_dtext(
     if label is None:
         labels = list()
     if cell is None:
-        cells = layout.each_cell()
+        cells = layout._layout.each_cell()
     else:
-        cells = (layout.cell(cell),)
+        cells = (layout._layout.cell(cell),)
     for c in cells:
-        for lyr in layout.layer_indexes():
-            for shape in c.shapes(lyr):
+        for lyr_nb in layout._layout.layer_indexes():
+            layer = layout.get_layer_from_index(lyr_nb)
+            for shape in c.shapes(lyr_nb):
                 if not shape.is_text():
                     continue
                 if label is None:
-                    labels.append((shape.dtext, lyr))
+                    labels.append((shape.dtext, layer))
                 elif shape.dtext.string == label:
-                    return [
-                        (shape.dtext, lyr),
-                    ]
+                    return [(shape.dtext, layer)]
     if label is None:
         return labels
     else:
         raise ValueError(f"label {label} not found in layout")
 
 
-def get_shape(layout: db.Layout, point: db.DPoint, layer: int) -> tuple[db.DBox, int]:
+def get_shape(layout: BaseCell, point: Point, layer: Layer) -> db.DBox | None:
     """
     Return the shape at the given point and layer.
 
@@ -132,16 +131,15 @@ def get_shape(layout: db.Layout, point: db.DPoint, layer: int) -> tuple[db.DBox,
     :param layer: layer to explore.
     :return: the shape at the given point and layer.
     """
-    for cell in layout.each_cell():
-        for lyr in layout.layer_indexes():
+    for cell in layout._layout.each_cell():
+        for lyr in layout._layout.layer_indexes():
             for shape in cell.shapes(lyr):
-                ref_info = layout.layer_infos()[layer]
-                current_info = layout.layer_infos()[lyr]
-                if ref_info.layer != current_info.layer:
+                current_info = layout._layout.layer_infos()[lyr]
+                if layer.layer != current_info.layer:
                     continue
-                if shape.is_box() and shape.dbox.contains(point):
-                    return shape.dbox, lyr
-    raise ValueError(f"no shape found at {point} on layer {layer}")
+                if shape.is_box() and shape.dbox.contains(db.DPoint(*point)):
+                    return shape.dbox
+    return None
 
 
 def set_as_port(cell: BaseCell, label: str) -> BaseCell:
@@ -152,14 +150,13 @@ def set_as_port(cell: BaseCell, label: str) -> BaseCell:
     :param label: The label to be retrieved and copied.
     :return: The cell with the copied label.
     """
-    lay = cell._layout
     for subcell in cell.top.each_child_cell():
         try:
-            res = get_dtext(lay.cell(subcell).layout(), label)
+            res = get_dtext(cell, label)
         except ValueError:
             continue
         txt, lyr = res[0] if isinstance(res, list) else res
-        cell.top.shapes(lyr).insert(txt)
+        add_port(cell, lyr, txt.string, (txt.position().x, txt.position().y))
     return cell
 
 
@@ -180,8 +177,8 @@ def add_rectangle(
     return cell
 
 
-type VAlign = Literal["left", "center", "right"]
-type HAlign = Literal["top", "center", "bottom"]
+type HAlign = Literal["left", "center", "right"]
+type VAlign = Literal["top", "center", "bottom"]
 
 
 def add_port(
@@ -189,8 +186,8 @@ def add_port(
     layer: Layer,
     text: str,
     position: Point,
-    valign: VAlign = "left",
-    halign: HAlign = "bottom",
+    valign: VAlign = "bottom",
+    halign: HAlign = "left",
 ) -> BaseCell:
     """
     Add a text to the cell.
@@ -199,8 +196,8 @@ def add_port(
     :param layer: The layer to use for the text.
     :param text: The text string to be added.
     :param position: tuple of the position (x, y) of the text.
-    :param valign: The vertical alignment of the text. Options are "left", "center", "right".
-    :param halign: The horizontal alignment of the text. Options are "top", "center", "bottom".
+    :param valign: The horizontal alignment of the text. Options are "top", "center", "bottom".
+    :param halign: The vertical alignment of the text. Options are "left", "center", "right".
     :return: The cell with the added text.
     """
     text_obj = db.DText(text, position[0], position[1])

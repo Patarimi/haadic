@@ -153,3 +153,13 @@ class BaseCell:
         """
         self._top.flatten(depth, recursive)
         return self
+
+    def get_layer_from_index(self, index: int) -> Layer:
+        """
+        Get the Layer object corresponding to a given layer index in the klayout layout.
+
+        :param index: The layer index.
+        :return: Corresponding Layer object from the layer stack.
+        """
+        lyr_infos = self._layout.layer_infos()[index]
+        return self._layer_stack.search_layer(lyr_infos.layer, lyr_infos.datatype)

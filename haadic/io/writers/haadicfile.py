@@ -7,7 +7,7 @@ from pathlib import Path
 import json
 import logging
 from haadic.core.techno import Available_PDK, get_file, add_reference
-from typing import Self, Sequence, override
+from typing import Self, Sequence, override, Generator
 from dataclasses import dataclass, field, fields
 from klayout.db import LayerInfo
 
@@ -205,6 +205,31 @@ class LayerStack:
         if end < 0:
             end = len(self._stack) + end + 1
         return list(range(start, end + 1))
+
+    def search_layer(self, layer: int, datatype: int) -> Layer:
+        """
+        Search for a layer in the stack based on its layer and datatype.
+
+        :param layer: The layer index.
+        :param datatype: The datatype.
+        :return: The corresponding Layer object.
+        """
+        for lyr in self.next():
+            if lyr.layer == layer and lyr.datatype == datatype:
+                return lyr
+        raise ValueError(f"Layer {layer}/{datatype} not found in LayerStack.")
+
+    def next(self) -> Generator[Layer, None, None]:
+        """Iterate over the routing layers in the stack."""
+        yield self._gate
+        for lyr in self._stack:
+            yield lyr
+        for vlyr in self._via_list:
+            yield vlyr
+        yield self._pad
+        yield self._nplus
+        yield self._pplus
+        yield self._nwell
 
     def apply_patch(self):
         """

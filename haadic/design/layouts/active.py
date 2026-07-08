@@ -2,8 +2,6 @@
 
 from typing import Literal, Sequence
 
-import klayout.db as db
-
 from haadic.design.layouts.base_cell import BaseCell
 import haadic.design.layouts.general as gen
 
@@ -94,16 +92,19 @@ def connect(cell: BaseCell, label_line: str, label_mos: str) -> BaseCell:
     :param label_mos: label of the mosfet pin to be connected.
     :return: the cell containing the connection.
     """
-    layout = cell._layout
-    lbl_h, lyr_hp = gen.get_dtext(layout, label_line)[0]
-    lbl_v, lyr_vp = gen.get_dtext(layout, label_mos)[0]
-    box_v, lyr_v = gen.get_shape(layout, lbl_v.position(), lyr_vp)
-    box_h, lbl_h = gen.get_shape(layout, lbl_h.position(), lyr_hp)
+    lbl_h, lyr_hp = gen.get_dtext(cell, label_line)[0]
+    lbl_v, lyr_vp = gen.get_dtext(cell, label_mos)[0]
+    box_v = gen.get_shape(cell, (lbl_v.position().x, lbl_v.position().y), lyr_vp)
+    box_h = gen.get_shape(cell, (lbl_h.position().x, lbl_h.position().y), lyr_hp)
+    if box_v is None:
+        raise RuntimeError("No Shape found on layer {lyr_vp} at {lbl_v}")
+    if box_h is None:
+        raise RuntimeError("No Shape found on layer {lyr_vh} at {lbl_h}")
     if box_h.center().y > box_v.center().y:
         top, bottom = box_v.top, box_h.top
     else:
         top, bottom = box_v.bottom, box_h.bottom
-    cell.top.shapes(lyr_v).insert(db.DBox(box_v.left, bottom, box_v.right, top))
+    gen.add_rectangle(cell, lyr_vp, (box_v.width(), top - bottom), (box_v.left, bottom))
     return cell
 
 
@@ -120,8 +121,7 @@ def pattern_connect(
     :param pattern: labels of the connections lines.
     :return: _cell_ with_ the added connections.
     """
-    layout = cell._layout
-    labels = gen.get_dtext(layout, cell=device_name)
+    labels = gen.get_dtext(cell, cell=device_name)
     for lbl, lyr in labels:
         i = 2 * int(lbl.string.lstrip("gdr"))
         if lbl.string.startswith("g"):
