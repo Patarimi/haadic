@@ -116,7 +116,7 @@ def pattern_connect(
 
     Pattern is replicated until all ports are connected.
 
-    :param cell: klayout cell in which the connection is inserted.
+    :param cell: BaseCell in which the connection is inserted.
     :param device_name: device to be connected.
     :param pattern: labels of the connections lines.
     :return: _cell_ with_ the added connections.
