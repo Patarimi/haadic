@@ -10,6 +10,7 @@ def test_nmos(base_cell, tmp_path):
 
 
 def test_pmos(base_cell, tmp_path):
+    base_cell._top.name = "pmos"  # rename top cell to match ref file
     mosfet(base_cell, nf=3, doping="P")
     base_cell.write(tmp_path / "pmos.gds")
     assert diff_gds(tmp_path / "pmos.gds", REF_PATH / "ref_pmos.gds")
@@ -18,6 +19,7 @@ def test_pmos(base_cell, tmp_path):
 def test_line(base_cell, tmp_path):
     # change the gate layer to match the reference GDS
     base_cell._layer_stack._gate.layer = 5
+    base_cell._top.name = "top"  # rename top cell to match ref file
     mosfet(base_cell, nf=5, doping="N")
     line(base_cell, "vdd", 2)
     line(base_cell, "gnd", 2, below=True)
