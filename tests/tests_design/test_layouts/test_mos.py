@@ -30,6 +30,7 @@ def test_line(tmp_path):
 
 def test_connect(tmp_path):
     top_cell = BaseCell("top", "mock")  # ty:ignore[invalid-argument-type]
+    top_cell._layer_stack._gate.layer = 5
     top_cell.read(REF_PATH / "ref_line.gds")
     line(top_cell, "vout", 2)
     connect(top_cell, "vdd", "dr0")

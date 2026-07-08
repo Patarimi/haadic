@@ -215,7 +215,7 @@ class LayerStack:
         :return: The corresponding Layer object.
         """
         for lyr in self.next():
-            if lyr.layer == layer and lyr.datatype == datatype:
+            if lyr.layer == layer and datatype in (lyr.datatype, lyr._pin):
                 return lyr
         raise ValueError(f"Layer {layer}/{datatype} not found in LayerStack.")
 
@@ -230,6 +230,7 @@ class LayerStack:
         yield self._nplus
         yield self._pplus
         yield self._nwell
+        yield self._active
 
     def apply_patch(self):
         """
