@@ -31,10 +31,9 @@ def test_via_stack2(base_cell, tmp_path):
 def test_dtext(base_cell):
     layer = base_cell.metal(1)
     base_cell.top.shapes(layer.drawing).insert(kl.DText("gnd", 0.0, -0.9))
-    gnd, lyr = gen.get_dtext(base_cell, "gnd")[0]
+    gnd_label = gen.get_dtext(base_cell, "gnd")[0]
 
-    assert gnd == kl.DText("gnd", 0.0, -0.9)
-    assert lyr == layer
+    assert gnd_label == gen.Label("gnd", (0.0, -0.9), layer)
 
 
 def test_shape(base_cell):

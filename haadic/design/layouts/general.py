@@ -4,6 +4,8 @@ Contains function to generate general purpose cells.
 (Via, via stack, ground plane, etc.)
 """
 
+from dataclasses import dataclass
+
 import logging
 import math
 from typing import Optional, Sequence, Literal
@@ -15,6 +17,21 @@ from haadic.io.writers.haadicfile import LayerStack, Layer
 
 
 type Point = tuple[float, float]
+
+
+@dataclass
+class Label:
+    """
+    Store information about a label (or DText) in a layout.
+
+    :param name: name displayed in the layout.
+    :param position: insertion point of the label.
+    :param layer: Layer in which the label is drawn.
+    """
+
+    name: str
+    position: Point
+    layer: Layer
 
 
 def via(cell: BaseCell, level: int, size: tuple[float, float]) -> BaseCell:
@@ -86,9 +103,6 @@ def via_stack(
     return v
 
 
-Label = tuple[db.DText, Layer]
-
-
 def get_dtext(
     layout: BaseCell, label: Optional[str] = None, cell: Optional[str] = None
 ) -> list[Label]:
@@ -112,10 +126,12 @@ def get_dtext(
             for shape in c.shapes(lyr_nb):
                 if not shape.is_text():
                     continue
+                pos = (shape.dtext.position().x, shape.dtext.position().y)
                 if label is None:
-                    labels.append((shape.dtext, layer))
+                    labels.append(Label(shape.dtext.string, pos, layer))
                 elif shape.dtext.string == label:
-                    return [(shape.dtext, layer)]
+                    pos = (shape.dtext.position().x, shape.dtext.position().y)
+                    return [Label(label, pos, layer)]
     if label is None:
         return labels
     else:
@@ -150,13 +166,8 @@ def set_as_port(cell: BaseCell, label: str) -> BaseCell:
     :param label: The label to be retrieved and copied.
     :return: The cell with the copied label.
     """
-    for subcell in cell.top.each_child_cell():
-        try:
-            res = get_dtext(cell, label)
-        except ValueError:
-            continue
-        txt, lyr = res[0] if isinstance(res, list) else res
-        add_port(cell, lyr, txt.string, (txt.position().x, txt.position().y))
+    res = get_dtext(cell, label)[0]
+    add_port(cell, res.layer, res.name, res.position)
     return cell
 
 

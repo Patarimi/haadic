@@ -92,10 +92,10 @@ def connect(cell: BaseCell, label_line: str, label_mos: str) -> BaseCell:
     :param label_mos: label of the mosfet pin to be connected.
     :return: the cell containing the connection.
     """
-    lbl_h, lyr_hp = gen.get_dtext(cell, label_line)[0]
-    lbl_v, lyr_vp = gen.get_dtext(cell, label_mos)[0]
-    box_v = gen.get_shape(cell, (lbl_v.position().x, lbl_v.position().y), lyr_vp)
-    box_h = gen.get_shape(cell, (lbl_h.position().x, lbl_h.position().y), lyr_hp)
+    lbl_h = gen.get_dtext(cell, label_line)[0]
+    lbl_v = gen.get_dtext(cell, label_mos)[0]
+    box_v = gen.get_shape(cell, lbl_v.position, lbl_v.layer)
+    box_h = gen.get_shape(cell, lbl_h.position, lbl_h.layer)
     if box_v is None:
         raise RuntimeError("No Shape found on layer {lyr_vp} at {lbl_v}")
     if box_h is None:
@@ -104,7 +104,9 @@ def connect(cell: BaseCell, label_line: str, label_mos: str) -> BaseCell:
         top, bottom = box_v.top, box_h.top
     else:
         top, bottom = box_v.bottom, box_h.bottom
-    gen.add_rectangle(cell, lyr_vp, (box_v.width(), top - bottom), (box_v.left, bottom))
+    gen.add_rectangle(
+        cell, lbl_v.layer, (box_v.width(), top - bottom), (box_v.left, bottom)
+    )
     return cell
 
 
@@ -122,10 +124,10 @@ def pattern_connect(
     :return: _cell_ with_ the added connections.
     """
     labels = gen.get_dtext(cell, cell=device_name)
-    for lbl, lyr in labels:
-        i = 2 * int(lbl.string.lstrip("gdr"))
-        if lbl.string.startswith("g"):
+    for lbl in labels:
+        i = 2 * int(lbl.name.lstrip("gdr"))
+        if lbl.name.startswith("g"):
             i += 1
         i = i % len(pattern)
-        connect(cell, pattern[i], lbl.string)
+        connect(cell, pattern[i], lbl.name)
     return cell
