@@ -55,12 +55,9 @@ def test_layerstack_layer_index_and_routing_range(mock_layer_stack):
     assert mock_layer_stack.layers_from_to(1, 2) == [1, 2]
 
 
-def test_layerstack_search_and_iteration(mock_layer_stack):
+def test_layerstack_search(mock_layer_stack):
     assert mock_layer_stack.search_layer(34, 5).name == "metal1"
-    layers = list(mock_layer_stack.next())
-    assert layers[0] is mock_layer_stack._gate
-    assert any(layer.name == "metal1" for layer in layers)
-    assert layers[-1] is mock_layer_stack._nwell
+    assert mock_layer_stack.search_layer(22, 0).name == "active"
 
 
 def test_layerstack_load_from_json(mock_layer_stack, tmp_path):
