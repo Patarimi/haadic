@@ -59,15 +59,17 @@ def diff_gds(gds1: str | Path, gds2: str | Path) -> bool:
         lambda c1: logging.error(f"Text {c1.text} only in {str(gds2)}.")
     )
     diff.on_polygon_in_a_only(  #  ty:ignore[call-non-callable]
-        lambda c1: logging.error(f"Polygon only in {str(gds1)}.")
+        lambda c1: logging.error(
+            f"Polygon only in {str(gds1)} on layer {c1.layer}/{c1.datatype}."
+        )
     )
     diff.on_polygon_in_b_only(  #  ty:ignore[call-non-callable]
-        lambda c1: logging.error(f"Polygon only in {str(gds2)}.")
+        lambda c1: logging.error(
+            f"Polygon only in {str(gds2)} on layer {c1.layer}/{c1.datatype}."
+        )
     )
     diff.on_begin_polygon_differences(  #  ty:ignore[call-non-callable]
-        lambda c1, c2: logging.error(
-            f"Polygon differs on layer {c1.layer}/{c1.datatype}."
-        )
+        lambda c1: logging.error(f"Polygon differs on layer {c1.layer}/{c1.datatype}.")
     )
     diff.on_dbu_differs(  #  ty:ignore[call-non-callable]
         lambda dbu1, dbu2: logging.error(f"DBU differs: {dbu1} != {dbu2}")

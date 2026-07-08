@@ -1,7 +1,13 @@
+import json
 import logging
 import pytest
 from haadic.core.techno import is_installed
 from haadic.io.writers import haadicfile as hf
+
+
+@pytest.fixture
+def mock_layer_stack():
+    return hf.LayerStack("mock", use_json=False)  # ty:ignore[invalid-argument-type]
 
 
 def test_layer():
@@ -11,13 +17,12 @@ def test_layer():
     assert str(lay2) == ": 141/0"
 
 
-def test_haadicfile():
-    process = hf.LayerStack("mock", use_json=False)  # ty:ignore[invalid-argument-type]
-    assert process.grid == 5e-9
-    assert process.get_metal_layer(1) == hf.Layer(
+def test_haadicfile(mock_layer_stack):
+    assert mock_layer_stack.grid == 5e-9
+    assert mock_layer_stack.get_metal_layer(1) == hf.Layer(
         34, 5, _pin=16, name="metal1", width=0.4
     )
-    assert process.get_via_layer(2) == hf.ViaLayer(
+    assert mock_layer_stack.get_via_layer(2) == hf.ViaLayer(
         12,
         8,
         _pin=0,
@@ -37,6 +42,72 @@ def test_haadicfile_layermap():
         "Metal1", valid_types, lm_file, valid_pin_types
     )
     assert layer_map == hf.Layer(34, 5, _pin=16, name="metal1")
+
+
+def test_layerstack_len_and_gate_pad_accessors(mock_layer_stack):
+    assert len(mock_layer_stack) == len(mock_layer_stack._stack)
+    assert mock_layer_stack.get_gate_layer() is mock_layer_stack._gate
+    assert mock_layer_stack.get_pad_layer() is mock_layer_stack._pad
+
+
+def test_layerstack_layer_index_and_routing_range(mock_layer_stack):
+    assert mock_layer_stack.get_layer_index(34, 5) == 1
+    assert mock_layer_stack.layers_from_to(1, 2) == [1, 2]
+
+
+def test_layerstack_search(mock_layer_stack):
+    assert mock_layer_stack.search_layer(34, 5).name == "metal1"
+    assert mock_layer_stack.search_layer(22, 0).name == "active"
+
+
+def test_layerstack_load_from_json(mock_layer_stack, tmp_path):
+    json_path = tmp_path / "stack.json"
+    json_path.write_text(
+        json.dumps(
+            {
+                "_stack": [
+                    {
+                        "layer": 77,
+                        "datatype": 3,
+                        "name": "fromjson",
+                        "width": 0.3,
+                        "spacing": 0.1,
+                    }
+                ]
+            }
+        )
+    )
+    mock_layer_stack.load_from_json(json_path)
+    assert mock_layer_stack.get_metal_layer(1).name == "fromjson"
+    assert mock_layer_stack.get_metal_layer(1).layer == 77
+
+
+def test_layerstack_load_from_tlef(mock_layer_stack):
+    mock_layer_stack._stack = []
+    mock_layer_stack._via_list = []
+    mock_layer_stack._gate = hf.default_layer()
+    mock_layer_stack._pad = hf.default_layer()
+    mock_layer_stack._nplus = hf.default_layer()
+    mock_layer_stack._pplus = hf.default_layer()
+    mock_layer_stack._nwell = hf.default_layer()
+    mock_layer_stack._active = hf.default_layer()
+    mock_layer_stack.load_from_tlef(hf.get_file("mock", "techlef"))
+    assert mock_layer_stack.get_metal_layer(1).name
+    assert len(mock_layer_stack._via_list) >= 0
+
+
+def test_layerstack_load_from_layermap(mock_layer_stack):
+    mock_layer_stack.load_from_layermap(hf.get_file("mock", "layermap"))
+    assert mock_layer_stack.get_metal_layer(1).layer == 34
+    assert mock_layer_stack.get_metal_layer(1).datatype == 5
+    assert mock_layer_stack.get_metal_layer(1)._pin == 16
+
+
+def test_layerstack_export_to_json(mock_layer_stack, tmp_path):
+    json_path = tmp_path / "exported.json"
+    mock_layer_stack.export_to_json(json_path)
+    data = json.loads(json_path.read_text())
+    assert data["_stack"][0]["name"] == "metal1"
 
 
 @pytest.mark.skipif(
