@@ -1,5 +1,4 @@
 from haadic.design.layouts.base_cell import BaseCell
-from klayout import db
 
 from haadic._config import REF_PATH
 from haadic.design.layouts.microstrip import (
@@ -15,19 +14,17 @@ from haadic.io.writers.haadicfile import LayerStack
 layerstack = LayerStack("mock")  # ty:ignore[invalid-argument-type]
 
 
-def test_straight_line(tmp_path):
-    lib = db.Layout()
-    lib.dbu = layerstack.grid * 1e6
-    straight_line(lib, 10e-6, 50e-6, layerstack, (Port("S1"), Port("")))
-    lib.write(tmp_path / "ms.gds")
+def test_straight_line(base_cell, tmp_path):
+    base_cell._top.name = "ms"
+    straight_line(base_cell, 10e-6, 50e-6, (Port("S1"), Port("")))
+    base_cell.write(tmp_path / "ms.gds")
     assert diff_gds(tmp_path / "ms.gds", REF_PATH / "ref_ms.gds")
 
 
-def test_coupler(tmp_path):
-    lib = db.Layout()
-    lib.dbu = layerstack.grid * 1e6
-    coupled_lines(lib, 10e-6, 50e-6, 20e-6, layerstack)
-    lib.write(tmp_path / "cpl.gds")
+def test_coupler(base_cell, tmp_path):
+    base_cell._top.name = "cpl"
+    coupled_lines(base_cell, 10e-6, 50e-6, 20e-6)
+    base_cell.write(tmp_path / "cpl.gds")
     assert diff_gds(tmp_path / "cpl.gds", REF_PATH / "ref_cpl.gds")
 
 
