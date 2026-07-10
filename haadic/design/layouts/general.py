@@ -41,7 +41,7 @@ def via(cell: BaseCell, level: int, size: tuple[float, float]) -> BaseCell:
     :param cell: The cell to use.
     :param level: The layer level for the via.
     :param size: tuple of the size (length and width) of the via array to be made.
-    :return: a db.Cell containing the via.
+    :return: a BaseCell containing the via.
     """
     v = cell.create_cell("via")
     layer = cell.via(level)
@@ -84,7 +84,7 @@ def via_stack(
     :param id_top: id of the top metal layer.
     :param id_bot: id of the bottom metal layer.
     :param size: tuple of the size (length and width) of the via.
-    :return: a db.Cell containing the via stack.
+    :return: a BaseCell containing the via stack.
     """
     v = layout.create_cell("via_stack")
     route = layout._layer_stack.layers_from_to(id_bot, id_top)

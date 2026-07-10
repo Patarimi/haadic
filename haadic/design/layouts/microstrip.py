@@ -3,57 +3,43 @@
 from haadic.design.layouts.base_cell import BaseCell
 
 from typing import Sequence
-import klayout.db as db
 
 from .tools import Port
 from .general import via_stack, via
-from haadic.io.writers.haadicfile import LayerStack
 from haadic.design.layouts import general as gen
 
 
 def straight_line(
-    layout: db.Layout,
+    cell: BaseCell,
     width: float,
     length: float,
-    layerstack: LayerStack,
     ports: Sequence[Port] = (Port("S1"), Port("S2")),
     name: str = "ms",
-) -> db.Cell:
+) -> BaseCell:
     """
     Generate a micro-strip straight line cell. Can be exported as a gds files.
 
-    :param layout: layout where the cell will be drawn.
+    :param cell: BaseCell where the cell will be drawn.
     :param name: name of the cell generated
     :param width: Width of the signal line (Reference line is three time wider).
     :param length: Length of the micro-strip.
-    :param layerstack: LayerStack object. The highest metal layer will be used for the signal line.
     The lowest metal layer will be used for the ground plane.
     :param ports: name of the ports
     :return: a db.Cell of a straight line micro-strip.
     """
-    m_top = layerstack.get_metal_layer(-1)
-    ly_top = layout.layer(m_top.layer, m_top.datatype)
-    m_bott = layerstack.get_metal_layer(1)
-    ly_bot = layout.layer(m_bott.layer, m_bott.datatype)
-    ms = layout.create_cell(name)
+    m_top = cell.metal(-1)
+    m_bott = cell.metal(1)
     le = length * 1e6
     w = width * 1e6
-    rf = db.DPath([db.DPoint(0, 0), db.DPoint(le, 0)], w).polygon()
-    ms.shapes(ly_top).insert(rf)
-    gnd = db.DPath([db.DPoint(0, 0), db.DPoint(le, 0)], 3 * w).polygon()
-    ms.shapes(ly_bot).insert(gnd)
+    gen.add_path(cell, m_top, [(0, 0), (le, 0)], w)
+    gen.add_path(cell, m_bott, [(0, 0), (le, 0)], 3 * w)
+
     for i in range(2):
         if ports[i].name == "":
             continue
-        t_pos = db.DText(ports[i].name, i * le, 0)
-        t_pos.halign = db.Text.HAlignCenter
-        t_pos.valign = db.Text.VAlignCenter
-        ms.shapes(ly_top).insert(t_pos)
-        t_ref = db.DText(ports[i].ref, i * le, 0)
-        t_ref.halign = db.Text.HAlignCenter
-        t_ref.valign = db.Text.VAlignCenter
-        ms.shapes(ly_bot).insert(t_ref)
-    return ms
+        gen.add_port(cell, m_top, ports[i].name, (i * le, 0), "center", "center")
+        gen.add_port(cell, m_bott, ports[i].ref, (i * le, 0), "center", "center")
+    return cell
 
 
 def_port = tuple(
@@ -63,22 +49,20 @@ def_port = tuple(
 
 
 def coupled_lines(
-    layout: db.Layout,
+    cell: BaseCell,
     width1: float,
     length: float,
     gap: float,
-    layerstack: LayerStack,
     width2: float = -1,
     ports: Sequence[Port] = def_port,
     name: str = "cpl",
-) -> db.Cell:
+) -> BaseCell:
     """
     Generate a cell with two micro-strip lines coupled by a gap. Can be exported as a gds files.
 
     :param width1: width of the first line.
     :param length: length of the two lines.
     :param gap: gap between the two lines.
-    :param layerstack: LayerStack object. The highest metal layer will be used for the signal line.
     The lowest metal layer will be used for the ground plane.
     :param width2: width of the second line.
     :param ports: name of each port.
@@ -86,13 +70,12 @@ def coupled_lines(
     :return: a cell with two coupled lines.
     """
     w2 = width2 if width2 > 0 else width1
-    ms1 = straight_line(layout, width1, length, layerstack, ports[0:2])
-    ms2 = straight_line(layout, w2, length, layerstack, ports[2:])
-    cpl = layout.create_cell(name)
-    cpl.insert(db.DCellInstArray(ms1, db.DVector(0, width1 * 1e6 + gap * 1e6) / 2))
-    cpl.insert(db.DCellInstArray(ms2, db.DVector(0, -(w2 * 1e6 + gap * 1e6) / 2)))
-    cpl.flatten(-1, True)
-    return cpl
+    ms1 = straight_line(cell.create_cell("part1"), width1, length, ports[0:2])
+    ms2 = straight_line(cell.create_cell("part2"), w2, length, ports[2:])
+    cell.insert_cell(ms1, (0, (width1 * 1e6 + gap * 1e6) / 2))
+    cell.insert_cell(ms2, (0, -(w2 * 1e6 + gap * 1e6) / 2))
+    cell.flatten(-1, True)
+    return cell
 
 
 diff_port = tuple(
