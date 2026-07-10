@@ -250,7 +250,7 @@ def add_path(
     if isinstance(extension, (float | int)):
         extension = (extension, extension)
     db_points = [db.DPoint(p[0], p[1]) for p in points]
-    path = db.DPath(db_points, width, extension[0], extension[1]).polygon()
+    path = db.DPath(db_points, width, extension[0], extension[1])
     cell.top.shapes(layer.drawing).insert(path)
     return cell
 

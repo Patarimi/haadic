@@ -19,11 +19,10 @@ def straight_line(
     """
     Generate a micro-strip straight line cell. Can be exported as a gds files.
 
-    :param layout: layout where the cell will be drawn.
+    :param cell: BaseCell where the cell will be drawn.
     :param name: name of the cell generated
     :param width: Width of the signal line (Reference line is three time wider).
     :param length: Length of the micro-strip.
-    :param layerstack: LayerStack object. The highest metal layer will be used for the signal line.
     The lowest metal layer will be used for the ground plane.
     :param ports: name of the ports
     :return: a db.Cell of a straight line micro-strip.
@@ -56,6 +55,7 @@ def coupled_lines(
     gap: float,
     width2: float = -1,
     ports: Sequence[Port] = def_port,
+    name: str = "cpl",
 ) -> BaseCell:
     """
     Generate a cell with two micro-strip lines coupled by a gap. Can be exported as a gds files.
@@ -63,7 +63,6 @@ def coupled_lines(
     :param width1: width of the first line.
     :param length: length of the two lines.
     :param gap: gap between the two lines.
-    :param layerstack: LayerStack object. The highest metal layer will be used for the signal line.
     The lowest metal layer will be used for the ground plane.
     :param width2: width of the second line.
     :param ports: name of each port.
