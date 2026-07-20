@@ -81,7 +81,7 @@ doc = [
     "cyclopts[mkdocs]>=4.22.0",
     "mkdocs>=1.6.1",
     "mkdocs-api-autonav>=0.4.0",
-    "mkdocs-material>=9.6.16",
+    "mkdocs-material>=9.7.7",
 ]
 
 
