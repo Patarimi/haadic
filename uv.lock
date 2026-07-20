@@ -389,7 +389,7 @@ dev = [
     { name = "pytest-xdist", specifier = ">=3.8.0" },
 ]
 doc = [
-    { name = "cyclopts", extras = ["mkdocs"], specifier = ">=4.21.0" },
+    { name = "cyclopts", extras = ["mkdocs"], specifier = ">=4.22.0" },
     { name = "mkdocs", specifier = ">=1.6.1" },
     { name = "mkdocs-api-autonav", specifier = ">=0.4.0" },
     { name = "mkdocs-material", specifier = ">=9.6.16" },
