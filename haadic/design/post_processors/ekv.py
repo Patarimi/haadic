@@ -145,7 +145,7 @@ def extract_rf(
             setattr(ekv, key, dimensions.dct[key])
 
     bench_data.to_csv(base_dir / "bench_ac_data.csv")
-    y = dict()
+    y = {}
     for i in (1, 2):
         for j in (1, 2):
             port = f"y_{i}_{j}"

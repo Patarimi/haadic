@@ -15,7 +15,7 @@ def parse_raw(results: Path) -> pd.DataFrame:
     :param results: file to be loaded.
     :return: dataframe with loaded data
     """
-    data = dict()
+    data = {}
     with open(results, "r") as f:
         for line in f:
             match line.split():
@@ -41,8 +41,8 @@ def parse_out(results: Path) -> pd.DataFrame:
     :param results: file to be loaded.
     :return: dataframe with loaded data
     """
-    data = dict()
-    keys = list()
+    data = {}
+    keys = []
     current_bloc = "Header"
     is_complex = False
     with open(results, "r") as f:
@@ -52,7 +52,7 @@ def parse_out(results: Path) -> pd.DataFrame:
                 current_bloc = words[0].rstrip(":")
                 continue
             if current_bloc == "Variables":
-                data[words[1]] = list()
+                data[words[1]] = []
                 keys.append(words[1])
             if current_bloc == "Values" and len(words) == 2:
                 index = 0

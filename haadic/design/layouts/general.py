@@ -115,7 +115,7 @@ def get_dtext(
     :return: DText
     """
     if label is None:
-        labels = list()
+        labels = []
     if cell is None:
         cells = layout._layout.each_cell()
     else:

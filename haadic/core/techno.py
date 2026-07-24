@@ -131,7 +131,7 @@ def list_pdk():
 
     Scans `PATHS` for JSON entries and aggregates available PDK keys.
     """
-    process_l = list()
+    process_l = []
     for path in PATHS:
         if os.path.isfile(path):
             process_d = _read_tech(path)

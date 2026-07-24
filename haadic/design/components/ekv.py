@@ -204,7 +204,7 @@ def extract_dc_ekv(
     options = ConfigFlow()
     options.run_dir = working_dir
 
-    param = dict()
+    param = {}
     for length in lengths:
         dim = Dim({"length": length * l_min, "width": 1, "n_finger": 80})
         if length == 1:

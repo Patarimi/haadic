@@ -56,7 +56,7 @@ def scaling(proto: np.ndarray, f: float, r_0: float):
     """
     w_c = 2 * np.pi * f
     denorm_f = proto / w_c
-    denorm = list()
+    denorm = []
     for i, d in enumerate(denorm_f):
         denorm.append(d * r_0 if i % 2 == 1 else d / r_0)
     return np.array(denorm)
@@ -76,7 +76,7 @@ def to_stepped_impedance(
     :param r_0: characteristic impedance
     :return: list of required delay in degrees ($beta l$)
     """
-    denorm = list()
+    denorm = []
     for i, g in enumerate(proto):
         if i % 2 == 1:
             # approx -> denorm.append(g * r_0 / z_high)

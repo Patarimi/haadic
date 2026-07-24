@@ -118,9 +118,9 @@ def single_shunt_stub(
             (x_l + t_n) / (r_l - r_0),
             (x_l - t_n) / (r_l - r_0),
         )
-    d = list()
-    lo = list()
-    ls = list()
+    d = []
+    lo = []
+    ls = []
     for t in t_l:
         if t >= 0:
             d.append(atan(t) / (2 * pi))

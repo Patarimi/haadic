@@ -160,7 +160,7 @@ def get_all_by_type(l_type: str, tlef_path: Path | str) -> list[Layer]:
     :param tlef_path: path to the TLEF file
     :return: list of layer names for the given type
     """
-    layers = list()
+    layers = []
     full_stack = load_tlef(tlef_path)
     for layer in full_stack.layers:
         if layer.type == l_type:

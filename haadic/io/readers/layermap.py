@@ -57,7 +57,7 @@ class LayerMap(Transformer):
 
     def start(self, start) -> dict[str, Map]:
         """Convert the start token to a dictionary mapping layer names to Map objects."""
-        map_d: dict[str, Map] = dict()
+        map_d: dict[str, Map] = {}
         for layer in start:
             name = layer[0].lower()
             if name in map_d:

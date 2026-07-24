@@ -122,9 +122,9 @@ def command(key: str, value: str) -> str:
 
 def parse(stream: str) -> rf.Network:
     """Parse the output of EMX and return a scikit RF network."""
-    f = list()
-    ports = list()
-    y = list()
+    f = []
+    ports = []
+    y = []
     port_list_next = False
     for line in stream.splitlines():
         words = line.split()

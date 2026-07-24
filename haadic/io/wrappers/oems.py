@@ -163,7 +163,7 @@ def compute(
     result = Network()
     result.frequency = f
     try:
-        s = list()
+        s = []
         for port in ports:
             port.CalcPort(sim_path, f)
             for inc in ports:
@@ -204,7 +204,7 @@ def make_geometry(
     proc_file = get_file(tech, "process")
     diels, metals = layer_stack(proc_file)
 
-    csx_metal = dict()
+    csx_metal = {}
     for name in metals:
         layer_n, data_type = [
             int(i) for i in metals[name].definition.strip("L").split("T")
