@@ -218,11 +218,11 @@ def compare_to(perf: dict, target: dict):
 
     """
     cost = 0
-    for key in target:
+    for key, val in target.items():
         if perf is None or key not in perf:
             logger.warning(f"Key {key} not found in performance dictionary")
-            cost += target[key] ** 2
+            cost += val**2
         else:
-            cost += (target[key] - perf[key]) ** 2
+            cost += (val - perf[key]) ** 2
 
     return cost

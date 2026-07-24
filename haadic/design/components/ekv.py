@@ -257,9 +257,9 @@ def extract_rf_ekv(
         "width": np.linspace(1, 8, 8),
         "length": l_min * np.linspace(1, 8, 8),
     }
-    for key in sweep:
+    for key, val in sweep.items():
         models_params = pd.DataFrame()
-        for dim in sweep[key]:
+        for dim in val:
             dimensions[key] = dim
             options.run_dir = working_dir
             params = flow.run_from_dim(dimensions).dct

@@ -96,15 +96,15 @@ class Emx:
             str_cmd = "Running EMX with command:\n\t"
             for elt in cmd:
                 str_cmd += str(elt) + " "
-        for key in options:
-            cmd += [command(key, options[key])]
+        for key, val in options:
+            cmd += [command(key, val)]
         exp = ""
         for c in cmd:
             exp += f"{c} "
         logger.debug(exp)
         proc = run(cmd, capture_output=True, encoding="latin")
         if proc.returncode != 0:
-            RuntimeWarning(str(cmd))
+            logger.warning(str(cmd))
             raise RuntimeError(proc.stderr)
         # get back the real name.
         nw = str(len(ports)) if ports is not None else "[0-9]"

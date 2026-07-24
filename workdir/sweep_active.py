@@ -20,7 +20,7 @@ sweep = {
     "width": np.linspace(1, 8, 8),
     "length": 0.18 * np.linspace(1, 8, 8),
 }
-for key in sweep:
+for key, val in sweep.items():
     fig = plt.figure()
     axs = fig.subplot_mosaic("AB;AC;AD", sharex=True)
     extracts = ["RC", "NoPar"]
@@ -32,7 +32,7 @@ for key in sweep:
             "linestyle": "--" if extract == "NoPar" else "-",
             "marker": "o" if extract != "NoPar" else None,
         }
-        for dim in sweep[key]:
+        for dim in val:
             print(
                 f"Sweeping {key}={dim:.2f} µm with extract option: [blue]{extract}[/]"
             )
