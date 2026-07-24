@@ -156,7 +156,7 @@ def compute(
                 + " ".join(sys.argv)
                 + "[/italic]"
             )
-            raise e
+            raise RuntimeError(e)
 
     ### Export as a touchstone file
     f = np.linspace(freq.start, freq.stop, 401)

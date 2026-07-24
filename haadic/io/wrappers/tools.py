@@ -4,7 +4,7 @@ import functools
 import logging
 import os
 from pathlib import Path
-from subprocess import CompletedProcess, run
+from subprocess import CalledProcessError, CompletedProcess, run
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ def nix_check():
         proc = nix_run(["nix --version"])
         logger.info(f"{proc.stdout=}")
         return True
-    except Exception as e:
+    except CalledProcessError as e:
         logger.error(e)
         return False
 

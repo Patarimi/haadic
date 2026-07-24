@@ -92,5 +92,5 @@ def extract_spice(
         proc.check_returncode()
     except CalledProcessError as e:
         logger.error(proc.stderr)
-        raise e
+        raise RuntimeError(e)
     return output_path
