@@ -1,7 +1,7 @@
 from haadic._config import REF_PATH
-from haadic.design.layouts.inductor import octagonal_inductor
 from haadic.core.tools import diff_gds
 from haadic.design.layouts.base_cell import BaseCell
+from haadic.design.layouts.inductor import octagonal_inductor
 
 
 def test_inductor(tmp_path):

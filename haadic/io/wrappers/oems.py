@@ -6,17 +6,16 @@ import logging
 import os
 import shutil
 import sys
+from collections.abc import Sequence
 from math import inf
 from os.path import dirname
 from pathlib import Path
-from typing import Optional, Sequence
 
+import numpy as np
 from cyclopts import App
 from klayout import db
-from pydantic import confloat, BaseModel
-
+from pydantic import BaseModel, confloat
 from skrf import Network
-import numpy as np
 
 from haadic.io.readers.process import layer_stack
 from haadic.techno import get_file
@@ -54,8 +53,8 @@ def compute(
     process: str,
     cell_name: str,
     freq: Sequence[float, float] | float,
-    ports: Optional[list[Port]] = None,
-    sim_path: Optional[Path] = Path("./."),
+    ports: list[Port] | None = None,
+    sim_path: Path | None = Path("./."),
     show_model: bool = False,
     skip_run: bool = False,
 ):
@@ -143,7 +142,7 @@ def compute(
         CSX.Write2XML(CSX_file)
         from CSXCAD import AppCSXCAD_BIN
 
-        os.system(AppCSXCAD_BIN + ' "{}"'.format(CSX_file))
+        os.system(AppCSXCAD_BIN + f' "{CSX_file}"')
 
     # Run the simulation
     if not skip_run:
@@ -176,7 +175,7 @@ def compute(
 def make_geometry(
     gds_file: Path,
     tech: str = "mock",
-    cell_name: Optional[str] = None,
+    cell_name: str | None = None,
     *,
     margin: float = 0.2,
 ):

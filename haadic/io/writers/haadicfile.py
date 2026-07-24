@@ -1,15 +1,18 @@
 """Dataclass for haadic process information."""
 
-from haadic._config import DATA_DIR
-from haadic.io.readers.tlef import load_tlef
-from haadic.io.readers.layermap import load_map
-from pathlib import Path
 import json
 import logging
-from haadic.core.techno import Available_PDK, get_file, add_reference
-from typing import Self, Sequence, override, Generator
+from collections.abc import Generator, Sequence
 from dataclasses import dataclass, field, fields
+from pathlib import Path
+from typing import Self, override
+
 from klayout.db import LayerInfo
+
+from haadic._config import DATA_DIR
+from haadic.core.techno import Available_PDK, add_reference, get_file
+from haadic.io.readers.layermap import load_map
+from haadic.io.readers.tlef import load_tlef
 
 
 @dataclass

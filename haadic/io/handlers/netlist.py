@@ -1,13 +1,12 @@
 """Spice netlist writer."""
 
 import logging
-from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Literal, Optional, Self
+from pathlib import Path
+from typing import Literal, Self
 
-from haadic.io.wrappers.tools import to_wsl
 from haadic.core.tools import eng
-
+from haadic.io.wrappers.tools import to_wsl
 
 Unit = {
     "L": "H",
@@ -161,7 +160,7 @@ class Netlist:
         """
         self.others.append((command, other))
 
-    def add_lib(self, lib_path: Path | str, section: Optional[str] = None) -> None:
+    def add_lib(self, lib_path: Path | str, section: str | None = None) -> None:
         """
         Add a library definition in the netlist.
 
@@ -170,7 +169,7 @@ class Netlist:
         :return: None.
         """
         if self.is_in_other(".lib", Path(lib_path)):
-            return None
+            return
         item = ["'" + to_wsl(lib_path) + "'"]
         if section is not None:
             item.append(section)
@@ -184,7 +183,7 @@ class Netlist:
         :return: None.
         """
         if self.is_in_other(".include", Path(include_path)):
-            return None
+            return
         self.add_other(".include", to_wsl(include_path))
 
     def is_in_other(self, key: str, file: Path) -> bool:

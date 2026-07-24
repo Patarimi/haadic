@@ -9,8 +9,8 @@ S[Filter Specifications] --> L[Low-Pass Prototype] --> C["Conversion\nScaling"] 
 
 from typing import Literal
 
-import scipy.signal as si
 import numpy as np
+import scipy.signal as si
 
 Filter_Styles = Literal["flat", "ripple"]
 

@@ -2,15 +2,14 @@
 
 from fileinput import FileInput
 from pathlib import Path
-from typing import Optional
 
 from haadic.io.wrappers.tools import nix_check, nix_run, to_wsl
 
 
 def compute(
     input_file: Path | str,
-    data_file: Optional[Path] = None,
-    log_file: Optional[Path] = None,
+    data_file: Path | None = None,
+    log_file: Path | None = None,
 ) -> None:
     """
     Simulate the spice input file with ngspice.

@@ -1,13 +1,14 @@
 """Spice simulation step for the haadic design flow."""
 
-from typing import Sequence
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
+
+from haadic.core.steps.step import Step, can_skip
+from haadic.core.techno import Available_PDK, get_file, load_pdk
 from haadic.io.handlers.netlist import Netlist
 from haadic.io.wrappers.ngspice import compute
 from haadic.io.wrappers.tools import to_wsl
-from haadic.core.techno import get_file, load_pdk, Available_PDK
-from haadic.core.steps.step import can_skip, Step
 
 
 @dataclass

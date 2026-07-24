@@ -1,8 +1,11 @@
-from haadic._config import REF_PATH
-import pytest
-from typing import Sequence, Any, override
 import dataclasses
+from collections.abc import Sequence
 from pathlib import Path
+from typing import Any, override
+
+import pytest
+
+from haadic._config import REF_PATH
 from haadic.core.steps import step
 
 

@@ -1,7 +1,6 @@
 """Magic tech file reader. Only support the GDSII section for now."""
 
 import logging
-
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any

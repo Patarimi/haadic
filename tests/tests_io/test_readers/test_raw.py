@@ -1,5 +1,5 @@
 from haadic._config import REF_PATH
-from haadic.io.readers.raw import parse_raw, parse_out
+from haadic.io.readers.raw import parse_out, parse_raw
 
 
 def test_parse_raw():

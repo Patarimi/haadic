@@ -1,7 +1,7 @@
 import pytest
 
-from haadic.io.readers.layermap import load_map, get_number
-from haadic.core.techno import is_installed, get_file
+from haadic.core.techno import get_file, is_installed
+from haadic.io.readers.layermap import get_number, load_map
 
 pytestmark = pytest.mark.skipif(not is_installed("mock"), reason="PDK not installed.")
 

@@ -3,6 +3,7 @@
 import dataclasses
 import logging
 from pathlib import Path
+
 from lark import Transformer
 
 from haadic.io.readers.tools import parse

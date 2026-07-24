@@ -1,14 +1,13 @@
 """KLayout wrapper for haadic."""
 
-from pathlib import Path
 from os.path import dirname
-from typing import Optional
+from pathlib import Path
 
 from klayout import db as kl
 
 
 def extract_spice(
-    gds_file: Path, techno: str, output_path: Optional[Path] = None
+    gds_file: Path, techno: str, output_path: Path | None = None
 ) -> Path:
     """
     Extract the equivalent spice schematic of a gdsii file.

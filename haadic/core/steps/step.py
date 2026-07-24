@@ -1,12 +1,13 @@
 """Module defining the Step protocol and related utilities for managing steps in the haadic flow."""
 
 import json
-from functools import reduce
-from typing import Any, Protocol, Sequence
 import logging
 import os
-from pathlib import Path
 import shutil
+from collections.abc import Sequence
+from functools import reduce
+from pathlib import Path
+from typing import Any, Protocol
 
 import pydantic
 
@@ -61,7 +62,6 @@ class Step(Protocol):
         :param input_file: path to the input file for the step.
         :return: path to the output file produced by the step.
         """
-        pass
 
 
 def init_step(dimensions: Dim, base_dir: Path, sweep_folder: bool = False) -> Path:

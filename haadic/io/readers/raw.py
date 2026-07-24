@@ -1,9 +1,9 @@
 """Functions to parse raw (results) ngspice output files."""
 
 import logging
+from pathlib import Path
 
 import pandas as pd
-from pathlib import Path
 
 
 def parse_raw(results: Path) -> pd.DataFrame:
@@ -15,14 +15,14 @@ def parse_raw(results: Path) -> pd.DataFrame:
     """
     data = dict()
     with open(results, "r") as f:
-        for line in f.readlines():
+        for line in f:
             match line.split():
                 case "Index", *k:
                     if "headers" not in locals():
                         headers = line.split()
                 case [ind, *k] if "headers" in locals() and len(k) == len(headers) - 1:
                     for head, val in zip(headers, k):
-                        if head not in data.keys():
+                        if head not in data:
                             data[head] = [
                                 float(val),
                             ]

@@ -9,8 +9,10 @@ import functools
 import logging
 from pathlib import Path
 from typing import Literal
-from .tools import parse
+
 from lark import Discard, Transformer
+
+from .tools import parse
 
 
 @dataclasses.dataclass

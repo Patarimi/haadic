@@ -1,7 +1,8 @@
 import shutil
 from pathlib import Path
-from haadic._config import REF_PATH
+
 import haadic.core.steps.spice_simulation as spsim
+from haadic._config import REF_PATH
 
 
 def test_spice_step(tmp_path):

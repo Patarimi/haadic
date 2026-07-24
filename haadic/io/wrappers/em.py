@@ -1,18 +1,18 @@
 """EMX wrapper for haadic."""
 
-from dataclasses import dataclass
+import glob
 import logging
-from pathlib import Path
 import shutil
+from dataclasses import dataclass
+from pathlib import Path
+from subprocess import run
 
 import numpy as np
 import skrf as rf
-from haadic.design.layouts.tools import Port
-from subprocess import run
 from dotenv import load_dotenv
-from haadic.core.techno import get_file, Available_PDK
-import glob
-from typing import Optional
+
+from haadic.core.techno import Available_PDK, get_file
+from haadic.design.layouts.tools import Port
 
 
 @dataclass
@@ -40,7 +40,7 @@ class Emx:
         input_file: Path,
         cell_name: str,
         freq: float | tuple[float],
-        ports: Optional[list[Port | str]] = None,
+        ports: list[Port | str] | None = None,
         **options,
     ):
         """
@@ -89,7 +89,7 @@ class Emx:
                     cmd += [f"-p {port}"]
                 else:
                     cmd += [f"-p{port}"]
-        if "debug" in options and options["debug"]:
+        if options.get("debug"):
             options.pop("debug")
             str_cmd = "Running EMX with command:\n\t"
             for elt in cmd:

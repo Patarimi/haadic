@@ -1,6 +1,8 @@
 import os
+
 import pytest
-import haadic.io.wrappers.tools as tools
+
+from haadic.io.wrappers import tools
 
 
 @pytest.mark.skipif((os.name != "nt"), reason="function for windows only")

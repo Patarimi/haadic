@@ -1,6 +1,7 @@
 import pytest
-from haadic.io.readers.tlef import load_tlef, get_metal, get_via, Layer
+
 from haadic.core.techno import get_file, is_installed
+from haadic.io.readers.tlef import Layer, get_metal, get_via, load_tlef
 
 pytestmark = pytest.mark.skipif((not is_installed("mock")), reason="PDK not installed.")
 

@@ -1,7 +1,7 @@
 from pathlib import Path
 
-import haadic.io.readers.process as process
 from haadic.core.techno import get_file
+from haadic.io.readers import process
 
 
 def test_process():

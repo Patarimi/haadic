@@ -1,7 +1,7 @@
 import fileinput
-from pathlib import Path
-from filecmp import cmp
 import shutil
+from filecmp import cmp
+from pathlib import Path
 
 import pytest
 

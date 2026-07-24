@@ -1,7 +1,8 @@
 import shutil
 from pathlib import Path
-from haadic._config import REF_PATH
+
 import haadic.core.steps.layout_generation as lay_gen
+from haadic._config import REF_PATH
 from haadic.design.layouts.commun_source import layout
 
 

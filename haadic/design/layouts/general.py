@@ -4,17 +4,16 @@ Contains function to generate general purpose cells.
 (Via, via stack, ground plane, etc.)
 """
 
-from dataclasses import dataclass
-
 import logging
 import math
-from typing import Optional, Sequence, Literal
+from collections.abc import Sequence
+from dataclasses import dataclass
+from typing import Literal
 
 from klayout import db
 
 from haadic.design.layouts.base_cell import BaseCell
-from haadic.io.writers.haadicfile import LayerStack, Layer
-
+from haadic.io.writers.haadicfile import Layer, LayerStack
 
 type Point = tuple[float, float]
 
@@ -104,7 +103,7 @@ def via_stack(
 
 
 def get_dtext(
-    layout: BaseCell, label: Optional[str] = None, cell: Optional[str] = None
+    layout: BaseCell, label: str | None = None, cell: str | None = None
 ) -> list[Label]:
     """
     Return the dtext with the associated label in the layout.

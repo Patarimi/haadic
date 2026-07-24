@@ -1,6 +1,7 @@
-import haadic.design.models.filter as flr
-from pytest import approx
 from numpy import array
+from pytest import approx
+
+import haadic.design.models.filter as flr
 
 
 def test_prototype():

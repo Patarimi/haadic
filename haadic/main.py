@@ -2,13 +2,13 @@
 
 import logging
 import os
-from typing import Optional
-from cyclopts import App
 from pathlib import Path
 
+from cyclopts import App
+
 from haadic._config import DATA_DIR
-from haadic.core.steps.step import cleanup
 from haadic.core import techno
+from haadic.core.steps.step import cleanup
 from haadic.design.components.ekv import EKV
 
 # Skip logging configuration if it is already done (eg during tests)
@@ -42,7 +42,7 @@ def smoke_test_cli():
 @app.command(name="extract-ekv")
 def extract_ekv_cli(
     techno_name: techno.Available_PDK,
-    output: Optional[Path] = None,
+    output: Path | None = None,
     rf: bool = True,
     force: bool = False,
 ) -> EKV:

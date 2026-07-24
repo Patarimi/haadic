@@ -1,25 +1,25 @@
 """EKV model extraction and representation for transistors in the haadic design flow."""
 
-from functools import partial
-from dataclasses import dataclass, asdict
 import json
 import logging
+from dataclasses import asdict, dataclass
+from functools import partial
 from pathlib import Path
-from typing import Optional, Self, get_args
-import pandas as pd
+from typing import Self, get_args
 
 import numpy as np
+import pandas as pd
 
-from haadic.core.flow import Flow, ConfigFlow
+from haadic.core.flow import ConfigFlow, Flow
 from haadic.core.steps.step import Dim
 from haadic.core.techno import Available_PDK, get_file
 from haadic.design.layouts.commun_source import layout
 from haadic.design.post_processors.ekv import (
-    extract_small_l,
-    extract_big_l,
-    _gm,
     _IC,
+    _gm,
+    extract_big_l,
     extract_rf,
+    extract_small_l,
 )
 
 LENGTH_RATIO = 15
@@ -108,7 +108,7 @@ class EKV:
         """Return the gm over IC ratio for a given drain current."""
         return _gm(id * self.ratio, self.l_c / self.length, self.n, self.i_spec_square)
 
-    def load(self, filename: Optional[str | Path] = None) -> Self:
+    def load(self, filename: str | Path | None = None) -> Self:
         """
         Load the model parameters from a json file.
 
@@ -160,7 +160,7 @@ class EKV:
         """
         return asdict(self)
 
-    def extract_model(self, output_dir: Optional[Path] = None, rf: bool = True) -> Self:
+    def extract_model(self, output_dir: Path | None = None, rf: bool = True) -> Self:
         """
         Extract the EKV model parameters for a transistor.
 
@@ -180,7 +180,7 @@ bench_ref = Path(__file__).parent / "ekv_bench.cir"
 
 
 def extract_dc_ekv(
-    techno: Available_PDK, working_dir: Optional[Path] = None, l_min: float = 0.18
+    techno: Available_PDK, working_dir: Path | None = None, l_min: float = 0.18
 ) -> Dim:
     """
     Extract the DC parameters of the EKV model for a transistor.
@@ -231,7 +231,7 @@ bench_ac_ref = Path(__file__).parent / "ekv_bench_ac.cir"
 
 
 def extract_rf_ekv(
-    techno: Available_PDK, working_dir: Optional[Path] = None, l_min: float = 0.18
+    techno: Available_PDK, working_dir: Path | None = None, l_min: float = 0.18
 ) -> Dim:
     """
     Extract the RF parameters of the EKV model for a transistor.
@@ -256,7 +256,7 @@ def extract_rf_ekv(
         "width": np.linspace(1, 8, 8),
         "length": l_min * np.linspace(1, 8, 8),
     }
-    for key in sweep.keys():
+    for key in sweep:
         models_params = pd.DataFrame()
         for dim in sweep[key]:
             dimensions[key] = dim

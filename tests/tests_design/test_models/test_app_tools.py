@@ -1,12 +1,12 @@
 import numpy as np
+import pytest
+from pytest import approx
+from skrf import Frequency
+from skrf.constants import c
+from skrf.media import DefinedGammaZ0
+
 from haadic.design.models import tools
 from haadic.io.handlers.netlist import Component
-from skrf import Frequency
-from skrf.media import DefinedGammaZ0
-from skrf.constants import c
-
-from pytest import approx
-import pytest
 
 
 @pytest.mark.parametrize(

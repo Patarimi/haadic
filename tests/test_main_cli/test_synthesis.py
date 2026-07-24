@@ -1,8 +1,8 @@
+import pytest
 from matplotlib import use
 
-from haadic.main import smoke_test_cli, extract_ekv_cli
 from haadic.core.techno import is_installed
-import pytest
+from haadic.main import extract_ekv_cli, smoke_test_cli
 
 use("Agg")
 

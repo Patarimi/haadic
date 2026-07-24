@@ -5,7 +5,7 @@ import logging
 import os
 from os.path import dirname
 from pathlib import Path
-from subprocess import run, CompletedProcess
+from subprocess import CompletedProcess, run
 
 
 @functools.cache

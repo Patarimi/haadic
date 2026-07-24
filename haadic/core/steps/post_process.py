@@ -1,12 +1,13 @@
 """Module defining the PostProcess step for post-processing simulation results and extracting performance metrics."""
 
-from haadic.io.readers.raw import parse_out
-from typing import Callable, Sequence
-from dataclasses import field, dataclass
+from collections.abc import Callable, Sequence
+from dataclasses import dataclass, field
 from pathlib import Path
+
 import pandas as pd
 
 from haadic.core.steps.step import Dim
+from haadic.io.readers.raw import parse_out
 
 SimRes = pd.DataFrame
 

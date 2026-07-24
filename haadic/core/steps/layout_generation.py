@@ -1,14 +1,14 @@
 """Module defining the Layout step for generating layouts from parametric descriptions."""
 
-import logging
-from haadic.core.techno import Available_PDK
-from pathlib import Path
-from typing import Callable, Sequence
-from dataclasses import field, dataclass
 import json
+import logging
+from collections.abc import Callable, Sequence
+from dataclasses import dataclass, field
+from pathlib import Path
 
-from haadic.design.layouts.base_cell import BaseCell
 from haadic.core.steps.step import Dim, Step
+from haadic.core.techno import Available_PDK
+from haadic.design.layouts.base_cell import BaseCell
 
 
 @dataclass

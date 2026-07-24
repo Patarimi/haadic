@@ -1,6 +1,6 @@
 from haadic._config import REF_PATH
-from haadic.design.layouts.active import mosfet, line, connect
 from haadic.core.tools import diff_gds
+from haadic.design.layouts.active import connect, line, mosfet
 
 
 def test_nmos(base_cell, tmp_path):

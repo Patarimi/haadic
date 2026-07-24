@@ -1,8 +1,8 @@
-import os
 import logging
+import os
 
-from haadic.core import tools
 from haadic._config import REF_PATH
+from haadic.core import tools
 
 
 def test_eng():

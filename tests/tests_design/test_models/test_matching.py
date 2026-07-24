@@ -1,6 +1,7 @@
 import numpy as np
-import haadic.design.models.matching as mt
 import pytest
+
+import haadic.design.models.matching as mt
 
 
 def test_lumped_l():

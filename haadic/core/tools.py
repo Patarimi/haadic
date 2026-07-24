@@ -1,7 +1,7 @@
 """Various tools used in the haadic package, such as the eng function to convert a number to engineer notation."""
 
-from pathlib import Path
 import logging
+from pathlib import Path
 
 import numpy as np
 from klayout import db as kl
@@ -41,31 +41,31 @@ def diff_gds(gds1: str | Path, gds2: str | Path) -> bool:
         lambda c1, c2: logging.error(f"Cell {c1.name} != {c2.name}")
     )
     diff.on_cell_in_a_only(  #  ty:ignore[call-non-callable]
-        lambda c1: logging.error(f"Cell {c1.name} only in file {str(gds1)}")
+        lambda c1: logging.error(f"Cell {c1.name} only in file {gds1!s}")
     )
     diff.on_cell_in_b_only(  #  ty:ignore[call-non-callable]
-        lambda c1: logging.error(f"Cell {c1.name} only in file {str(gds2)}")
+        lambda c1: logging.error(f"Cell {c1.name} only in file {gds2!s}")
     )
     diff.on_layer_in_a_only(  #  ty:ignore[call-non-callable]
-        lambda c1: logging.error(f"Layer {c1.layer}/{c1.datatype} only in {str(gds1)}.")
+        lambda c1: logging.error(f"Layer {c1.layer}/{c1.datatype} only in {gds1!s}.")
     )
     diff.on_layer_in_b_only(  #  ty:ignore[call-non-callable]
-        lambda c1: logging.error(f"Layer {c1.layer}/{c1.datatype} only in {str(gds2)}.")
+        lambda c1: logging.error(f"Layer {c1.layer}/{c1.datatype} only in {gds2!s}.")
     )
     diff.on_text_in_a_only(  #  ty:ignore[call-non-callable]
-        lambda c1: logging.error(f"Text {c1.text} only in {str(gds1)}.")
+        lambda c1: logging.error(f"Text {c1.text} only in {gds1!s}.")
     )
     diff.on_text_in_b_only(  #  ty:ignore[call-non-callable]
-        lambda c1: logging.error(f"Text {c1.text} only in {str(gds2)}.")
+        lambda c1: logging.error(f"Text {c1.text} only in {gds2!s}.")
     )
     diff.on_polygon_in_a_only(  #  ty:ignore[call-non-callable]
         lambda c1: logging.error(
-            f"Polygon only in {str(gds1)} on layer {c1.layer}/{c1.datatype}."
+            f"Polygon only in {gds1!s} on layer {c1.layer}/{c1.datatype}."
         )
     )
     diff.on_polygon_in_b_only(  #  ty:ignore[call-non-callable]
         lambda c1: logging.error(
-            f"Polygon only in {str(gds2)} on layer {c1.layer}/{c1.datatype}."
+            f"Polygon only in {gds2!s} on layer {c1.layer}/{c1.datatype}."
         )
     )
     diff.on_begin_polygon_differences(  #  ty:ignore[call-non-callable]

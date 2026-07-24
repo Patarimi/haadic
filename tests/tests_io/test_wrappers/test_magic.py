@@ -1,10 +1,10 @@
 import pytest
 
 from haadic._config import REF_PATH
+from haadic.core.techno import get_file, is_installed
+from haadic.core.tools import diff_spice
 from haadic.io.wrappers.magic import extract_spice
 from haadic.io.wrappers.tools import nix_check
-from haadic.core.tools import diff_spice
-from haadic.core.techno import is_installed, get_file
 
 
 @pytest.mark.skipif(not is_installed("sky130"), reason="PDK not installed.")

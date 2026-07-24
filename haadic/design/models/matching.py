@@ -1,10 +1,12 @@
 """Models for matching circuits."""
 
-from math import sqrt, pi, atan
-import numpy as np
-from haadic.io.handlers.netlist import Component
-from haadic.design.models.tools import quality
 from enum import Enum
+from math import atan, pi, sqrt
+
+import numpy as np
+
+from haadic.design.models.tools import quality
+from haadic.io.handlers.netlist import Component
 
 
 def lumped_l(

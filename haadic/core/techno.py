@@ -1,20 +1,21 @@
 """Module for managing technology files and PDK installations in the haadic design flow."""
 
 import functools
+import json
 import logging
 import os
-from pathlib import Path
-from subprocess import run
 import tarfile
 import urllib.request
 import zipfile
 from os.path import isdir
-import json
+from pathlib import Path
+from subprocess import run
+from typing import Literal
+
 from cyclopts import App
-from typing import Literal, Optional
+from rich import print
 from rich.console import Console
 from rich.table import Table
-from rich import print
 
 from haadic._config import DATA_DIR
 
@@ -143,7 +144,7 @@ def is_installed(pdk_name: Available_PDK | Literal["mock"]) -> bool:
 
 
 @functools.cache
-def load_pdk(pdk_name: Available_PDK, path: Optional[str] = None) -> dict[str, str]:
+def load_pdk(pdk_name: Available_PDK, path: str | None = None) -> dict[str, str]:
     """
     Load the metadata dictionary for a PDK by name.
 
@@ -174,7 +175,7 @@ def add_reference(
     pdk_name: Available_PDK,
     ref_name: Handled_key,
     path_file: Path,
-    path_tech: Optional[Path] = None,
+    path_tech: Path | None = None,
 ) -> None:
     """
     Add a reference file to the techno.json file.

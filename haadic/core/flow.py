@@ -1,19 +1,20 @@
 """Module defining the Flow class, which composes multiple steps (layout generation, extraction, simulation, post-processing) into a complete design flow."""
 
 import logging
-from pathlib import Path
-from typing import Callable, Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
+from pathlib import Path
+
 from tabulate import tabulate
 
-import haadic.core.steps.step as step
-from haadic.core.steps.extraction import Extract, ConfigExtract
-from haadic.core.steps.layout_generation import Layout, ConfigLayout
+from haadic.core.steps import step
+from haadic.core.steps.extraction import ConfigExtract, Extract
+from haadic.core.steps.layout_generation import ConfigLayout, Layout
+from haadic.core.steps.post_process import ConfigPostProc, PostProcess, PostProcessFunc
 from haadic.core.steps.spice_simulation import BenchSim, ConfigSim
-from haadic.core.steps.post_process import PostProcess, ConfigPostProc, PostProcessFunc
 from haadic.core.techno import Available_PDK
-from haadic.io.wrappers.magic import ExtractLevels
 from haadic.design.layouts.base_cell import BaseCell
+from haadic.io.wrappers.magic import ExtractLevels
 
 
 @dataclass
