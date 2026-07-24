@@ -27,6 +27,9 @@ class ConfigPostProc:
     evaluate: PostProcessFunc
 
 
+def_dim = Dim()
+
+
 @dataclass
 class PostProcess:
     """
@@ -44,7 +47,7 @@ class PostProcess:
     input_suffixes: Sequence[str] = field(default_factory=lambda: [".raw"])
     output_suffix: str = ""
 
-    def run(self, data_file: Path = Path("top.raw"), dimensions: Dim = Dim()) -> Dim:
+    def run(self, data_file: Path = Path("top.raw"), dimensions: Dim = def_dim) -> Dim:
         """
         Run the post-processing step.
 

@@ -120,9 +120,7 @@ def can_skip(input_file: Path, output_file: Path):
     """
     if not output_file.is_file():
         return False
-    if input_file.stat().st_mtime >= output_file.stat().st_mtime:
-        return False
-    return True
+    return not input_file.stat().st_mtime >= output_file.stat().st_mtime
 
 
 def compose(*steps: Step, reload: bool = True) -> Step:

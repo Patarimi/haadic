@@ -116,7 +116,7 @@ class Netlist:
             lines = f.readlines()
         self.name = lines.pop(0).strip("*").strip()
         for line in lines:
-            if line.startswith("*") or line.lstrip() == "" or line.startswith(".endc"):
+            if line.startswith(("*", ".endc")) or line.lstrip() == "":
                 block = "comment"
                 # comment or empty line, ignore
                 continue

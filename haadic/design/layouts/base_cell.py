@@ -117,7 +117,7 @@ class BaseCell:
             raise ValueError(
                 f"Cannot insert cell with different technology: {cell.techno} vs {self.techno}"
             )
-        if isinstance(spacing, float) or isinstance(spacing, int):
+        if isinstance(spacing, (float, int)):
             spacing = (spacing, spacing)
         dest_cell = self._layout.create_cell(cell.name)
         dest_cell.copy_tree(cell._top)

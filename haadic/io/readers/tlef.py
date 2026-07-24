@@ -134,9 +134,8 @@ class TechLef(Transformer):
         for layer in start:
             if isinstance(layer, Layer):
                 ss.layers.append(layer)
-            if isinstance(layer, list):
-                if layer[0] == "MANUFACTURINGGRID":
-                    ss.unit = float(layer[1]) * 1e-6
+            if isinstance(layer, list) and layer[0] == "MANUFACTURINGGRID":
+                ss.unit = float(layer[1]) * 1e-6
         logger.info(f"In Start: {ss=}")
         return ss
 
