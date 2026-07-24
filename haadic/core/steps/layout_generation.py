@@ -10,6 +10,8 @@ from haadic.core.steps.step import Dim, Step
 from haadic.core.techno import Available_PDK
 from haadic.design.layouts.base_cell import BaseCell
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class ConfigLayout:
@@ -48,7 +50,7 @@ class Layout(Step):
             dimensions = json.load(f)
         top_cell_name = input_file.stem
         output_file = self.output_file(input_file)
-        logging.info("layout generation with geometry: " + str(dimensions))
+        logger.info("layout generation with geometry: " + str(dimensions))
 
         cell = BaseCell(top_cell_name, self.config.techno)
         self.config.layout(cell, dimensions)

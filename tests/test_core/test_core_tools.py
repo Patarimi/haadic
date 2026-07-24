@@ -4,6 +4,8 @@ import os
 from haadic._config import REF_PATH
 from haadic.core import tools
 
+logger = logging.getLogger(__name__)
+
 
 def test_eng():
     assert tools.eng(1) == "1.000 "
@@ -14,7 +16,7 @@ def test_eng():
 
 def test_diff_gds():
     ref = REF_PATH / "ref_ind.gds"
-    logging.debug(os.name)
+    logger.debug(os.name)
     assert tools.diff_gds(ref, ref)
     assert not tools.diff_gds(ref, REF_PATH / "ref_ms.gds")
 

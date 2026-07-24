@@ -23,6 +23,7 @@ from haadic.design.post_processors.ekv import (
 )
 
 LENGTH_RATIO = 15
+logger = logging.getLogger(__name__)
 
 
 @dataclass(slots=True)
@@ -116,7 +117,7 @@ class EKV:
         :return Self: The EKV model with the loaded parameters.
         """
         if filename is None:
-            logging.debug(
+            logger.debug(
                 f"Loading EKV model from pdk install directory for {self.techno}"
             )
             filename = get_file(self.techno, "ekv_model")
@@ -135,7 +136,7 @@ class EKV:
             other = other.dct
         for key in other:
             if key not in self.__dataclass_fields__:
-                logging.warning(
+                logger.warning(
                     f"{key} not a field of EKV. Available fields : {self.__dataclass_fields__}."
                 )
             else:
@@ -191,7 +192,7 @@ def extract_dc_ekv(
     :returns Dim: A Dim object containing the extracted parameters.
     """
     if techno == "mock":
-        logging.warning("Using EKV model with mock techno for testing purposes only.")
+        logger.warning("Using EKV model with mock techno for testing purposes only.")
         return EKV(techno=techno)
     if techno not in get_args(Available_PDK):
         raise ValueError(f"Techno {techno} not supported in EKV model.")
@@ -293,7 +294,7 @@ def extract_rf_ekv(
     dim = Dim()
     for param, eqs in parameters:
         raw_param = param[0].rstrip("_rwl")
-        logging.info(f"Fitting parameter {raw_param} with equations {eqs[1]}")
+        logger.info(f"Fitting parameter {raw_param} with equations {eqs[1]}")
         Y = data[raw_param]
 
         X = np.vstack(eqs[0]).T

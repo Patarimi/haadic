@@ -20,6 +20,8 @@ from skrf import Network
 from haadic.io.readers.process import layer_stack
 from haadic.techno import get_file
 
+logger = logging.getLogger(__name__)
+
 # define OPENEMS variable for correct CSXCAD import
 if shutil.which("openEMS"):
     if "OPENEMS_INSTALL_PATH" not in os.environ:
@@ -27,12 +29,12 @@ if shutil.which("openEMS"):
 else:
     raise ImportError("openEMS not found")
     paths = os.environ["PATH"].split(";" if os.name == "nt" else ":")
-    [logging.info(f"{p}") for p in paths]
+    [logger.info(f"{p}") for p in paths]
 try:
     from CSXCAD import CSXCAD
     from openEMS.openEMS import openEMS
 except ImportError:
-    logging.error("CSXCAD or openEMS not found")
+    logger.error("CSXCAD or openEMS not found")
 
 
 from haadic.design.layouts.tools import Port
@@ -84,10 +86,10 @@ def compute(
     FDTD = openEMS(CoordSystem=0, EndCriteria=1e-4)  # init a rectangular FDTD
     if freq.start == freq.stop:
         FDTD.SetSinusExcite(freq.start)
-        logging.info("Using Sinusoidal Excitation")
+        logger.info("Using Sinusoidal Excitation")
     else:
         FDTD.SetGaussExcite((freq.start + freq.stop) / 2, (freq.stop - freq.start) / 2)
-        logging.info("Using Gaussian Pulse Excitation")
+        logger.info("Using Gaussian Pulse Excitation")
 
     FDTD.SetBoundaryCond(
         ["MUR", "MUR", "MUR", "MUR", "PEC", "MUR"]
@@ -111,7 +113,7 @@ def compute(
     ports = []
     for name in metals:
         lyr, dtyp = metals[name].definition.strip("L").split("T")
-        logging.debug(f"layer {name} : {lyr} {dtyp}")
+        logger.debug(f"layer {name} : {lyr} {dtyp}")
         for i, shape in enumerate(gdsii.shapes(db.LayerInfo(int(lyr), int(dtyp)))):
             if not shape.is_text():
                 continue
@@ -149,7 +151,7 @@ def compute(
         try:
             FDTD.Run(sim_path)
         except AssertionError as e:
-            logging.error(
+            logger.error(
                 "Error during OpenEMS run, try :[italic]python -O "
                 + " ".join(sys.argv)
                 + "[/italic]"
@@ -168,7 +170,7 @@ def compute(
                 s.append(port.uf_ref / inc.uf_inc)
         result.s = s
     except FileNotFoundError:
-        logging.error("Ports files not found, run the simulation first")
+        logger.error("Ports files not found, run the simulation first")
     return result
 
 
@@ -188,7 +190,7 @@ def make_geometry(
     :param margin: margin around the model. The simulation box is the bounding box of the model time (1 + margin).
     :return:
     """
-    logging.info(f"Creating geometry from {gds_file}")
+    logger.info(f"Creating geometry from {gds_file}")
     layout = db.Layout()
     layout.read(str(gds_file))
     dbu = layout.dbu
@@ -209,7 +211,7 @@ def make_geometry(
         ]
         polygons = gdsii.shapes(db.LayerInfo(layer_n, data_type))
         if len(polygons) == 0:
-            logging.info(f"No drawing found, skipping layer {layer_n}/{data_type}")
+            logger.info(f"No drawing found, skipping layer {layer_n}/{data_type}")
         else:
             csx_metal[layer_n] = CSX.AddMaterial(name, kappa=metals[name].conductivity)
             for poly in polygons:

@@ -19,6 +19,7 @@ from rich.table import Table
 
 from haadic._config import DATA_DIR
 
+logger = logging.getLogger(__name__)
 console = Console(stderr=True)
 pkd_app = App("pdk", help="Manage the PDKs")
 
@@ -88,12 +89,12 @@ def install(pdk_name: Available_PDK):
         )
     ]
     urllib.request.install_opener(opener)
-    logging.info("downloading files, might take some times...")
+    logger.info("downloading files, might take some times...")
     ext = ".zip" if ".zip" in base_url else ".tar.bz2"
     file_name = (base_install / pdk_name).with_suffix(ext)
-    logging.info(f"download complete, file available at {file_name}")
+    logger.info(f"download complete, file available at {file_name}")
     urllib.request.urlretrieve(base_url, file_name)
-    logging.info("extracting, please wait...")
+    logger.info("extracting, please wait...")
     if ext == ".tar.bz2":
         with tarfile.open(file_name, mode="r") as bz:
             bz.extractall(base_install / pdk_name)
@@ -161,7 +162,7 @@ def load_pdk(pdk_name: Available_PDK, path: str | None = None) -> dict[str, str]
     """
     if path is not None:
         PATHS.insert(0, Path(path))
-        logging.info(f"Paths list updated: {PATHS}")
+        logger.info(f"Paths list updated: {PATHS}")
     for file in PATHS:
         if not os.path.isfile(file):
             continue

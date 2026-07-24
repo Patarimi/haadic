@@ -14,6 +14,8 @@ from lark import Discard, Transformer
 
 from .tools import parse
 
+logger = logging.getLogger(__name__)
+
 
 @dataclasses.dataclass
 class Enclosure:
@@ -82,7 +84,7 @@ class TechLef(Transformer):
             return list(item)
         if item[0] in ("MANUFACTURINGGRID",):
             return list(item)
-        logging.debug(f"Discarding item: {item}")
+        logger.debug(f"Discarding item: {item}")
         return Discard  # ty:ignore[invalid-return-type]
 
     def table(self, _):
@@ -108,7 +110,7 @@ class TechLef(Transformer):
     def block(self, block):
         """Transform a block of the TLEF file into a Layer object if it is a layer definition, or discard it otherwise."""
         if block[0] != "LAYER":
-            logging.debug(f"Discarding block: {block}")
+            logger.debug(f"Discarding block: {block}")
             return Discard
         if block[1] != block[-1]:
             raise ValueError(f"Block name does not match ({block[1]} and {block[-1]}")
@@ -123,7 +125,7 @@ class TechLef(Transformer):
                 layer[key.lower()] = item[2]
             if key == "WELL":
                 layer["type"] = item[1]
-        logging.debug(f"In block: {layer=}")
+        logger.debug(f"In block: {layer=}")
         return Layer(**layer)
 
     def start(self, start) -> TechStack:
@@ -135,7 +137,7 @@ class TechLef(Transformer):
             if isinstance(layer, list):
                 if layer[0] == "MANUFACTURINGGRID":
                     ss.unit = float(layer[1]) * 1e-6
-        logging.info(f"In Start: {ss=}")
+        logger.info(f"In Start: {ss=}")
         return ss
 
 

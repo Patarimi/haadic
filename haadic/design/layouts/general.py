@@ -15,6 +15,7 @@ from klayout import db
 from haadic.design.layouts.base_cell import BaseCell
 from haadic.io.writers.haadicfile import Layer, LayerStack
 
+logger = logging.getLogger(__name__)
 type Point = tuple[float, float]
 
 
@@ -87,16 +88,16 @@ def via_stack(
     """
     v = layout.create_cell("via_stack")
     route = layout._layer_stack.layers_from_to(id_bot, id_top)
-    logging.info(f"Via Stack between : {id_top=}\t{id_bot=}")
+    logger.info(f"Via Stack between : {id_top=}\t{id_bot=}")
     for i in route:
         lyr = layout.metal(i)
-        logging.debug("Metal:\t" + lyr.name)
+        logger.debug("Metal:\t" + lyr.name)
         # create the bottom metal plate of the vias
         add_rectangle(v, lyr, size)
         if i == max(route):
             continue  # no via above top layer
         lyr = layout.via(i)
-        logging.debug("Via:\t" + lyr.name)
+        logger.debug("Via:\t" + lyr.name)
         v.insert_cell(via(layout, i, size))
     v.flatten(-1, True)
     return v

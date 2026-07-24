@@ -13,6 +13,8 @@ from haadic.io.wrappers.tools import nix_run, to_wsl
 
 ExtractLevels = Literal["NoPar", "Ronly", "COnly", "RC"]
 
+logger = logging.getLogger(__name__)
+
 
 def extract_spice(
     gds_file: Path,
@@ -40,14 +42,14 @@ def extract_spice(
     root_path = dirname(output_path) if dirname(output_path) != "/" else "."
     if root_path == "":
         root_path = "."
-    logging.debug(f"working dir :{root_path}")
+    logger.debug(f"working dir :{root_path}")
     if cell_name == "None":
-        logging.warning("No cell name specified, using first cell in the layout.")
+        logger.warning("No cell name specified, using first cell in the layout.")
         layout = kl.Layout()
         layout.read(str(gds_file))
         cell_name = layout.top_cells()[0].name
-        logging.info(f"Using cell name {cell_name}")
-        logging.info(
+        logger.info(f"Using cell name {cell_name}")
+        logger.info(
             f"Available cells in the layout:{[cell.name for cell in layout.top_cells()]}"
         )
     tcl_template = Path(dirname(__file__)) / "magic_extract.tcl"
@@ -70,10 +72,10 @@ def extract_spice(
                 line = f"ext2spice extresist {toggle}\n"
             buff_out.append(line)
     tcl_file = output_path.with_suffix(".tcl")
-    logging.info(tcl_file)
+    logger.info(tcl_file)
     with open(tcl_file, "w") as f:
         f.writelines(buff_out)
-    logging.info(f"Command file generated: {tcl_file}")
+    logger.info(f"Command file generated: {tcl_file}")
     cmd = [
         f"export PDK_ROOT={to_wsl(PDK_INSTALL_DIR)} &&",
         "magic",
@@ -83,12 +85,12 @@ def extract_spice(
         to_wsl(rc_file),
         to_wsl(tcl_file),
     ]
-    logging.info("Extraction with command: " + " ".join(cmd))
+    logger.info("Extraction with command: " + " ".join(cmd))
     proc = nix_run(cmd)
-    logging.debug(proc.stdout)
+    logger.debug(proc.stdout)
     try:
         proc.check_returncode()
     except CalledProcessError as e:
-        logging.error(proc.stderr)
+        logger.error(proc.stderr)
         raise e
     return output_path

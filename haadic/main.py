@@ -23,6 +23,8 @@ if not logging.getLogger().hasHandlers():
         format="|%(levelname)-7s| %(filename)s:%(lineno)d | %(message)s",
     )
 
+logger = logging.getLogger(__name__)
+
 app = App(name="haadic")
 app.command(techno.pkd_app)
 
@@ -36,7 +38,7 @@ def smoke_test_cli():
 
     if not nix_check():
         raise SystemError(f"Error during nix check. Please check {log_path}.")
-    logging.info("haadic installed correctly !")
+    logger.info("haadic installed correctly !")
 
 
 @app.command(name="extract-ekv")
@@ -60,7 +62,7 @@ def extract_ekv_cli(
         output.parent.mkdir(parents=True, exist_ok=True)
     ekv = EKV(techno=techno_name)
     if not output.is_file() or force:
-        logging.info(
+        logger.info(
             f"Extracting EKV model for {techno_name} and saving it in {output}."
         )
         ekv.extract_model(output.parent, rf=rf)

@@ -16,6 +16,8 @@ from haadic.core.techno import Available_PDK
 from haadic.design.layouts.base_cell import BaseCell
 from haadic.io.wrappers.magic import ExtractLevels
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class ConfigFlow:
@@ -103,11 +105,11 @@ class Flow:
         """
         perf = self.run_from_dim(local_model(target))
         res = [(key, perf.dct[key], target.dct.get(key, "N/A")) for key in perf.dct]
-        logging.info(
+        logger.info(
             "\n" + tabulate(res, headers=["obtained", "targeted"], tablefmt="grid")
         )
 
-        logging.info("compare performances to targets")
+        logger.info("compare performances to targets")
         cost = step.compare_to(perf.dct, target.dct)
-        logging.info(f"current cost: {cost}")
+        logger.info(f"current cost: {cost}")
         return perf

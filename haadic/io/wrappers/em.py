@@ -14,6 +14,8 @@ from dotenv import load_dotenv
 from haadic.core.techno import Available_PDK, get_file
 from haadic.design.layouts.tools import Port
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class Emx:
@@ -99,7 +101,7 @@ class Emx:
         exp = ""
         for c in cmd:
             exp += f"{c} "
-        logging.debug(exp)
+        logger.debug(exp)
         proc = run(cmd, capture_output=True, encoding="latin")
         if proc.returncode != 0:
             RuntimeWarning(str(cmd))

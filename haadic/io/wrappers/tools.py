@@ -7,6 +7,8 @@ from os.path import dirname
 from pathlib import Path
 from subprocess import CompletedProcess, run
 
+logger = logging.getLogger(__name__)
+
 
 @functools.cache
 def nix_check():
@@ -15,14 +17,14 @@ def nix_check():
         proc = run(["wsl", "-l"], capture_output=True, text=True)
         list_of_wsl = proc.stdout.replace("\0", "")
         if "NixOS" not in list_of_wsl:
-            logging.error(list_of_wsl)
+            logger.error(list_of_wsl)
             return False
     try:
         proc = nix_run(["nix --version"])
-        logging.info(f"{proc.stdout=}")
+        logger.info(f"{proc.stdout=}")
         return True
     except Exception as e:
-        logging.error(e)
+        logger.error(e)
         return False
 
 
@@ -60,6 +62,6 @@ def nix_run(
         over_head = ["wsl", "-d", "NixOS", "--shell-type", "login"] + over_head
     over_head.append(" ".join(cmd))
     over_head.append(to_wsl(shell_path))
-    logging.info('"' + '" "'.join(over_head))
+    logger.info('"' + '" "'.join(over_head))
     proc = run(over_head, capture_output=True, text=True, encoding="UTF-8")
     return proc

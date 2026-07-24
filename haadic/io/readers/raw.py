@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pandas as pd
 
+logger = logging.getLogger(__name__)
+
 
 def parse_raw(results: Path) -> pd.DataFrame:
     """
@@ -69,5 +71,5 @@ def parse_out(results: Path) -> pd.DataFrame:
                 else:
                     data[keys[index]].append(words[0])
     df = pd.DataFrame(data=data, dtype=float if not is_complex else complex)
-    logging.debug(df.info)
+    logger.debug(df.info)
     return df

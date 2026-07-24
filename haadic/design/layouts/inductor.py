@@ -7,6 +7,8 @@ from numpy import pi, tan
 import haadic.design.layouts.general as gen
 from haadic.design.layouts.base_cell import BaseCell
 
+logger = logging.getLogger(__name__)
+
 
 def octagonal_inductor(
     layout: BaseCell,
@@ -53,7 +55,7 @@ def octagonal_inductor(
         d_a = d_i + width + 2 * i * (width + gap)
         end = i == n_turn - 1
         start = i == 0
-        logging.debug(
+        logger.debug(
             f"{end=}\t{even_turn=} {0 if (not end) and even_turn else p_gap / 2}"
         )
 

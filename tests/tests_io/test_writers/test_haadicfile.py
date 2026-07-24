@@ -6,6 +6,8 @@ import pytest
 from haadic.core.techno import is_installed
 from haadic.io.writers import haadicfile as hf
 
+logger = logging.getLogger(__name__)
+
 
 @pytest.fixture
 def mock_layer_stack():
@@ -117,7 +119,7 @@ def test_layerstack_export_to_json(mock_layer_stack, tmp_path):
 )
 def test_layer_stack_gf():
     layer_stack = hf.LayerStack("gf180mcu", use_json=False)
-    logging.debug(layer_stack)
+    logger.debug(layer_stack)
     assert layer_stack.get_metal_layer(1) == hf.Layer(
         34, 0, name="metal1", width=0.23, spacing=0.3, _pin=10
     )
@@ -148,7 +150,7 @@ def test_layer_stack_gf():
 @pytest.mark.skipif(not is_installed("sky130"), reason="The PDK sky130 not installed.")
 def test_layer_stack_sw():
     layer_stack = hf.LayerStack("sky130", use_json=False)
-    logging.debug(layer_stack)
+    logger.debug(layer_stack)
     assert layer_stack.get_metal_layer(1) == hf.Layer(
         layer=67, datatype=20, _pin=16, name="li1", width=0.17, spacing=0
     )

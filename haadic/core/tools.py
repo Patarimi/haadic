@@ -6,6 +6,8 @@ from pathlib import Path
 import numpy as np
 from klayout import db as kl
 
+logger = logging.getLogger(__name__)
+
 
 def diff_spice(file1: Path, file2: Path) -> bool:
     """
@@ -38,41 +40,41 @@ def diff_gds(gds1: str | Path, gds2: str | Path) -> bool:
     cell2.read(str(gds2))
     diff = kl.LayoutDiff()
     diff.on_cell_name_differs(  # ty:ignore[call-non-callable]
-        lambda c1, c2: logging.error(f"Cell {c1.name} != {c2.name}")
+        lambda c1, c2: logger.error(f"Cell {c1.name} != {c2.name}")
     )
     diff.on_cell_in_a_only(  #  ty:ignore[call-non-callable]
-        lambda c1: logging.error(f"Cell {c1.name} only in file {gds1!s}")
+        lambda c1: logger.error(f"Cell {c1.name} only in file {gds1!s}")
     )
     diff.on_cell_in_b_only(  #  ty:ignore[call-non-callable]
-        lambda c1: logging.error(f"Cell {c1.name} only in file {gds2!s}")
+        lambda c1: logger.error(f"Cell {c1.name} only in file {gds2!s}")
     )
     diff.on_layer_in_a_only(  #  ty:ignore[call-non-callable]
-        lambda c1: logging.error(f"Layer {c1.layer}/{c1.datatype} only in {gds1!s}.")
+        lambda c1: logger.error(f"Layer {c1.layer}/{c1.datatype} only in {gds1!s}.")
     )
     diff.on_layer_in_b_only(  #  ty:ignore[call-non-callable]
-        lambda c1: logging.error(f"Layer {c1.layer}/{c1.datatype} only in {gds2!s}.")
+        lambda c1: logger.error(f"Layer {c1.layer}/{c1.datatype} only in {gds2!s}.")
     )
     diff.on_text_in_a_only(  #  ty:ignore[call-non-callable]
-        lambda c1: logging.error(f"Text {c1.text} only in {gds1!s}.")
+        lambda c1: logger.error(f"Text {c1.text} only in {gds1!s}.")
     )
     diff.on_text_in_b_only(  #  ty:ignore[call-non-callable]
-        lambda c1: logging.error(f"Text {c1.text} only in {gds2!s}.")
+        lambda c1: logger.error(f"Text {c1.text} only in {gds2!s}.")
     )
     diff.on_polygon_in_a_only(  #  ty:ignore[call-non-callable]
-        lambda c1: logging.error(
+        lambda c1: logger.error(
             f"Polygon only in {gds1!s} on layer {c1.layer}/{c1.datatype}."
         )
     )
     diff.on_polygon_in_b_only(  #  ty:ignore[call-non-callable]
-        lambda c1: logging.error(
+        lambda c1: logger.error(
             f"Polygon only in {gds2!s} on layer {c1.layer}/{c1.datatype}."
         )
     )
     diff.on_begin_polygon_differences(  #  ty:ignore[call-non-callable]
-        lambda c1: logging.error(f"Polygon differs on layer {c1.layer}/{c1.datatype}.")
+        lambda c1: logger.error(f"Polygon differs on layer {c1.layer}/{c1.datatype}.")
     )
     diff.on_dbu_differs(  #  ty:ignore[call-non-callable]
-        lambda dbu1, dbu2: logging.error(f"DBU differs: {dbu1} != {dbu2}")
+        lambda dbu1, dbu2: logger.error(f"DBU differs: {dbu1} != {dbu2}")
     )
     return diff.compare(cell1, cell2)
 

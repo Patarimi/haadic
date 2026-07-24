@@ -8,6 +8,8 @@ from typing import Literal, Self
 from haadic.core.tools import eng
 from haadic.io.wrappers.tools import to_wsl
 
+logger = logging.getLogger(__name__)
+
 Unit = {
     "L": "H",
     "C": "F",
@@ -44,7 +46,7 @@ class Component:
         :param value: the value of the component, as a string (e.g., "1k", "10u", etc.). It can be split in several parts if it contains spaces (e.g., "1 k" will be parsed as 1k).
         """
         if name[0].upper() not in ComponentList:
-            logging.error(
+            logger.error(
                 f"Could not initialize component {name} between nodes {node1} and {node2} with value: {' '.join(str(v) for v in value)}"
             )
             raise ValueError(
@@ -53,7 +55,7 @@ class Component:
         self.type = name[0].upper()  # type: ignore
         self.name = name[1:]
         self.node = (node1, node2)
-        logging.debug(
+        logger.debug(
             f"Initializing component {name} between nodes {node1} and {node2} with value: {value}"
         )
         if len(value) == 1:
@@ -131,7 +133,7 @@ class Netlist:
                     break
             match block:
                 case "circuit":
-                    logging.debug(f"Parsing component line: {line.strip()}")
+                    logger.debug(f"Parsing component line: {line.strip()}")
                     self.circuit.append(Component(*line.split()))
                 case "control":
                     self.controls.append(line.rstrip())

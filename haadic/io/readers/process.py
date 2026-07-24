@@ -8,6 +8,8 @@ from lark import Transformer
 
 from haadic.io.readers.tools import parse
 
+logger = logging.getLogger(__name__)
+
 
 @dataclasses.dataclass
 class DielectricLayer:
@@ -85,7 +87,7 @@ class Process(Transformer):
             + self.DielectricLayers[-1].thickness
         )
         layer = [lyr for lyr in layer if lyr is not None]
-        logging.info(f"layer{len(self.DielectricLayers)}: {layer}")
+        logger.info(f"layer{len(self.DielectricLayers)}: {layer}")
         self.DielectricLayers.append(
             DielectricLayer(
                 elevation=self.elevation,
@@ -98,12 +100,12 @@ class Process(Transformer):
 
     def offset(self, offset):
         """Apply an elevation offset to the current layer stack."""
-        logging.debug(f"offset {offset[0]}")
+        logger.debug(f"offset {offset[0]}")
         self.elevation += float(offset[0])
 
     def conductor(self, conductor):
         """Add a new conductor layer to the process stack."""
-        logging.debug(f"last diel {self.DielectricLayers[-1].thickness}")
+        logger.debug(f"last diel {self.DielectricLayers[-1].thickness}")
         name = conductor[-1]
         offset = self.elevation
         self.MetalLayers[name] = MetalLayer(
