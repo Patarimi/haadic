@@ -63,6 +63,7 @@ def install(pdk_name: Available_PDK):
             capture_output=True,
             shell=True,
             text=True,
+            check=False,
         )
         if "True" not in proc.stdout:
             cmd += ["sudo"]
@@ -77,7 +78,7 @@ def install(pdk_name: Available_PDK):
             str(base_install),
             tech["version"],
         ]
-        run(cmd, capture_output=False, text=True)
+        run(cmd, capture_output=False, text=True, check=False)
         return
     if not (isdir(base_install / pdk_name)):
         os.makedirs(base_install / pdk_name)

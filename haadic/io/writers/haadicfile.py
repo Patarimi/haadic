@@ -227,10 +227,8 @@ class LayerStack:
     def next(self) -> Generator[Layer, None, None]:
         """Iterate over the routing layers in the stack."""
         yield self._gate
-        for lyr in self._stack:
-            yield lyr
-        for vlyr in self._via_list:
-            yield vlyr
+        yield from self._stack
+        yield from self._via_list
         yield self._pad
         yield self._nplus
         yield self._pplus
@@ -360,7 +358,7 @@ def get_info_from_layermap(
     :return: Layer object corresponding to the requested layer name.
     """
     layers_map = load_map(path)
-    keys = [k for k in layers_map.keys()]
+    keys = [k for k in layers_map]
     layer_name = layer_name.lower()
     if layer_name not in keys:
         raise KeyError(
@@ -369,13 +367,13 @@ def get_info_from_layermap(
     lyr = Layer(layer=0, name=layer_name)
     dtypes = layers_map[layer_name].types
     for dtype in valid_drawing_types:
-        for key in dtypes.keys():
+        for key in dtypes:
             if dtype.lower() in dtypes[key]:
                 lyr.layer = layers_map[layer_name].layer
                 lyr.datatype = key
                 continue
     for dtype in valid_pin_types:
-        for key in dtypes.keys():
+        for key in dtypes:
             if dtype.lower() in dtypes[key]:
                 lyr._pin = key
     if lyr.layer == 0:

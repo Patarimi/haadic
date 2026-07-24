@@ -1,9 +1,12 @@
 """NGSPICE wrapper for haadic."""
 
+import logging
 from fileinput import FileInput
 from pathlib import Path
 
 from haadic.io.wrappers.tools import nix_check, nix_run, to_wsl
+
+logger = logging.getLogger(__name__)
 
 
 def compute(
@@ -63,7 +66,7 @@ def compute(
     ]
     proc = nix_run(cmd)
     if proc.returncode != 0:
-        RuntimeWarning(str(cmd))
+        logger.warning(cmd)
         with open(log_file) as f:
             strm = f.readlines()
         raise RuntimeError(strm)

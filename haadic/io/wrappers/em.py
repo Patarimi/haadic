@@ -102,7 +102,7 @@ class Emx:
         for c in cmd:
             exp += f"{c} "
         logger.debug(exp)
-        proc = run(cmd, capture_output=True, encoding="latin")
+        proc = run(cmd, capture_output=True, encoding="latin", check=False)
         if proc.returncode != 0:
             logger.warning(str(cmd))
             raise RuntimeError(proc.stderr)
