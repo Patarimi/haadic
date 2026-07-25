@@ -1,6 +1,5 @@
 """Models for inductors."""
 
-
 from numpy import pi
 
 WHEELER_REF = {"hexagonal": (2.3, 3.83)}
