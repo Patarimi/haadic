@@ -11,12 +11,11 @@
 
 from pathlib import Path
 
-from haadic.design.layouts.base_cell import BaseCell
-
-from haadic.design.layouts import general as gen
-from haadic.core.steps.step import Dim
-from haadic.core.steps.post_process import SimRes
 from haadic.core.flow import ConfigFlow, Flow
+from haadic.core.steps.post_process import SimRes
+from haadic.core.steps.step import Dim
+from haadic.design.layouts import general as gen
+from haadic.design.layouts.base_cell import BaseCell
 
 # Class storing the configuration of the flow. You can add any additional configuration parameters you need here.
 # See https://patarimi.github.io/haadic/reference/haadic/core/flow/#haadic.core.flow.ConfigFlow for more details on how to use it.

@@ -1,12 +1,13 @@
 """Module defining the PostProcess step for post-processing simulation results and extracting performance metrics."""
 
-from haadic.io.readers.raw import parse_out
-from typing import Callable, Sequence
-from dataclasses import field, dataclass
+from collections.abc import Callable, Sequence
+from dataclasses import dataclass, field
 from pathlib import Path
+
 import pandas as pd
 
 from haadic.core.steps.step import Dim
+from haadic.io.readers.raw import parse_out
 
 SimRes = pd.DataFrame
 
@@ -26,6 +27,9 @@ class ConfigPostProc:
     evaluate: PostProcessFunc
 
 
+def_dim = Dim()
+
+
 @dataclass
 class PostProcess:
     """
@@ -43,7 +47,7 @@ class PostProcess:
     input_suffixes: Sequence[str] = field(default_factory=lambda: [".raw"])
     output_suffix: str = ""
 
-    def run(self, data_file: Path = Path("top.raw"), dimensions: Dim = Dim()) -> Dim:
+    def run(self, data_file: Path = Path("top.raw"), dimensions: Dim = def_dim) -> Dim:
         """
         Run the post-processing step.
 

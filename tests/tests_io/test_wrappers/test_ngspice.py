@@ -1,7 +1,7 @@
 import fileinput
-from pathlib import Path
-from filecmp import cmp
 import shutil
+from filecmp import cmp
+from pathlib import Path
 
 import pytest
 
@@ -19,9 +19,10 @@ def test_ngspice(tmp_path):
     assert Path(data_file).exists()
     assert Path(spice_file.with_suffix(".log")).exists()
     # remove the line with the date before comparison
-    for line in fileinput.input(data_file, inplace=True):
-        if not line.startswith("Date:") and not line.startswith("Command:"):
-            print(line, end="")
+    with fileinput.input(data_file, inplace=True) as f:
+        for line in f:
+            if not line.startswith("Date:") and not line.startswith("Command:"):
+                print(line, end="")
     assert cmp(REF_PATH / "inv.raw", data_file)
 
     with pytest.raises(RuntimeError):

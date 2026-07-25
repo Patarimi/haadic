@@ -1,6 +1,7 @@
 import pytest
-from haadic.io.readers.magic_tech import MagicTech
+
 from haadic.core.techno import get_file, is_installed
+from haadic.io.readers.magic_tech import MagicTech
 
 pytestmark = pytest.mark.skipif(not is_installed("sky130"), reason="PDK not installed.")
 

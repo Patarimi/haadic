@@ -1,23 +1,25 @@
 """Module for managing technology files and PDK installations in the haadic design flow."""
 
 import functools
+import json
 import logging
 import os
-from pathlib import Path
-from subprocess import run
 import tarfile
 import urllib.request
 import zipfile
 from os.path import isdir
-import json
+from pathlib import Path
+from subprocess import run
+from typing import Literal
+
 from cyclopts import App
-from typing import Literal, Optional
+from rich import print
 from rich.console import Console
 from rich.table import Table
-from rich import print
 
 from haadic._config import DATA_DIR
 
+logger = logging.getLogger(__name__)
 console = Console(stderr=True)
 pkd_app = App("pdk", help="Manage the PDKs")
 
@@ -61,6 +63,7 @@ def install(pdk_name: Available_PDK):
             capture_output=True,
             shell=True,
             text=True,
+            check=False,
         )
         if "True" not in proc.stdout:
             cmd += ["sudo"]
@@ -75,7 +78,7 @@ def install(pdk_name: Available_PDK):
             str(base_install),
             tech["version"],
         ]
-        run(cmd, capture_output=False, text=True)
+        run(cmd, capture_output=False, text=True, check=False)
         return
     if not (isdir(base_install / pdk_name)):
         os.makedirs(base_install / pdk_name)
@@ -87,12 +90,12 @@ def install(pdk_name: Available_PDK):
         )
     ]
     urllib.request.install_opener(opener)
-    logging.info("downloading files, might take some times...")
+    logger.info("downloading files, might take some times...")
     ext = ".zip" if ".zip" in base_url else ".tar.bz2"
     file_name = (base_install / pdk_name).with_suffix(ext)
-    logging.info(f"download complete, file available at {file_name}")
+    logger.info(f"download complete, file available at {file_name}")
     urllib.request.urlretrieve(base_url, file_name)
-    logging.info("extracting, please wait...")
+    logger.info("extracting, please wait...")
     if ext == ".tar.bz2":
         with tarfile.open(file_name, mode="r") as bz:
             bz.extractall(base_install / pdk_name)
@@ -129,7 +132,7 @@ def list_pdk():
 
     Scans `PATHS` for JSON entries and aggregates available PDK keys.
     """
-    process_l = list()
+    process_l = []
     for path in PATHS:
         if os.path.isfile(path):
             process_d = _read_tech(path)
@@ -143,7 +146,7 @@ def is_installed(pdk_name: Available_PDK | Literal["mock"]) -> bool:
 
 
 @functools.cache
-def load_pdk(pdk_name: Available_PDK, path: Optional[str] = None) -> dict[str, str]:
+def load_pdk(pdk_name: Available_PDK, path: str | None = None) -> dict[str, str]:
     """
     Load the metadata dictionary for a PDK by name.
 
@@ -160,7 +163,7 @@ def load_pdk(pdk_name: Available_PDK, path: Optional[str] = None) -> dict[str, s
     """
     if path is not None:
         PATHS.insert(0, Path(path))
-        logging.info(f"Paths list updated: {PATHS}")
+        logger.info(f"Paths list updated: {PATHS}")
     for file in PATHS:
         if not os.path.isfile(file):
             continue
@@ -174,7 +177,7 @@ def add_reference(
     pdk_name: Available_PDK,
     ref_name: Handled_key,
     path_file: Path,
-    path_tech: Optional[Path] = None,
+    path_tech: Path | None = None,
 ) -> None:
     """
     Add a reference file to the techno.json file.

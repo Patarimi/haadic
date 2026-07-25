@@ -1,14 +1,16 @@
 """Module defining the Layout step for generating layouts from parametric descriptions."""
 
-import logging
-from haadic.core.techno import Available_PDK
-from pathlib import Path
-from typing import Callable, Sequence
-from dataclasses import field, dataclass
 import json
+import logging
+from collections.abc import Callable, Sequence
+from dataclasses import dataclass, field
+from pathlib import Path
 
-from haadic.design.layouts.base_cell import BaseCell
 from haadic.core.steps.step import Dim, Step
+from haadic.core.techno import Available_PDK
+from haadic.design.layouts.base_cell import BaseCell
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -48,7 +50,7 @@ class Layout(Step):
             dimensions = json.load(f)
         top_cell_name = input_file.stem
         output_file = self.output_file(input_file)
-        logging.info("layout generation with geometry: " + str(dimensions))
+        logger.info("layout generation with geometry: " + str(dimensions))
 
         cell = BaseCell(top_cell_name, self.config.techno)
         self.config.layout(cell, dimensions)

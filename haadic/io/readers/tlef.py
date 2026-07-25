@@ -9,8 +9,12 @@ import functools
 import logging
 from pathlib import Path
 from typing import Literal
-from .tools import parse
+
 from lark import Discard, Transformer
+
+from .tools import parse
+
+logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass
@@ -80,7 +84,7 @@ class TechLef(Transformer):
             return list(item)
         if item[0] in ("MANUFACTURINGGRID",):
             return list(item)
-        logging.debug(f"Discarding item: {item}")
+        logger.debug(f"Discarding item: {item}")
         return Discard  # ty:ignore[invalid-return-type]
 
     def table(self, _):
@@ -106,7 +110,7 @@ class TechLef(Transformer):
     def block(self, block):
         """Transform a block of the TLEF file into a Layer object if it is a layer definition, or discard it otherwise."""
         if block[0] != "LAYER":
-            logging.debug(f"Discarding block: {block}")
+            logger.debug(f"Discarding block: {block}")
             return Discard
         if block[1] != block[-1]:
             raise ValueError(f"Block name does not match ({block[1]} and {block[-1]}")
@@ -121,7 +125,7 @@ class TechLef(Transformer):
                 layer[key.lower()] = item[2]
             if key == "WELL":
                 layer["type"] = item[1]
-        logging.debug(f"In block: {layer=}")
+        logger.debug(f"In block: {layer=}")
         return Layer(**layer)
 
     def start(self, start) -> TechStack:
@@ -130,10 +134,9 @@ class TechLef(Transformer):
         for layer in start:
             if isinstance(layer, Layer):
                 ss.layers.append(layer)
-            if isinstance(layer, list):
-                if layer[0] == "MANUFACTURINGGRID":
-                    ss.unit = float(layer[1]) * 1e-6
-        logging.info(f"In Start: {ss=}")
+            if isinstance(layer, list) and layer[0] == "MANUFACTURINGGRID":
+                ss.unit = float(layer[1]) * 1e-6
+        logger.info(f"In Start: {ss=}")
         return ss
 
 
@@ -156,7 +159,7 @@ def get_all_by_type(l_type: str, tlef_path: Path | str) -> list[Layer]:
     :param tlef_path: path to the TLEF file
     :return: list of layer names for the given type
     """
-    layers = list()
+    layers = []
     full_stack = load_tlef(tlef_path)
     for layer in full_stack.layers:
         if layer.type == l_type:

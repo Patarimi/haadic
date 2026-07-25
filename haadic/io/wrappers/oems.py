@@ -6,20 +6,21 @@ import logging
 import os
 import shutil
 import sys
+from collections.abc import Sequence
 from math import inf
 from os.path import dirname
 from pathlib import Path
-from typing import Optional, Sequence
 
+import numpy as np
 from cyclopts import App
 from klayout import db
-from pydantic import confloat, BaseModel
-
+from pydantic import BaseModel, confloat
 from skrf import Network
-import numpy as np
 
 from haadic.io.readers.process import layer_stack
 from haadic.techno import get_file
+
+logger = logging.getLogger(__name__)
 
 # define OPENEMS variable for correct CSXCAD import
 if shutil.which("openEMS"):
@@ -28,12 +29,12 @@ if shutil.which("openEMS"):
 else:
     raise ImportError("openEMS not found")
     paths = os.environ["PATH"].split(";" if os.name == "nt" else ":")
-    [logging.info(f"{p}") for p in paths]
+    [logger.info(f"{p}") for p in paths]
 try:
     from CSXCAD import CSXCAD
     from openEMS.openEMS import openEMS
 except ImportError:
-    logging.error("CSXCAD or openEMS not found")
+    logger.error("CSXCAD or openEMS not found")
 
 
 from haadic.design.layouts.tools import Port
@@ -54,8 +55,8 @@ def compute(
     process: str,
     cell_name: str,
     freq: Sequence[float, float] | float,
-    ports: Optional[list[Port]] = None,
-    sim_path: Optional[Path] = Path("./."),
+    ports: list[Port] | None = None,
+    sim_path: Path | None = Path("./."),
     show_model: bool = False,
     skip_run: bool = False,
 ):
@@ -85,10 +86,10 @@ def compute(
     FDTD = openEMS(CoordSystem=0, EndCriteria=1e-4)  # init a rectangular FDTD
     if freq.start == freq.stop:
         FDTD.SetSinusExcite(freq.start)
-        logging.info("Using Sinusoidal Excitation")
+        logger.info("Using Sinusoidal Excitation")
     else:
         FDTD.SetGaussExcite((freq.start + freq.stop) / 2, (freq.stop - freq.start) / 2)
-        logging.info("Using Gaussian Pulse Excitation")
+        logger.info("Using Gaussian Pulse Excitation")
 
     FDTD.SetBoundaryCond(
         ["MUR", "MUR", "MUR", "MUR", "PEC", "MUR"]
@@ -112,7 +113,7 @@ def compute(
     ports = []
     for name in metals:
         lyr, dtyp = metals[name].definition.strip("L").split("T")
-        logging.debug(f"layer {name} : {lyr} {dtyp}")
+        logger.debug(f"layer {name} : {lyr} {dtyp}")
         for i, shape in enumerate(gdsii.shapes(db.LayerInfo(int(lyr), int(dtyp)))):
             if not shape.is_text():
                 continue
@@ -143,40 +144,40 @@ def compute(
         CSX.Write2XML(CSX_file)
         from CSXCAD import AppCSXCAD_BIN
 
-        os.system(AppCSXCAD_BIN + ' "{}"'.format(CSX_file))
+        os.system(AppCSXCAD_BIN + f' "{CSX_file}"')
 
     # Run the simulation
     if not skip_run:
         try:
             FDTD.Run(sim_path)
         except AssertionError as e:
-            logging.error(
+            logger.error(
                 "Error during OpenEMS run, try :[italic]python -O "
                 + " ".join(sys.argv)
                 + "[/italic]"
             )
-            raise e
+            raise RuntimeError(e)
 
     ### Export as a touchstone file
     f = np.linspace(freq.start, freq.stop, 401)
     result = Network()
     result.frequency = f
     try:
-        s = list()
+        s = []
         for port in ports:
             port.CalcPort(sim_path, f)
             for inc in ports:
                 s.append(port.uf_ref / inc.uf_inc)
         result.s = s
     except FileNotFoundError:
-        logging.error("Ports files not found, run the simulation first")
+        logger.error("Ports files not found, run the simulation first")
     return result
 
 
 def make_geometry(
     gds_file: Path,
     tech: str = "mock",
-    cell_name: Optional[str] = None,
+    cell_name: str | None = None,
     *,
     margin: float = 0.2,
 ):
@@ -189,7 +190,7 @@ def make_geometry(
     :param margin: margin around the model. The simulation box is the bounding box of the model time (1 + margin).
     :return:
     """
-    logging.info(f"Creating geometry from {gds_file}")
+    logger.info(f"Creating geometry from {gds_file}")
     layout = db.Layout()
     layout.read(str(gds_file))
     dbu = layout.dbu
@@ -203,14 +204,14 @@ def make_geometry(
     proc_file = get_file(tech, "process")
     diels, metals = layer_stack(proc_file)
 
-    csx_metal = dict()
+    csx_metal = {}
     for name in metals:
         layer_n, data_type = [
             int(i) for i in metals[name].definition.strip("L").split("T")
         ]
         polygons = gdsii.shapes(db.LayerInfo(layer_n, data_type))
         if len(polygons) == 0:
-            logging.info(f"No drawing found, skipping layer {layer_n}/{data_type}")
+            logger.info(f"No drawing found, skipping layer {layer_n}/{data_type}")
         else:
             csx_metal[layer_n] = CSX.AddMaterial(name, kappa=metals[name].conductivity)
             for poly in polygons:

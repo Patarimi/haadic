@@ -3,26 +3,29 @@
 import functools
 import logging
 import os
-from os.path import dirname
 from pathlib import Path
-from subprocess import run, CompletedProcess
+from subprocess import CalledProcessError, CompletedProcess, run
+
+logger = logging.getLogger(__name__)
+
+dir_file = Path(__file__).parent
 
 
 @functools.cache
 def nix_check():
     """Check if nix is available on the system and correctly configured."""
     if os.name == "nt":
-        proc = run(["wsl", "-l"], capture_output=True, text=True)
+        proc = run(["wsl", "-l"], capture_output=True, text=True, check=False)
         list_of_wsl = proc.stdout.replace("\0", "")
         if "NixOS" not in list_of_wsl:
-            logging.error(list_of_wsl)
+            logger.error(list_of_wsl)
             return False
     try:
         proc = nix_run(["nix --version"])
-        logging.info(f"{proc.stdout=}")
+        logger.info(f"{proc.stdout=}")
         return True
-    except Exception as e:
-        logging.error(e)
+    except CalledProcessError as e:
+        logger.error(e)
         return False
 
 
@@ -43,7 +46,7 @@ def to_wsl(path: (Path | str)) -> str:
 
 
 def nix_run(
-    cmd: list[str], shell_path: Path = Path(dirname(__file__) + "/shell.nix")
+    cmd: list[str], shell_path: Path = dir_file / "shell.nix"
 ) -> CompletedProcess:
     """
     Run a command in a nix-shell.
@@ -60,6 +63,6 @@ def nix_run(
         over_head = ["wsl", "-d", "NixOS", "--shell-type", "login"] + over_head
     over_head.append(" ".join(cmd))
     over_head.append(to_wsl(shell_path))
-    logging.info('"' + '" "'.join(over_head))
-    proc = run(over_head, capture_output=True, text=True, encoding="UTF-8")
+    logger.info('"' + '" "'.join(over_head))
+    proc = run(over_head, capture_output=True, text=True, encoding="UTF-8", check=False)
     return proc

@@ -1,4 +1,5 @@
 import pytest
+
 import haadic.design.models.inductor as ind
 
 

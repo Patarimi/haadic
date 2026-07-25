@@ -1,14 +1,17 @@
 """Module defining the Step protocol and related utilities for managing steps in the haadic flow."""
 
 import json
-from functools import reduce
-from typing import Any, Protocol, Sequence
 import logging
 import os
-from pathlib import Path
 import shutil
+from collections.abc import Sequence
+from functools import reduce
+from pathlib import Path
+from typing import Any, Protocol
 
 import pydantic
+
+logger = logging.getLogger(__name__)
 
 
 @pydantic.dataclasses.dataclass
@@ -61,7 +64,6 @@ class Step(Protocol):
         :param input_file: path to the input file for the step.
         :return: path to the output file produced by the step.
         """
-        pass
 
 
 def init_step(dimensions: Dim, base_dir: Path, sweep_folder: bool = False) -> Path:
@@ -118,9 +120,7 @@ def can_skip(input_file: Path, output_file: Path):
     """
     if not output_file.is_file():
         return False
-    if input_file.stat().st_mtime >= output_file.stat().st_mtime:
-        return False
-    return True
+    return not input_file.stat().st_mtime >= output_file.stat().st_mtime
 
 
 def compose(*steps: Step, reload: bool = True) -> Step:
@@ -158,11 +158,11 @@ def compose(*steps: Step, reload: bool = True) -> Step:
                 validate_input(path, step.input_suffixes)
                 excepted_output = step.output_file(path)
                 if self.config["reload"] and can_skip(path, excepted_output):
-                    logging.info(
+                    logger.info(
                         f"Skipping step {step.__class__.__name__} as {excepted_output.name} is up to date with {path.name}"
                     )
                     return excepted_output
-                logging.info(
+                logger.info(
                     f"Running step {step.__class__.__name__} with input {path.name}"
                 )
                 return step.run(path)
@@ -216,11 +216,11 @@ def compare_to(perf: dict, target: dict):
 
     """
     cost = 0
-    for key in target:
+    for key, val in target.items():
         if perf is None or key not in perf:
-            logging.warning(f"Key {key} not found in performance dictionary")
-            cost += target[key] ** 2
+            logger.warning(f"Key {key} not found in performance dictionary")
+            cost += val**2
         else:
-            cost += (target[key] - perf[key]) ** 2
+            cost += (val - perf[key]) ** 2
 
     return cost

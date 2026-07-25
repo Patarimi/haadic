@@ -1,9 +1,11 @@
 """Functions to parse raw (results) ngspice output files."""
 
 import logging
+from pathlib import Path
 
 import pandas as pd
-from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 
 def parse_raw(results: Path) -> pd.DataFrame:
@@ -13,16 +15,16 @@ def parse_raw(results: Path) -> pd.DataFrame:
     :param results: file to be loaded.
     :return: dataframe with loaded data
     """
-    data = dict()
+    data = {}
     with open(results, "r") as f:
-        for line in f.readlines():
+        for line in f:
             match line.split():
                 case "Index", *k:
                     if "headers" not in locals():
                         headers = line.split()
                 case [ind, *k] if "headers" in locals() and len(k) == len(headers) - 1:
                     for head, val in zip(headers, k):
-                        if head not in data.keys():
+                        if head not in data:
                             data[head] = [
                                 float(val),
                             ]
@@ -39,8 +41,8 @@ def parse_out(results: Path) -> pd.DataFrame:
     :param results: file to be loaded.
     :return: dataframe with loaded data
     """
-    data = dict()
-    keys = list()
+    data = {}
+    keys = []
     current_bloc = "Header"
     is_complex = False
     with open(results, "r") as f:
@@ -50,7 +52,7 @@ def parse_out(results: Path) -> pd.DataFrame:
                 current_bloc = words[0].rstrip(":")
                 continue
             if current_bloc == "Variables":
-                data[words[1]] = list()
+                data[words[1]] = []
                 keys.append(words[1])
             if current_bloc == "Values" and len(words) == 2:
                 index = 0
@@ -69,5 +71,5 @@ def parse_out(results: Path) -> pd.DataFrame:
                 else:
                     data[keys[index]].append(words[0])
     df = pd.DataFrame(data=data, dtype=float if not is_complex else complex)
-    logging.debug(df.info)
+    logger.debug(df.info)
     return df

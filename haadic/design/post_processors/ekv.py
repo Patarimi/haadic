@@ -9,7 +9,7 @@ from haadic.core.steps.step import Dim
 from haadic.core.tools import eng
 from haadic.design.models.constants import ut
 from haadic.design.models.tools import med_Xpercentile
-from haadic.design.post_processors.graphs import export_graph, Data
+from haadic.design.post_processors.graphs import Data, export_graph
 
 
 def extract_small_l(
@@ -145,7 +145,7 @@ def extract_rf(
             setattr(ekv, key, dimensions.dct[key])
 
     bench_data.to_csv(base_dir / "bench_ac_data.csv")
-    y = dict()
+    y = {}
     for i in (1, 2):
         for j in (1, 2):
             port = f"y_{i}_{j}"

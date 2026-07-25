@@ -1,9 +1,10 @@
 """Functions to generate mos transistor layouts. This fonction are based on a standard grid design."""
 
-from typing import Literal, Sequence
+from collections.abc import Sequence
+from typing import Literal
 
-from haadic.design.layouts.base_cell import BaseCell
 import haadic.design.layouts.general as gen
+from haadic.design.layouts.base_cell import BaseCell
 
 
 def mosfet(

@@ -1,10 +1,11 @@
 """Magic tech file reader. Only support the GDSII section for now."""
 
 import logging
-
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -52,4 +53,4 @@ class MagicTech:
                         layerinfo["gdsii_layer"] = (int(layer), int(dtype))
                         self.gdsii.append(MagicTechLayer(**layerinfo))
                         layerinfo = {}
-        logging.info(self.gdsii)
+        logger.info(self.gdsii)

@@ -1,12 +1,13 @@
 """Lark transformer for layermap (gds map files) grammar tokens."""
 
 import functools
-
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
 from typing import override
-from haadic.io.readers.tools import parse
+
 from lark import Transformer
+
+from haadic.io.readers.tools import parse
 
 
 @dataclass
@@ -56,10 +57,10 @@ class LayerMap(Transformer):
 
     def start(self, start) -> dict[str, Map]:
         """Convert the start token to a dictionary mapping layer names to Map objects."""
-        map_d: dict[str, Map] = dict()
+        map_d: dict[str, Map] = {}
         for layer in start:
             name = layer[0].lower()
-            if name in map_d.keys():
+            if name in map_d:
                 map_d[name].types.update({layer[-1]: layer[1]})
             else:
                 map_d[name] = Map({layer[-1]: layer[1]}, layer[-2])

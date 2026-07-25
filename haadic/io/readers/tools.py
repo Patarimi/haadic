@@ -1,9 +1,9 @@
 """General tools to help parse file with lark."""
 
+from os.path import dirname, join
 from pathlib import Path
 
 from lark import Lark, Tree
-from os.path import join, dirname
 
 
 def parse(file: str | Path, template: str = "spice") -> Tree:

@@ -1,9 +1,10 @@
-import pytest
 from difflib import unified_diff
-from haadic.io.wrappers.tools import to_wsl
+
+import pytest
 
 from haadic._config import REF_PATH
 from haadic.io.handlers.netlist import Component, Netlist
+from haadic.io.wrappers.tools import to_wsl
 
 
 def test_component():

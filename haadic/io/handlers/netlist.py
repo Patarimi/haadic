@@ -1,13 +1,14 @@
 """Spice netlist writer."""
 
 import logging
-from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Literal, Optional, Self
+from pathlib import Path
+from typing import Literal, Self
 
-from haadic.io.wrappers.tools import to_wsl
 from haadic.core.tools import eng
+from haadic.io.wrappers.tools import to_wsl
 
+logger = logging.getLogger(__name__)
 
 Unit = {
     "L": "H",
@@ -45,7 +46,7 @@ class Component:
         :param value: the value of the component, as a string (e.g., "1k", "10u", etc.). It can be split in several parts if it contains spaces (e.g., "1 k" will be parsed as 1k).
         """
         if name[0].upper() not in ComponentList:
-            logging.error(
+            logger.error(
                 f"Could not initialize component {name} between nodes {node1} and {node2} with value: {' '.join(str(v) for v in value)}"
             )
             raise ValueError(
@@ -54,7 +55,7 @@ class Component:
         self.type = name[0].upper()  # type: ignore
         self.name = name[1:]
         self.node = (node1, node2)
-        logging.debug(
+        logger.debug(
             f"Initializing component {name} between nodes {node1} and {node2} with value: {value}"
         )
         if len(value) == 1:
@@ -115,7 +116,7 @@ class Netlist:
             lines = f.readlines()
         self.name = lines.pop(0).strip("*").strip()
         for line in lines:
-            if line.startswith("*") or line.lstrip() == "" or line.startswith(".endc"):
+            if line.startswith(("*", ".endc")) or line.lstrip() == "":
                 block = "comment"
                 # comment or empty line, ignore
                 continue
@@ -132,7 +133,7 @@ class Netlist:
                     break
             match block:
                 case "circuit":
-                    logging.debug(f"Parsing component line: {line.strip()}")
+                    logger.debug(f"Parsing component line: {line.strip()}")
                     self.circuit.append(Component(*line.split()))
                 case "control":
                     self.controls.append(line.rstrip())
@@ -161,7 +162,7 @@ class Netlist:
         """
         self.others.append((command, other))
 
-    def add_lib(self, lib_path: Path | str, section: Optional[str] = None) -> None:
+    def add_lib(self, lib_path: Path | str, section: str | None = None) -> None:
         """
         Add a library definition in the netlist.
 
@@ -170,7 +171,7 @@ class Netlist:
         :return: None.
         """
         if self.is_in_other(".lib", Path(lib_path)):
-            return None
+            return
         item = ["'" + to_wsl(lib_path) + "'"]
         if section is not None:
             item.append(section)
@@ -184,7 +185,7 @@ class Netlist:
         :return: None.
         """
         if self.is_in_other(".include", Path(include_path)):
-            return None
+            return
         self.add_other(".include", to_wsl(include_path))
 
     def is_in_other(self, key: str, file: Path) -> bool:

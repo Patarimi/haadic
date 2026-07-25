@@ -1,9 +1,10 @@
 """Module for common rf functions and utilities."""
 
-from typing import Sequence
+from collections.abc import Sequence
+
 import numpy as np
-from skrf.media import Media
 from skrf import Network
+from skrf.media import Media
 
 from haadic.io.handlers.netlist import Component
 

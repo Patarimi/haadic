@@ -2,13 +2,13 @@
 
 import logging
 import os
-from typing import Optional
-from cyclopts import App
 from pathlib import Path
 
+from cyclopts import App
+
 from haadic._config import DATA_DIR
-from haadic.core.steps.step import cleanup
 from haadic.core import techno
+from haadic.core.steps.step import cleanup
 from haadic.design.components.ekv import EKV
 
 # Skip logging configuration if it is already done (eg during tests)
@@ -23,6 +23,8 @@ if not logging.getLogger().hasHandlers():
         format="|%(levelname)-7s| %(filename)s:%(lineno)d | %(message)s",
     )
 
+logger = logging.getLogger(__name__)
+
 app = App(name="haadic")
 app.command(techno.pkd_app)
 
@@ -32,17 +34,17 @@ app.command(cleanup, name="clean")
 @app.command(name="smoke-test")
 def smoke_test_cli():
     """Run a 'smoke test' to check if haadic is installed correctly."""
-    from haadic.io.wrappers.tools import nix_check
+    from haadic.io.wrappers.tools import nix_check  # ruff ignore [PCL0415]
 
     if not nix_check():
         raise SystemError(f"Error during nix check. Please check {log_path}.")
-    logging.info("haadic installed correctly !")
+    logger.info("haadic installed correctly !")
 
 
 @app.command(name="extract-ekv")
 def extract_ekv_cli(
     techno_name: techno.Available_PDK,
-    output: Optional[Path] = None,
+    output: Path | None = None,
     rf: bool = True,
     force: bool = False,
 ) -> EKV:
@@ -60,7 +62,7 @@ def extract_ekv_cli(
         output.parent.mkdir(parents=True, exist_ok=True)
     ekv = EKV(techno=techno_name)
     if not output.is_file() or force:
-        logging.info(
+        logger.info(
             f"Extracting EKV model for {techno_name} and saving it in {output}."
         )
         ekv.extract_model(output.parent, rf=rf)

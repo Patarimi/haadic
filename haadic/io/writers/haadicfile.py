@@ -1,15 +1,20 @@
 """Dataclass for haadic process information."""
 
-from haadic._config import DATA_DIR
-from haadic.io.readers.tlef import load_tlef
-from haadic.io.readers.layermap import load_map
-from pathlib import Path
 import json
 import logging
-from haadic.core.techno import Available_PDK, get_file, add_reference
-from typing import Self, Sequence, override, Generator
+from collections.abc import Generator, Sequence
 from dataclasses import dataclass, field, fields
+from pathlib import Path
+from typing import Self, override
+
 from klayout.db import LayerInfo
+
+from haadic._config import DATA_DIR
+from haadic.core.techno import Available_PDK, add_reference, get_file
+from haadic.io.readers.layermap import load_map
+from haadic.io.readers.tlef import load_tlef
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -125,7 +130,7 @@ class LayerStack:
         if self.use_json and get_file(self.techno, "haadic").is_file():
             path_json = get_file(self.techno, "haadic")
             self.load_from_json(path_json)
-            logging.info(f"LayerStack loaded from {path_json}")
+            logger.info(f"LayerStack loaded from {path_json}")
         else:
             path = get_file(self.techno, "techlef")
             self.load_from_tlef(path)
@@ -137,7 +142,7 @@ class LayerStack:
         if self.use_json and not path_json.is_file():
             add_reference(self.techno, "haadic", Path(f"{self.techno}.json"))
             self.export_to_json(path_json)
-            logging.info(f"LayerStack exported to {path_json}")
+            logger.info(f"LayerStack exported to {path_json}")
 
     def __len__(self):
         """Return the number of routing layers in the stack."""
@@ -222,10 +227,8 @@ class LayerStack:
     def next(self) -> Generator[Layer, None, None]:
         """Iterate over the routing layers in the stack."""
         yield self._gate
-        for lyr in self._stack:
-            yield lyr
-        for vlyr in self._via_list:
-            yield vlyr
+        yield from self._stack
+        yield from self._via_list
         yield self._pad
         yield self._nplus
         yield self._pplus
@@ -240,10 +243,10 @@ class LayerStack:
         """
         patch_file = DATA_DIR / "patches" / f"{self.techno}.json"
         if not Path(patch_file).is_file():
-            logging.info(f"No patch file found at {patch_file}.")
+            logger.info(f"No patch file found at {patch_file}.")
             return
         self.load_from_json(patch_file)
-        logging.info(f"Patch file {patch_file} applied to LayerStack.")
+        logger.info(f"Patch file {patch_file} applied to LayerStack.")
 
     def load_from_json(self, path_json: Path | str):
         """Load the layer stack information from a JSON file."""
@@ -294,18 +297,18 @@ class LayerStack:
             elif layer.type == "NWELL":
                 self._nplus = Layer(layer=0, name=layer.name)
             else:
-                logging.error(f"Unknown layer type: {layer}")
+                logger.error(f"Unknown layer type: {layer}")
 
         if self._stack[-1].name[0] in ("m", "v") or isinstance(
             self._stack[-1], ViaLayer
         ):
-            logging.warning("No Pad layer detected")
-            logging.debug("".join("\t" + lyr.name for lyr in self._stack))
+            logger.warning("No Pad layer detected")
+            logger.debug("".join("\t" + lyr.name for lyr in self._stack))
             self._pad = default_layer()
         else:
             self._pad = self._stack.pop(-1)
-            logging.debug(f"{self._pad.name} set as Pad layer")
-        logging.info("".join("\t" + lyr.name for lyr in self._stack))
+            logger.debug(f"{self._pad.name} set as Pad layer")
+        logger.info("".join("\t" + lyr.name for lyr in self._stack))
 
     def load_from_layermap(self, path: Path):
         """Load the layer numbers for GDSSI export from a layer map file."""
@@ -319,7 +322,7 @@ class LayerStack:
                     ["pin", "lefpin"],
                 )
             except KeyError as e:
-                logging.warning(f"{e}")
+                logger.warning(f"{e}")
             self._stack[i].layer = layer_info.layer
             self._stack[i].datatype = layer_info.datatype
             self._stack[i]._pin = layer_info._pin
@@ -329,7 +332,7 @@ class LayerStack:
                     self._via_list[i].name, ["drawing", "net", "via"], path
                 )
             except KeyError as e:
-                logging.warning(f"{e}")
+                logger.warning(f"{e}")
             self._via_list[i].layer = layer_info.layer
             self._via_list[i].datatype = layer_info.datatype
 
@@ -355,7 +358,7 @@ def get_info_from_layermap(
     :return: Layer object corresponding to the requested layer name.
     """
     layers_map = load_map(path)
-    keys = [k for k in layers_map.keys()]
+    keys = [k for k in layers_map]
     layer_name = layer_name.lower()
     if layer_name not in keys:
         raise KeyError(
@@ -364,13 +367,13 @@ def get_info_from_layermap(
     lyr = Layer(layer=0, name=layer_name)
     dtypes = layers_map[layer_name].types
     for dtype in valid_drawing_types:
-        for key in dtypes.keys():
+        for key in dtypes:
             if dtype.lower() in dtypes[key]:
                 lyr.layer = layers_map[layer_name].layer
                 lyr.datatype = key
                 continue
     for dtype in valid_pin_types:
-        for key in dtypes.keys():
+        for key in dtypes:
             if dtype.lower() in dtypes[key]:
                 lyr._pin = key
     if lyr.layer == 0:

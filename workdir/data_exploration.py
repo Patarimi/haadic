@@ -1,12 +1,12 @@
 """Script to explore the data from the simulations and find simplified models for the parameters."""
 
+from collections.abc import Sequence
 from itertools import product
 from pathlib import Path
-from typing import Sequence
 
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 
 def load_data(files: Sequence[Path]) -> pd.DataFrame:
@@ -38,7 +38,7 @@ def load_dis(config: str) -> pd.DataFrame:
 
 if __name__ == "__main__":
     # chargement des données
-    for level in {"NoPar", "RC"}:
+    for level in ("NoPar", "RC"):
         data = load_dis(level)
 
         W_f = data["width"]

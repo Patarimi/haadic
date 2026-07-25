@@ -1,12 +1,12 @@
 """Functions to generate micro-strip lines and couplers. These functions can be used to create cells that can be exported as gds files."""
 
+from collections.abc import Sequence
+
+from haadic.design.layouts import general as gen
 from haadic.design.layouts.base_cell import BaseCell
 
-from typing import Sequence
-
+from .general import via, via_stack
 from .tools import Port
-from .general import via_stack, via
-from haadic.design.layouts import general as gen
 
 
 def straight_line(

@@ -1,16 +1,16 @@
 """Sweep script for active device parameters extraction and analysis."""
 
 from itertools import product
-
-from rich import print
-import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib import ticker
 from pathlib import Path
+
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+from gen_active import benches, dimensions, layout, postprocess
+from matplotlib import ticker
+from rich import print
 
 from haadic.core.flow import ConfigFlow, Flow
-from gen_active import layout, benches, postprocess, dimensions
 
 options = ConfigFlow()
 options.reload = True
@@ -20,7 +20,7 @@ sweep = {
     "width": np.linspace(1, 8, 8),
     "length": 0.18 * np.linspace(1, 8, 8),
 }
-for key in sweep.keys():
+for key, val in sweep.items():
     fig = plt.figure()
     axs = fig.subplot_mosaic("AB;AC;AD", sharex=True)
     extracts = ["RC", "NoPar"]
@@ -32,7 +32,7 @@ for key in sweep.keys():
             "linestyle": "--" if extract == "NoPar" else "-",
             "marker": "o" if extract != "NoPar" else None,
         }
-        for dim in sweep[key]:
+        for dim in val:
             print(
                 f"Sweeping {key}={dim:.2f} µm with extract option: [blue]{extract}[/]"
             )

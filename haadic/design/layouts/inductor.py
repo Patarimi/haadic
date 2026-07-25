@@ -1,11 +1,13 @@
 """Functions to generate inductors. These functions can be used to create cells that can be exported as gds files."""
 
-from numpy import tan, pi
-from typing import Optional
 import logging
 
-from haadic.design.layouts.base_cell import BaseCell
+from numpy import pi, tan
+
 import haadic.design.layouts.general as gen
+from haadic.design.layouts.base_cell import BaseCell
+
+logger = logging.getLogger(__name__)
 
 
 def octagonal_inductor(
@@ -18,7 +20,7 @@ def octagonal_inductor(
     pin_name: tuple[str, str] = ("P1", "P2"),
     port_ext: float = 15,
     port_gap: float = -1,
-    bridge_nb: Optional[int] = None,
+    bridge_nb: int | None = None,
 ) -> BaseCell:
     """
     Generate a multi-turn octagonal inductor.
@@ -53,7 +55,7 @@ def octagonal_inductor(
         d_a = d_i + width + 2 * i * (width + gap)
         end = i == n_turn - 1
         start = i == 0
-        logging.debug(
+        logger.debug(
             f"{end=}\t{even_turn=} {0 if (not end) and even_turn else p_gap / 2}"
         )
 

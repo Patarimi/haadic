@@ -1,11 +1,12 @@
 """Module defining the Extract step, which performs layout extraction to generate a SPICE netlist from a GDSII layout."""
 
-from haadic.core.steps.step import Step
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Sequence
-from haadic.io.wrappers.magic import ExtractLevels, extract_spice
 from pathlib import Path
-from haadic.core.techno import get_file, Available_PDK
+
+from haadic.core.steps.step import Step
+from haadic.core.techno import Available_PDK, get_file
+from haadic.io.wrappers.magic import ExtractLevels, extract_spice
 
 
 @dataclass

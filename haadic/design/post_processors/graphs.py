@@ -1,8 +1,9 @@
 """Graph generator."""
 
-from typing import Sequence, Literal
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 import matplotlib.pyplot as plt
 import numpy as np

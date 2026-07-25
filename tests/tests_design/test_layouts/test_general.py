@@ -1,9 +1,9 @@
 import klayout.db as kl
 
-from haadic.design.layouts import general as gen
-from haadic.core.tools import diff_gds
-from haadic.io.writers.haadicfile import LayerStack
 from haadic._config import REF_PATH
+from haadic.core.tools import diff_gds
+from haadic.design.layouts import general as gen
+from haadic.io.writers.haadicfile import LayerStack
 
 stack = LayerStack("mock")  # ty:ignore[invalid-argument-type]
 

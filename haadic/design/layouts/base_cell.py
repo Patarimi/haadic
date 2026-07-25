@@ -1,13 +1,13 @@
 """BaseCell is a wrapper around klayout cell with technological information."""
 
-from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Self, Literal
+from pathlib import Path
+from typing import Literal, Self
 
 from klayout import db as kdb
 
 from haadic.core.techno import Available_PDK
-from haadic.io.writers.haadicfile import LayerStack, Layer, ViaLayer
+from haadic.io.writers.haadicfile import Layer, LayerStack, ViaLayer
 
 
 @dataclass(slots=True)
@@ -117,7 +117,7 @@ class BaseCell:
             raise ValueError(
                 f"Cannot insert cell with different technology: {cell.techno} vs {self.techno}"
             )
-        if isinstance(spacing, float) or isinstance(spacing, int):
+        if isinstance(spacing, (float, int)):
             spacing = (spacing, spacing)
         dest_cell = self._layout.create_cell(cell.name)
         dest_cell.copy_tree(cell._top)
