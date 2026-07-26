@@ -1,7 +1,6 @@
 """Contains the main entry point of the haadic package, which is the command line interface (CLI) defined using the cyclopts library. It also contains some utility functions for the CLI commands."""
 
 import logging
-import os
 from pathlib import Path
 
 from cyclopts import App
@@ -11,8 +10,10 @@ from haadic.core import techno
 from haadic.core.steps.step import cleanup
 from haadic.design.components.ekv import EKV
 
+CUR_DIR = Path().cwd()
+
 # Skip logging configuration if it is already done (eg during tests)
-log_path = os.path.join(os.path.curdir, "haadic.log")
+log_path = CUR_DIR / "haadic.log"
 if not logging.getLogger().hasHandlers():
     logging.basicConfig(
         level=logging.INFO,
@@ -71,12 +72,17 @@ def extract_ekv_cli(
 
 
 @app.command(name="new")
-def template(output_dir: Path = Path(os.curdir), no_input: bool = False) -> None:
+def template(output_dir: Path = CUR_DIR, no_input: bool = False) -> None:
     """Create a new project using the haadic template."""
     import subprocess
 
     template_dir = DATA_DIR / "template"
-    cmd = ["uvx", "cookiecutter", template_dir, "--output-dir", output_dir]
+    cmd = ["uvx", "cookiecutter", str(template_dir), "--output-dir", str(output_dir)]
     if no_input:
         cmd.append("--no-input")
-    subprocess.run(cmd, check=True)
+    try:
+        subprocess.run(cmd, check=True)
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Failed to run cookiecutter. Error: {' '.join(cmd)}")
+        logger.error(e)
+        raise SystemExit(1)
