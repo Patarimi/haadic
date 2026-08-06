@@ -35,7 +35,7 @@ app.command(cleanup, name="clean")
 @app.command(name="smoke-test")
 def smoke_test_cli():
     """Run a 'smoke test' to check if haadic is installed correctly."""
-    from haadic.io.wrappers.tools import nix_check  # ruff ignore [PCL0415]
+    from nixthon.core import nix_check  # ruff ignore [PCL0415]
 
     if not nix_check():
         raise SystemError(f"Error during nix check. Please check {log_path}.")

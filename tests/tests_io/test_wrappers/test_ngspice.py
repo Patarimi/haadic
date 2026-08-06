@@ -4,10 +4,10 @@ from filecmp import cmp
 from pathlib import Path
 
 import pytest
+from nixthon.core import nix_check
 
 from haadic._config import REF_PATH
 from haadic.io.wrappers.ngspice import compute
-from haadic.io.wrappers.tools import nix_check
 
 
 @pytest.mark.skipif(not nix_check(), reason="Nix not correctly installed")

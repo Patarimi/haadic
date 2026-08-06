@@ -7,9 +7,9 @@ from subprocess import CalledProcessError
 from typing import Literal
 
 import klayout.db as kl
+from nixthon.core import nix_run, to_wsl
 
 from haadic.core.techno import PDK_INSTALL_DIR
-from haadic.io.wrappers.tools import nix_run, to_wsl
 
 ExtractLevels = Literal["NoPar", "Ronly", "COnly", "RC"]
 
@@ -86,7 +86,7 @@ def extract_spice(
         to_wsl(tcl_file),
     ]
     logger.info("Extraction with command: " + " ".join(cmd))
-    proc = nix_run(cmd)
+    proc = nix_run(cmd, pkgs="magic-vlsi")
     logger.debug(proc.stdout)
     try:
         proc.check_returncode()

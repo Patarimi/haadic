@@ -4,7 +4,7 @@ import logging
 from fileinput import FileInput
 from pathlib import Path
 
-from haadic.io.wrappers.tools import nix_check, nix_run, to_wsl
+from nixthon.core import nix_check, nix_run, to_wsl
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ def compute(
         "-o",
         to_wsl(log_file),
     ]
-    proc = nix_run(cmd)
+    proc = nix_run(cmd, pkgs="ngspice")
     if proc.returncode != 0:
         logger.warning(cmd)
         with open(log_file) as f:
