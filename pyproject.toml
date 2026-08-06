@@ -40,7 +40,7 @@ haadic = "haadic.main:app"
 update_show = "uv lock --dry-run --upgrade"
 update_all = "uv sync --upgrade --all-groups --all-extras"
 test = 'pytest --basetemp=tmp'
-cover = "pytest --basetemp=tmp --cov-report term-missing:skip-covered --cov=haadic -n auto"
+cover = "pytest --basetemp=tmp --cov-report term-missing:skip-covered --cov=haadic"
 publish = "poetry publish --build --username __token__ --password $PYPI_TOKEN"
 doc = "mkdocs build"
 
