@@ -4,8 +4,6 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from nixthon.core import to_wsl
-
 from haadic.core.steps.step import Step, can_skip
 from haadic.core.techno import Available_PDK, get_file, load_pdk
 from haadic.io.handlers.netlist import Netlist
@@ -56,7 +54,7 @@ class BenchSim(Step):
 
         spice = Netlist().load(bench)
         section = load_pdk(techno).get("section", "tt")
-        spice.add_lib(to_wsl(get_file(techno, "lib_spice")), section)
+        spice.add_lib(get_file(techno, "lib_spice"), section)
 
         spice.add_include(input_file)
         spice.write(data_file.with_name(bench.name))
