@@ -7,7 +7,7 @@ readme = "docs/README.md"
 requires-python = ">3.12,<3.14"
 dependencies = [
     "ciel>=2.6.0",
-    "cyclopts>=4.22.3",
+    "cyclopts>=4.22.5",
     "klayout>=0.30.10",
     "lark>=1.2.2",
     "matplotlib>=3.11.1",
@@ -78,7 +78,7 @@ dev = [
     "pytest-xdist>=3.8.0",
 ]
 doc = [
-    "cyclopts[mkdocs]>=4.22.3",
+    "cyclopts[mkdocs]>=4.22.5",
     "mkdocs>=1.6.1",
     "mkdocs-api-autonav>=0.4.0",
     "mkdocs-material>=9.7.7",
