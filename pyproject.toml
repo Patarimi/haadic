@@ -78,7 +78,7 @@ dev = [
     "pytest-xdist>=3.8.0",
 ]
 doc = [
-    "cyclopts[mkdocs]>=4.22.3",
+    "cyclopts[mkdocs]>=4.22.5",
     "mkdocs>=1.6.1",
     "mkdocs-api-autonav>=0.4.0",
     "mkdocs-material>=9.7.7",
