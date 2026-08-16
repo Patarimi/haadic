@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from typing import Literal
 
 import pandas as pd
 
@@ -34,6 +35,9 @@ def parse_raw(results: Path) -> pd.DataFrame:
     return df
 
 
+type Bloc = Literal["Header", "Variables", "Values"]
+
+
 def parse_out(results: Path) -> pd.DataFrame:
     """
     Read ngspice output (in multiline output format) and load it in a dataframe.
@@ -43,33 +47,60 @@ def parse_out(results: Path) -> pd.DataFrame:
     """
     data = {}
     keys = []
-    current_bloc = "Header"
-    is_complex = False
+    current_bloc: Bloc = "Header"
     with open(results, "r") as f:
-        for num, line in enumerate(f.readlines()):
-            words = line.split()
-            if len(words) == 1 and words[0].endswith(":"):
-                current_bloc = words[0].rstrip(":")
+        for line in f:
+            if starting_variable(line):
+                current_bloc = "Variables"
                 continue
-            if current_bloc == "Variables":
-                data[words[1]] = []
-                keys.append(words[1])
-            if current_bloc == "Values" and len(words) == 2:
-                index = 0
-                if "," in words[1]:
-                    cmplx = words[1].split(",")
-                    data[keys[index]].append(float(cmplx[0]) + 1j * float(cmplx[1]))
-                    is_complex = True
-                else:
-                    data[keys[index]].append(words[1])
-            if current_bloc == "Values" and len(words) == 1:
-                index += 1
-                if "," in words[0]:
-                    cmplx = words[0].split(",")
-                    data[keys[index]].append(float(cmplx[0]) + 1j * float(cmplx[1]))
-                    is_complex = True
-                else:
-                    data[keys[index]].append(words[0])
-    df = pd.DataFrame(data=data, dtype=float if not is_complex else complex)
+            if starting_values(line):
+                current_bloc = "Values"
+                continue
+            words = line.split()
+            match current_bloc:
+                case "Variables":
+                    data[words[1]] = []
+                    keys.append(words[1])
+                case "Values" if len(words) == 2:
+                    index = 0
+                    data[keys[index]].append(parse_values(words[1]))
+                case "Values" if len(words) == 1:
+                    index += 1
+                    data[keys[index]].append(parse_values(words[0]))
+    df = pd.DataFrame(data=data)
     logger.debug(df.info)
     return df
+
+
+def starting_variable(line: str) -> bool:
+    """
+    Check if a line indicates the start of a variable section.
+
+    :param line: The line to check.
+    :return: True if the line indicates the start of a variable section, False otherwise.
+    """
+    return line.startswith("Variables:")
+
+
+def starting_values(line: str) -> bool:
+    """
+    Check if a line indicates the start of a values section.
+
+    :param line: The line to check.
+    :return: True if the line indicates the start of a values section, False otherwise.
+    """
+    return line.startswith("Values:")
+
+
+def parse_values(word: str) -> complex | float:
+    """
+    Parse a string into a complex or float number.
+
+    :param word: The string to parse.
+    :return: The parsed number.
+    """
+    if "," in word:
+        cmplx = word.split(",")
+        return float(cmplx[0]) + 1j * float(cmplx[1])
+    else:
+        return float(word)
