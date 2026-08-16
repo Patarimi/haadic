@@ -30,6 +30,7 @@ def test_netlist(tmp_path):
 C5 gnd 5 5.000 pF
 
 .lib '{to_wsl("test.lib")}'
+.end
 
 .control
 run

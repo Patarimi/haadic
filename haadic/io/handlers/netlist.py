@@ -46,7 +46,7 @@ class Component:
         :param node2: the second node of the component.
         :param value: the value of the component, as a string (e.g., "1k", "10u", etc.). It can be split in several parts if it contains spaces (e.g., "1 k" will be parsed as 1k).
         """
-        if name[0].upper() not in ComponentList:
+        if not is_component(name):
             logger.error(
                 f"Could not initialize component {name} between nodes {node1} and {node2} with value: {' '.join(str(v) for v in value)}"
             )
@@ -112,36 +112,28 @@ class Netlist:
         :param spice_file: path of the spice file to load.
         :return: the Netlist instance with the content of the spice file.
         """
-        block: Literal["circuit", "control", "other", "comment"] = "comment"
+        block: Literal["control", "other", "circuit"] = "circuit"
         with open(spice_file, "r") as f:
             lines = f.readlines()
         self.name = lines.pop(0).strip("*").strip()
         for line in lines:
-            if line.startswith(("*", ".endc")) or line.lstrip() == "":
-                block = "comment"
-                # comment or empty line, ignore
+            if is_comment(line):
+                block = "circuit"
                 continue
-            if line.startswith(".control"):
+            if is_control_bloc(line):
                 block = "control"
                 continue
-            for command in OtherList:
-                if line.startswith(command) and not line.startswith(".endc"):
-                    block = "other"
-                    break
-            for component in ComponentList:
-                if line.startswith(component):
-                    block = "circuit"
-                    break
+            if other_command(line) is not None:
+                command = other_command(line)
+                block = "other"
             match block:
-                case "circuit":
+                case "circuit" if is_component(line):
                     logger.debug(f"Parsing component line: {line.strip()}")
                     self.circuit.append(Component(*line.split()))
                 case "control":
                     self.controls.append(line.rstrip())
                 case "other":
-                    self.add_other(command, line.rstrip().lstrip(command).strip())
-                    if command.startswith(".end"):
-                        block = "comment"
+                    self.add_other(command, line.rstrip().lstrip(command).strip())  # ty: ignore[invalid-argument-type]
         return self
 
     def add_component(self, component: Component):
@@ -211,7 +203,7 @@ class Netlist:
             spice += (
                 "\n"
                 + "\n".join([f"{cmd} {args}".strip() for cmd, args in self.others])
-                + "\n"
+                + "\n.end\n"
             )
         if self.controls:
             spice += "\n.control\n"
@@ -228,3 +220,47 @@ class Netlist:
         with open(filename, "w") as f:
             f.write(self.spice())
         return Path(filename)
+
+
+def is_comment(line: str) -> bool:
+    """
+    Check if a line is a comment or empty.
+
+    :param line: the line to check.
+    :return: True if the line is a comment or empty, False otherwise.
+    """
+    return line.startswith(("*", ".end")) or line.lstrip() == ""
+
+
+def other_command(line: str) -> OtherComponent | None:
+    """
+    Check if a line is an 'other' command (not a component and not in the control section) and return the command if it is, None otherwise.
+
+    :param line: the line to check.
+    :return: The 'other' command if the line is an 'other' command, None otherwise.
+    """
+    cmd = line.split(" ")[0].lower()
+    if cmd in OtherList:
+        return cmd
+    return None
+
+
+def is_component(line: str) -> bool:
+    """
+    Check if a line is a component line (not an 'other' command and not in the control section).
+
+    :param line: the line to check.
+    :return: True if the line is a component line, False otherwise.
+    """
+    comp = line[0].upper()
+    return comp in ComponentList
+
+
+def is_control_bloc(line: str) -> bool:
+    """
+    Check if a line is a control line (not an 'other' command and not in the circuit section).
+
+    :param line: the line to check.
+    :return: True if the line is a control line, False otherwise.
+    """
+    return line.startswith(".control")
