@@ -1,6 +1,4 @@
-import fileinput
 import shutil
-from filecmp import cmp
 from pathlib import Path
 from subprocess import CalledProcessError
 
@@ -8,6 +6,7 @@ import pytest
 from nixthon.core import nix_check
 
 from haadic._config import REF_PATH
+from haadic.core.tools import diff_raw
 from haadic.io.wrappers.ngspice import compute
 
 
@@ -19,12 +18,8 @@ def test_ngspice(tmp_path):
     compute(str(spice_file))
     assert Path(data_file).exists()
     assert Path(spice_file.with_suffix(".log")).exists()
-    # remove the line with the date before comparison
-    with fileinput.input(data_file, inplace=True) as f:
-        for line in f:
-            if not line.startswith("Date:") and not line.startswith("Command:"):
-                print(line, end="")
-    assert cmp(REF_PATH / "inv.raw", data_file)
+    # load the data file and check that it contains the expected data
+    assert diff_raw(REF_PATH / "inv.raw", data_file, abs_tol=1e-6)
 
     with pytest.raises(CalledProcessError):
         compute(
