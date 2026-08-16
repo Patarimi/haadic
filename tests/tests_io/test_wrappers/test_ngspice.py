@@ -2,6 +2,7 @@ import fileinput
 import shutil
 from filecmp import cmp
 from pathlib import Path
+from subprocess import CalledProcessError
 
 import pytest
 from nixthon.core import nix_check
@@ -25,7 +26,7 @@ def test_ngspice(tmp_path):
                 print(line, end="")
     assert cmp(REF_PATH / "inv.raw", data_file)
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(CalledProcessError):
         compute(
             REF_PATH / "ref_sky130_fd.cir",
             tmp_path / "data.raw",
