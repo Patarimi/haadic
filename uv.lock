@@ -335,6 +335,7 @@ source = { editable = "." }
 dependencies = [
     { name = "ciel" },
     { name = "cyclopts" },
+    { name = "jinja2" },
     { name = "klayout" },
     { name = "lark" },
     { name = "matplotlib" },
@@ -368,6 +369,7 @@ doc = [
 requires-dist = [
     { name = "ciel", specifier = ">=2.6.0" },
     { name = "cyclopts", specifier = ">=4.22.5" },
+    { name = "jinja2", specifier = ">=3.1.6" },
     { name = "klayout", specifier = ">=0.30.10" },
     { name = "lark", specifier = ">=1.2.2" },
     { name = "matplotlib", specifier = ">=3.11.1" },

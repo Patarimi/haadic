@@ -7,6 +7,7 @@ from subprocess import CalledProcessError
 from typing import Literal
 
 import klayout.db as kl
+from jinja2 import Environment, PackageLoader
 from nixthon.core import nix_run, to_wsl
 
 from haadic.core.techno import PDK_INSTALL_DIR
@@ -53,29 +54,19 @@ def extract_spice(
         logger.info(
             f"Available cells in the layout:{[cell.name for cell in layout.top_cells()]}"
         )
-    tcl_template = Path(dirname(__file__)) / "magic_extract.tcl"
-    with open(tcl_template, "r") as f:
-        buff_out = []
-        for line in f:
-            if "{gds_file}" in line:
-                line = line.replace("{gds_file}", to_wsl(gds_file))
-            if "{top_cell}" in line:
-                line = line.replace("{top_cell}", cell_name)
-            if "{output_file}" in line:
-                line = line.replace("{output_file}", to_wsl(output_path))
-            if "{root_path}" in line:
-                line = line.replace("{root_path}", to_wsl(root_path))
-            if "cthresh" in line:
-                thresh = "0.1" if options in ("COnly", "RC") else "infinite"
-                line = f"ext2spice cthresh {thresh}\n"
-            if "ext2spice extresist" in line:
-                toggle = "on" if options in ("ROnly", "RC") else "off"
-                line = f"ext2spice extresist {toggle}\n"
-            buff_out.append(line)
+    env = Environment(loader=PackageLoader("haadic"))
+    template = env.get_template("magic_extract.tcl")
+    stream = template.stream(
+        gds_file=to_wsl(gds_file),
+        top_cell=cell_name,
+        output_file=to_wsl(output_path),
+        root_path=to_wsl(root_path),
+        thresh="0.1" if options in ("COnly", "RC") else "infinite",
+        toggle="on" if options in ("ROnly", "RC") else "off",
+    )
     tcl_file = output_path.with_suffix(".tcl")
     logger.info(tcl_file)
-    with open(tcl_file, "w") as f:
-        f.writelines(buff_out)
+    stream.dump(str(tcl_file))
     logger.info(f"Command file generated: {tcl_file}")
     cmd = [
         f"export PDK_ROOT={to_wsl(PDK_INSTALL_DIR)} &&",
