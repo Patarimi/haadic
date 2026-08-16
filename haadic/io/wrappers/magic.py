@@ -14,6 +14,7 @@ from haadic.core.techno import PDK_INSTALL_DIR
 ExtractLevels = Literal["NoPar", "Ronly", "COnly", "RC"]
 
 logger = logging.getLogger(__name__)
+CURRENT_DIR = Path(__file__).parent
 
 
 def extract_spice(
@@ -86,7 +87,7 @@ def extract_spice(
         to_wsl(tcl_file),
     ]
     logger.info("Extraction with command: " + " ".join(cmd))
-    proc = nix_run(cmd, pkgs="magic-vlsi")
+    proc = nix_run(cmd, nix_file=CURRENT_DIR / "shell.nix")
     logger.debug(proc.stdout)
     try:
         proc.check_returncode()
