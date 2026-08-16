@@ -6,6 +6,8 @@ from pathlib import Path
 import numpy as np
 from klayout import db as kl
 
+from haadic.io.readers.raw import parse_out
+
 logger = logging.getLogger(__name__)
 
 
@@ -108,3 +110,17 @@ def eng(x: float, precision: int = 3, prefix: bool = True) -> str:
         return f"{x * 10 ** (-3 * pw):.{precision}f} {ref[pw]}"
     else:
         return f"{x * 10 ** (-3 * pw):.{precision}f}e{3 * pw}"
+
+
+def diff_raw(raw1: Path, raw2: Path, abs_tol: float = 1e-12) -> bool:
+    """
+    Check if two raw (ngspice output) files are identical.
+
+    :param raw1: Path to the first file.
+    :param raw2: Path to the second file.
+    :param abs_tol: Absolute tolerance for the comparison.
+    :return: True if the files are identical, False otherwise.
+    """
+    data1 = parse_out(raw1)
+    data2 = parse_out(raw2)
+    return np.allclose(data1, data2, atol=abs_tol)

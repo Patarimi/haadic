@@ -11,6 +11,7 @@ dependencies = [
     "klayout>=0.30.10",
     "lark>=1.2.2",
     "matplotlib>=3.11.1",
+    "nixthon",
     "numpy>=2.5.0",
     "pandas>=3.0.0",
     "pydantic>=2.13.4",
@@ -29,6 +30,9 @@ build-backend = "uv_build"
 [tool.uv.build-backend]
 module-root = ""
 
+[tool.uv.sources]
+nixthon = { git = "https://github.com/Patarimi/nixthon.git" }
+
 [project.scripts]
 haadic = "haadic.main:app"
 
@@ -36,7 +40,7 @@ haadic = "haadic.main:app"
 update_show = "uv lock --dry-run --upgrade"
 update_all = "uv sync --upgrade --all-groups --all-extras"
 test = 'pytest --basetemp=tmp'
-cover = "pytest --basetemp=tmp --cov-report term-missing:skip-covered --cov=haadic -n auto"
+cover = "pytest --basetemp=tmp --cov-report term-missing:skip-covered --cov=haadic"
 publish = "poetry publish --build --username __token__ --password $PYPI_TOKEN"
 doc = "mkdocs build"
 

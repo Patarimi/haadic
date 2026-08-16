@@ -5,8 +5,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal, Self
 
+from nixthon.core import to_wsl
+
 from haadic.core.tools import eng
-from haadic.io.wrappers.tools import to_wsl
 
 logger = logging.getLogger(__name__)
 

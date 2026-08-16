@@ -8,7 +8,6 @@ from haadic.core.steps.step import Step, can_skip
 from haadic.core.techno import Available_PDK, get_file, load_pdk
 from haadic.io.handlers.netlist import Netlist
 from haadic.io.wrappers.ngspice import compute
-from haadic.io.wrappers.tools import to_wsl
 
 
 @dataclass
@@ -55,7 +54,7 @@ class BenchSim(Step):
 
         spice = Netlist().load(bench)
         section = load_pdk(techno).get("section", "tt")
-        spice.add_lib(to_wsl(get_file(techno, "lib_spice")), section)
+        spice.add_lib(get_file(techno, "lib_spice"), section)
 
         spice.add_include(input_file)
         spice.write(data_file.with_name(bench.name))
