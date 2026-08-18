@@ -94,6 +94,8 @@ class Component:
 
 OtherList = (".lib", ".include", ".model", ".save", ".tran", ".end")
 type OtherComponent = Literal[".lib", ".include", ".model", ".save", ".tran", ".end"]
+CircuitList = (".subckt", ".ends")
+type CircuitComponent = Literal[".subckt", ".ends"]
 
 
 @dataclass
@@ -105,7 +107,7 @@ class Netlist:
     """
 
     name: str = ""
-    circuit: list[Component] = field(default_factory=list)
+    circuit: list[Component | str] = field(default_factory=list)
     controls: list[str] = field(default_factory=list)
     others: list[tuple[OtherComponent, str]] = field(default_factory=list)
 
@@ -134,6 +136,8 @@ class Netlist:
                 case "circuit" if is_component(line):
                     logger.debug(f"Parsing component line: {line.strip()}")
                     self.circuit.append(Component(*line.split()))
+                case "circuit" if line.startswith(CircuitList):
+                    self.circuit.append(line)
                 case "control":
                     self.controls.append(line.rstrip())
                 case "other":
@@ -278,7 +282,7 @@ def is_comment(line: str) -> bool:
     :param line: the line to check.
     :return: True if the line is a comment or empty, False otherwise.
     """
-    return line.startswith(("*", ".end")) or line.lstrip() == ""
+    return line.startswith(("*", ".end", ".subckt", ".ends")) or line.lstrip() == ""
 
 
 def other_command(line: str) -> OtherComponent | None:

@@ -15,15 +15,16 @@ def test_ngspice(tmp_path):
     spice_file = tmp_path / "schem_test.net"
     data_file = spice_file.with_suffix(".raw")
     shutil.copy(REF_PATH / "schem_test.net", spice_file)
-    compute(str(spice_file))
+    compute(spice_file)
     assert Path(data_file).exists()
     assert Path(spice_file.with_suffix(".log")).exists()
     # load the data file and check that it contains the expected data
     assert diff_raw(REF_PATH / "inv.raw", data_file, abs_tol=1e-6)
 
+    shutil.copy(REF_PATH / "ref_sky130_fd.cir", spice_file)
     with pytest.raises(CalledProcessError):
         compute(
-            REF_PATH / "ref_sky130_fd.cir",
+            spice_file,
             tmp_path / "data.raw",
             tmp_path / "data.log",
         )
