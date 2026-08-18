@@ -81,7 +81,21 @@ def diff_gds(gds1: str | Path, gds2: str | Path) -> bool:
     return diff.compare(cell1, cell2)
 
 
-def eng(x: float, precision: int = 3, prefix: bool = True) -> str:
+REF = {
+    -5: "f",
+    -4: "p",
+    -3: "n",
+    -2: "µ",
+    -1: "m",
+    0: "",
+    1: "k",
+    2: "M",
+    3: "G",
+    4: "T",
+}
+
+
+def float_to_eng(x: float, precision: int = 3, prefix: bool = True) -> str:
     """
     Convert a number to engineer notation (notation with an exponent multiple of 3).
 
@@ -95,21 +109,28 @@ def eng(x: float, precision: int = 3, prefix: bool = True) -> str:
     """
     pw = int(np.log10(np.abs(x)) // 3)
     if prefix:
-        ref = {
-            -5: "f",
-            -4: "p",
-            -3: "n",
-            -2: "µ",
-            -1: "m",
-            0: "",
-            1: "k",
-            2: "M",
-            3: "G",
-            4: "T",
-        }
-        return f"{x * 10 ** (-3 * pw):.{precision}f} {ref[pw]}"
+        return f"{x * 10 ** (-3 * pw):.{precision}f} {REF[pw]}"
     else:
         return f"{x * 10 ** (-3 * pw):.{precision}f}e{3 * pw}"
+
+
+def eng_to_float(s: str) -> float:
+    """
+    Convert a string in engineer notation to a float.
+
+    For example, "1µ" will be converted to 0.000001, "1k" will be converted to 1000, etc.
+
+    :param s: string to convert
+    :return: float representing the number
+    """
+    try:
+        return float(s)
+    except ValueError:
+        pass
+    for factor, prefix in REF.items():
+        if s.endswith(prefix):
+            return float(s[: -len(prefix)]) * factor
+    raise ValueError(f"String {s} is not a valid engineer notation.")
 
 
 def diff_raw(raw1: Path, raw2: Path, abs_tol: float = 1e-12) -> bool:

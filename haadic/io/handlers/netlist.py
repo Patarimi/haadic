@@ -7,7 +7,7 @@ from typing import Literal, Self
 
 from nixthon.core import to_wsl
 
-from haadic.core.tools import eng
+from haadic.core.tools import eng_to_float, float_to_eng
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +60,11 @@ class Component:
             f"Initializing component {name} between nodes {node1} and {node2} with value: {value}"
         )
         if len(value) == 1:
-            self.value = float(value[0])
+            self.value = (
+                value[0]
+                if isinstance(value[0], (int, float))
+                else eng_to_float(value[0])
+            )
         else:
             self.value = " ".join(str(v) for v in value)
 
@@ -81,7 +85,7 @@ class Component:
         """
         if isinstance(self.value, str):
             return self.value
-        return f"{eng(self.value)}{Unit[self.type]}".strip()
+        return f"{float_to_eng(self.value)}{Unit[self.type]}".strip()
 
     def full_name(self):
         """Get the full name of the component, which is the concatenation of its type and its name."""
@@ -143,6 +147,51 @@ class Netlist:
     def add_control(self, control: str):
         """Add an element to the netlist in the control section."""
         self.controls.append(control)
+
+    def add_write(self, raw_file: Path, output: list[str] | None = None):
+        """Add a write statement to the netlist in the control section."""
+        out_joined = " ".join(output) if output is not None else "all"
+        write_cmds = self.search_control("write")
+        if write_cmds:
+            for cmd in write_cmds:
+                file_path_is_template = "{" in cmd.split(" ")[1]
+                out_joined = (
+                    " ".join(cmd.split(" ")[2:])
+                    if file_path_is_template
+                    else out_joined
+                )
+                self.replace_control(cmd, f"write {to_wsl(raw_file)} {out_joined}")
+        else:
+            self.add_control(f"write {to_wsl(raw_file)} {out_joined}")
+
+    def set_filetype(self, filetype: str = "ASCII"):
+        """Set the filetype in the control section."""
+        if not self.search_control("set filetype"):
+            self.add_control(f"set filetype = {filetype}")
+        else:
+            self.replace_control("set filetype", f"set filetype = {filetype}")
+
+    def search_control(self, control: str) -> list[str]:
+        """
+        Search for a control statement in the netlist.
+
+        :param control: the control statement to search for.
+        :return: True if the control statement is found, False otherwise.
+        """
+        return [c for c in self.controls if control in c]
+
+    def replace_control(self, old_control: str, new_control: str):
+        """
+        Replace a control statement in the netlist.
+
+        :param old_control: the control statement to replace.
+        :param new_control: the new control statement.
+        :return: None
+        """
+        self.controls = [
+            new_control if control.startswith(old_control) else control
+            for control in self.controls
+        ]
 
     def add_other(self, command: OtherComponent, other: str) -> None:
         """

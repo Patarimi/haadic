@@ -7,11 +7,21 @@ from haadic.core import tools
 logger = logging.getLogger(__name__)
 
 
-def test_eng():
-    assert tools.eng(1) == "1.000 "
-    assert tools.eng(1000) == "1.000 k"
-    assert tools.eng(1e-3, prefix=False, precision=0) == "1e-3"
-    assert tools.eng(-1000, precision=2) == "-1.00 k"
+def test_float_to_eng():
+    assert tools.float_to_eng(1) == "1.000 "
+    assert tools.float_to_eng(1000) == "1.000 k"
+    assert tools.float_to_eng(1e-3, prefix=False, precision=0) == "1e-3"
+    assert tools.float_to_eng(-1000, precision=2) == "-1.00 k"
+
+
+def test_eng_to_float():
+    assert tools.eng_to_float("1k") == 1000
+    assert tools.eng_to_float("1.5M") == 1.5e6
+    assert tools.eng_to_float("1.5m") == 1.5e-3
+    assert tools.eng_to_float("1.5µ") == 1.5e-6
+    assert tools.eng_to_float("1.5n") == 1.5e-9
+    assert tools.eng_to_float("1.5p") == 1.5e-12
+    assert tools.eng_to_float("1.5f") == 1.5e-15
 
 
 def test_diff_gds():
