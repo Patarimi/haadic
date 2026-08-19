@@ -17,6 +17,11 @@ def test_component():
         Component("Q5", "gnd", "5", "5e-12")
 
 
+def test_component_with_subunit():
+    c5 = Component("C5", "gnd", "5", "5p")
+    assert str(c5) == "C5 gnd 5 5.000 pF"
+
+
 def test_netlist(tmp_path):
     net = Netlist("test")
     net.add_component(Component("C5", "gnd", "5", "5e-12"))
@@ -30,6 +35,7 @@ def test_netlist(tmp_path):
 C5 gnd 5 5.000 pF
 
 .lib '{to_wsl("test.lib")}'
+.end
 
 .control
 run

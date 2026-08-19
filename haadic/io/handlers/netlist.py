@@ -7,7 +7,7 @@ from typing import Literal, Self
 
 from nixthon.core import to_wsl
 
-from haadic.core.tools import eng
+from haadic.core.tools import eng_to_float, float_to_eng
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class Component:
         :param node2: the second node of the component.
         :param value: the value of the component, as a string (e.g., "1k", "10u", etc.). It can be split in several parts if it contains spaces (e.g., "1 k" will be parsed as 1k).
         """
-        if name[0].upper() not in ComponentList:
+        if not is_component(name):
             logger.error(
                 f"Could not initialize component {name} between nodes {node1} and {node2} with value: {' '.join(str(v) for v in value)}"
             )
@@ -60,7 +60,11 @@ class Component:
             f"Initializing component {name} between nodes {node1} and {node2} with value: {value}"
         )
         if len(value) == 1:
-            self.value = float(value[0])
+            self.value = (
+                value[0]
+                if isinstance(value[0], (int, float))
+                else eng_to_float(value[0])
+            )
         else:
             self.value = " ".join(str(v) for v in value)
 
@@ -81,7 +85,7 @@ class Component:
         """
         if isinstance(self.value, str):
             return self.value
-        return f"{eng(self.value)}{Unit[self.type]}".strip()
+        return f"{float_to_eng(self.value)}{Unit[self.type]}".strip()
 
     def full_name(self):
         """Get the full name of the component, which is the concatenation of its type and its name."""
@@ -90,6 +94,8 @@ class Component:
 
 OtherList = (".lib", ".include", ".model", ".save", ".tran", ".end")
 type OtherComponent = Literal[".lib", ".include", ".model", ".save", ".tran", ".end"]
+CircuitList = (".subckt", ".ends")
+type CircuitComponent = Literal[".subckt", ".ends"]
 
 
 @dataclass
@@ -101,7 +107,7 @@ class Netlist:
     """
 
     name: str = ""
-    circuit: list[Component] = field(default_factory=list)
+    circuit: list[Component | str] = field(default_factory=list)
     controls: list[str] = field(default_factory=list)
     others: list[tuple[OtherComponent, str]] = field(default_factory=list)
 
@@ -112,36 +118,30 @@ class Netlist:
         :param spice_file: path of the spice file to load.
         :return: the Netlist instance with the content of the spice file.
         """
-        block: Literal["circuit", "control", "other", "comment"] = "comment"
+        block: Literal["control", "other", "circuit"] = "circuit"
         with open(spice_file, "r") as f:
             lines = f.readlines()
         self.name = lines.pop(0).strip("*").strip()
         for line in lines:
-            if line.startswith(("*", ".endc")) or line.lstrip() == "":
-                block = "comment"
-                # comment or empty line, ignore
+            if is_comment(line):
+                block = "circuit"
                 continue
-            if line.startswith(".control"):
+            if is_control_bloc(line):
                 block = "control"
                 continue
-            for command in OtherList:
-                if line.startswith(command) and not line.startswith(".endc"):
-                    block = "other"
-                    break
-            for component in ComponentList:
-                if line.startswith(component):
-                    block = "circuit"
-                    break
+            if other_command(line) is not None:
+                command = other_command(line)
+                block = "other"
             match block:
-                case "circuit":
+                case "circuit" if is_component(line):
                     logger.debug(f"Parsing component line: {line.strip()}")
                     self.circuit.append(Component(*line.split()))
+                case "circuit" if line.startswith(CircuitList):
+                    self.circuit.append(line)
                 case "control":
                     self.controls.append(line.rstrip())
                 case "other":
-                    self.add_other(command, line.rstrip().lstrip(command).strip())
-                    if command.startswith(".end"):
-                        block = "comment"
+                    self.add_other(command, line.rstrip().lstrip(command).strip())  # ty: ignore[invalid-argument-type]
         return self
 
     def add_component(self, component: Component):
@@ -151,6 +151,51 @@ class Netlist:
     def add_control(self, control: str):
         """Add an element to the netlist in the control section."""
         self.controls.append(control)
+
+    def add_write(self, raw_file: Path, output: list[str] | None = None):
+        """Add a write statement to the netlist in the control section."""
+        out_joined = " ".join(output) if output is not None else "all"
+        write_cmds = self.search_control("write")
+        if write_cmds:
+            for cmd in write_cmds:
+                file_path_is_template = "{" in cmd.split(" ")[1]
+                out_joined = (
+                    " ".join(cmd.split(" ")[2:])
+                    if file_path_is_template
+                    else out_joined
+                )
+                self.replace_control(cmd, f"write {to_wsl(raw_file)} {out_joined}")
+        else:
+            self.add_control(f"write {to_wsl(raw_file)} {out_joined}")
+
+    def set_filetype(self, filetype: str = "ASCII"):
+        """Set the filetype in the control section."""
+        if not self.search_control("set filetype"):
+            self.add_control(f"set filetype = {filetype}")
+        else:
+            self.replace_control("set filetype", f"set filetype = {filetype}")
+
+    def search_control(self, control: str) -> list[str]:
+        """
+        Search for a control statement in the netlist.
+
+        :param control: the control statement to search for.
+        :return: True if the control statement is found, False otherwise.
+        """
+        return [c for c in self.controls if control in c]
+
+    def replace_control(self, old_control: str, new_control: str):
+        """
+        Replace a control statement in the netlist.
+
+        :param old_control: the control statement to replace.
+        :param new_control: the new control statement.
+        :return: None
+        """
+        self.controls = [
+            new_control if control.startswith(old_control) else control
+            for control in self.controls
+        ]
 
     def add_other(self, command: OtherComponent, other: str) -> None:
         """
@@ -211,7 +256,7 @@ class Netlist:
             spice += (
                 "\n"
                 + "\n".join([f"{cmd} {args}".strip() for cmd, args in self.others])
-                + "\n"
+                + "\n.end\n"
             )
         if self.controls:
             spice += "\n.control\n"
@@ -228,3 +273,47 @@ class Netlist:
         with open(filename, "w") as f:
             f.write(self.spice())
         return Path(filename)
+
+
+def is_comment(line: str) -> bool:
+    """
+    Check if a line is a comment or empty.
+
+    :param line: the line to check.
+    :return: True if the line is a comment or empty, False otherwise.
+    """
+    return line.startswith(("*", ".end", ".subckt", ".ends")) or line.lstrip() == ""
+
+
+def other_command(line: str) -> OtherComponent | None:
+    """
+    Check if a line is an 'other' command (not a component and not in the control section) and return the command if it is, None otherwise.
+
+    :param line: the line to check.
+    :return: The 'other' command if the line is an 'other' command, None otherwise.
+    """
+    cmd = line.split(" ")[0].lower()
+    if cmd in OtherList:
+        return cmd
+    return None
+
+
+def is_component(line: str) -> bool:
+    """
+    Check if a line is a component line (not an 'other' command and not in the control section).
+
+    :param line: the line to check.
+    :return: True if the line is a component line, False otherwise.
+    """
+    comp = line[0].upper()
+    return comp in ComponentList
+
+
+def is_control_bloc(line: str) -> bool:
+    """
+    Check if a line is a control line (not an 'other' command and not in the circuit section).
+
+    :param line: the line to check.
+    :return: True if the line is a control line, False otherwise.
+    """
+    return line.startswith(".control")

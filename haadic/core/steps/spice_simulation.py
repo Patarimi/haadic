@@ -57,7 +57,9 @@ class BenchSim(Step):
         spice.add_lib(get_file(techno, "lib_spice"), section)
 
         spice.add_include(input_file)
+
+        spice.add_write(data_file)
         spice.write(data_file.with_name(bench.name))
 
-        compute(data_file.with_name(bench.name), data_file)
+        compute(data_file.with_name(bench.name), data_file.with_suffix(".log"))
         return data_file

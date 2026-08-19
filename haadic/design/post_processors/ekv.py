@@ -6,7 +6,7 @@ import numpy as np
 
 from haadic.core.steps.post_process import SimRes
 from haadic.core.steps.step import Dim
-from haadic.core.tools import eng
+from haadic.core.tools import float_to_eng
 from haadic.design.models.constants import ut
 from haadic.design.models.tools import med_Xpercentile
 from haadic.design.post_processors.graphs import Data, export_graph
@@ -52,7 +52,7 @@ def extract_small_l(
             Data(
                 1 / (IC * ekv["l_c"] / ekv["length"]),
                 "l/(IC*λc)",
-                f"l_c={eng(ekv['l_c'] * 1e-6, 0)}m",
+                f"l_c={float_to_eng(ekv['l_c'] * 1e-6, 0)}m",
             ),
         ],
         base_dir / "gm_ic.png",
@@ -105,7 +105,7 @@ def extract_big_l(
             Data(
                 1 / (np.sqrt(_IC(id, ekv["i_spec_square"], ratio)) * ekv["n"]),
                 "1/(sqrt(IC)*n)",
-                f"i_spec={eng(ekv['i_spec_square'], 0)}A",
+                f"i_spec={float_to_eng(ekv['i_spec_square'], 0)}A",
             ),
         ],
         base_dir / "gm_ic.png",

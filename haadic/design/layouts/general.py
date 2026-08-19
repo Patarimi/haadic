@@ -111,11 +111,29 @@ def get_dtext(
 
     :param layout: Layout to be explored.
     :param label: label (string) to be found, if None, return all label.
-    :param cell: if cell is not None, only look inside this cell.
-    :return: DText
+    :param cell: if cell is not None, only look inside this cell. Else, look in all cells.
+    :return: list
     """
+    labels = get_labels(layout, cell)
+
     if label is None:
-        labels = []
+        return labels
+
+    for l in labels:
+        if l.name == label:
+            return [l]
+    raise ValueError(f"label {label} not found in layout")
+
+
+def get_labels(layout: BaseCell, cell: str | None = None) -> list[Label]:
+    """
+    Return all the labels in the layout.
+
+    :param layout: Layout to be explored.
+    :param cell: if cell is not None, only look inside this cell.
+    :return: list of Label objects.
+    """
+    labels = []
     if cell is None:
         cells = layout._layout.each_cell()
     else:
@@ -127,15 +145,8 @@ def get_dtext(
                 if not shape.is_text():
                     continue
                 pos = (shape.dtext.position().x, shape.dtext.position().y)
-                if label is None:
-                    labels.append(Label(shape.dtext.string, pos, layer))
-                elif shape.dtext.string == label:
-                    pos = (shape.dtext.position().x, shape.dtext.position().y)
-                    return [Label(label, pos, layer)]
-    if label is None:
-        return labels
-    else:
-        raise ValueError(f"label {label} not found in layout")
+                labels.append(Label(shape.dtext.string, pos, layer))
+    return labels
 
 
 def get_shape(layout: BaseCell, point: Point, layer: Layer) -> db.DBox | None:
