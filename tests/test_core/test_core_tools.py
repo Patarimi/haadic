@@ -1,6 +1,8 @@
 import logging
 import os
 
+import pytest
+
 from haadic._config import REF_PATH
 from haadic.core import tools
 
@@ -16,12 +18,12 @@ def test_float_to_eng():
 
 def test_eng_to_float():
     assert tools.eng_to_float("1k") == 1000
-    assert tools.eng_to_float("1.5M") == 1.5e6
-    assert tools.eng_to_float("1.5m") == 1.5e-3
-    assert tools.eng_to_float("1.5µ") == 1.5e-6
-    assert tools.eng_to_float("1.5n") == 1.5e-9
-    assert tools.eng_to_float("1.5p") == 1.5e-12
-    assert tools.eng_to_float("1.5f") == 1.5e-15
+    assert tools.eng_to_float("1.5M") == pytest.approx(1.5e6)
+    assert tools.eng_to_float("1.5m") == pytest.approx(1.5e-3)
+    assert tools.eng_to_float("1.5µ") == pytest.approx(1.5e-6)
+    assert tools.eng_to_float("1.5n") == pytest.approx(1.5e-9)
+    assert tools.eng_to_float("1.5p") == pytest.approx(1.5e-12)
+    assert tools.eng_to_float("1.5f") == pytest.approx(1.5e-15)
 
 
 def test_diff_gds():

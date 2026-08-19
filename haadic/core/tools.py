@@ -134,7 +134,7 @@ def eng_to_float(s: str) -> float:
             logger.debug(
                 f"Converting {s[: -len(prefix) + 1]} to float. prefix: {prefix}, factor: {factor}"
             )
-            return float(s[: -len(prefix) + 1]) * factor
+            return float(s[: -len(prefix)]) * 10 ** (3 * factor)
     raise ValueError(f"String {s} is not a valid engineer notation.")
 
 
