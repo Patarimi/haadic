@@ -11,7 +11,7 @@ CURRENT_DIR = Path(__file__).parent
 
 
 def compute(
-    input_file: Path | str,
+    input_file: Path,
     data_file: Path | None = None,
     log_file: Path | None = None,
 ) -> None:
@@ -23,16 +23,10 @@ def compute(
     :param log_file: a path to the log file. (default: same as data_file with .log extension)
     :return: None
     """
-    if type(input_file) is str:
-        input_file = Path(input_file)
     if data_file is None:
         data_file = Path(input_file).with_suffix(".raw")
-    if type(data_file) is str:
-        data_file = Path(data_file)
     if log_file is None:
         log_file = data_file.with_suffix(".log")
-    if type(log_file) is str:
-        log_file = Path(log_file)
 
     if not nix_check():
         raise RuntimeError("nix is not installed.")

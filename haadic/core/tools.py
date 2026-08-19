@@ -128,8 +128,13 @@ def eng_to_float(s: str) -> float:
     except ValueError:
         pass
     for factor, prefix in REF.items():
+        if prefix == "":
+            continue
         if s.endswith(prefix):
-            return float(s[: -len(prefix)]) * factor
+            logger.debug(
+                f"Converting {s[: -len(prefix) + 1]} to float. prefix: {prefix}, factor: {factor}"
+            )
+            return float(s[: -len(prefix) + 1]) * factor
     raise ValueError(f"String {s} is not a valid engineer notation.")
 
 
