@@ -34,10 +34,10 @@ class ConfigFlow:
     """
 
     techno: Available_PDK = "sky130"
-    reload: bool = True
     run_dir: Path = Path("./results")
     extract_level: ExtractLevels = "RC"
     sweep_folder: bool = True
+    reload: bool = True
 
 
 @dataclass

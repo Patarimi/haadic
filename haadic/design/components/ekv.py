@@ -201,8 +201,7 @@ def extract_dc_ekv(
         working_dir = get_file(techno, "base_dir") / "haadic"
 
     lengths = [LENGTH_RATIO, 1]
-    options = ConfigFlow()
-    options.run_dir = working_dir
+    options = ConfigFlow(techno, working_dir)
 
     param = {}
     for length in lengths:
@@ -247,29 +246,24 @@ def extract_rf_ekv(
 
     if working_dir is None:
         working_dir = get_file(techno, "base_dir") / "haadic"
-    options = ConfigFlow()
-    options.extract_level = "RC"
+    config = ConfigFlow(techno, working_dir, "RC")
 
-    flow = Flow(layout, {bench_ac_ref}, {extract_rf}, options)
+    flow = Flow(layout, {bench_ac_ref}, {extract_rf}, config)
 
-    dimensions = Dim({"length": l_min, "width": 1, "n_finger": 4})
-    sweep = {
-        "width": np.linspace(1, 8, 8),
-        "length": l_min * np.linspace(1, 8, 8),
-    }
-    for key, val in sweep.items():
-        models_params = pd.DataFrame()
-        for dim in val:
-            dimensions[key] = dim
-            options.run_dir = working_dir
-            params = flow.run_from_dim(dimensions).dct
-            params[key] = dim
-            models_params = pd.concat(
-                [models_params, pd.DataFrame([params])], ignore_index=True
-            )
-        models_params["rho_d"] = models_params["gds"] / models_params["gm"]
+    width_values = np.linspace(1, 8, 8)
+    length_values = l_min * np.linspace(1, 8, 8)
+    sweep_points = [
+        Dim({"length": length_values[0], "width": width, "n_finger": 4})
+        for width in width_values
+    ] + [
+        Dim({"length": length, "width": width_values[0], "n_finger": 4})
+        for length in length_values
+    ]
 
-    data = models_params
+    rows = [res.dct for res in flow.run_from_sweeps(sweep_points)]
+
+    data = pd.DataFrame.from_records(rows)
+    data["rho_d"] = data["gds"] / data["gm"]
     W_f = data["width"]
     L = data["length"]
     N_f = data["n_finger"]
