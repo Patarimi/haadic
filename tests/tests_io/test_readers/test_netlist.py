@@ -4,7 +4,7 @@ import pytest
 from nixthon.core import to_wsl
 
 from haadic._config import REF_PATH
-from haadic.io.handlers.netlist import Component, Netlist
+from haadic.io.handlers.netlist import Component, Netlist, load_netlist
 
 
 def test_component():
@@ -22,7 +22,7 @@ def test_component_with_subunit():
     assert str(c5) == "C5 gnd 5 5.000 pF"
 
 
-def test_netlist(tmp_path):
+def test_netlist():
     net = Netlist("test")
     net.add_component(Component("C5", "gnd", "5", "5e-12"))
     assert net.name == "test"
@@ -47,7 +47,7 @@ run
 def test_netlist_load(tmp_path):
     ref_spice = REF_PATH / "ref_netlist.spice"
     res_path = tmp_path / "test_output.spice"
-    net = Netlist().load(ref_spice)
+    net = load_netlist(ref_spice)
     net.write(res_path)
     with open(res_path, "r") as f:
         result = f.readlines()

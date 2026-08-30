@@ -3,7 +3,7 @@
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal, Self
+from typing import Literal
 
 from nixthon.core import to_wsl
 
