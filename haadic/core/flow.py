@@ -1,7 +1,9 @@
 """Module defining the Flow class, which composes multiple steps (layout generation, extraction, simulation, post-processing) into a complete design flow."""
 
 import logging
-from collections.abc import Callable, Iterable
+import os
+from collections.abc import Callable, Iterable, Sequence
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -113,3 +115,18 @@ class Flow:
         cost = step.compare_to(perf.dct, target.dct)
         logger.info(f"current cost: {cost}")
         return perf
+
+    def run_from_sweeps(
+        self, sweep_points: Sequence[step.Dim], max_workers: int | None = None
+    ) -> list[step.Dim]:
+        """Run the flow for all the dimensions configuration passed."""
+        if not max_workers:
+            max_workers = min(len(sweep_points), os.cpu_count() or 1)
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            rows = list(
+                executor.map(
+                    lambda point: self.run_from_dim(point),
+                    sweep_points,
+                )
+            )
+        return rows
