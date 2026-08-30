@@ -111,39 +111,6 @@ class Netlist:
     controls: list[str] = field(default_factory=list)
     others: list[tuple[OtherComponent, str]] = field(default_factory=list)
 
-    def load(self, spice_file: Path | str) -> Self:
-        """
-        Load a spice netlist from a file.
-
-        :param spice_file: path of the spice file to load.
-        :return: the Netlist instance with the content of the spice file.
-        """
-        block: Literal["control", "other", "circuit"] = "circuit"
-        with open(spice_file, "r") as f:
-            lines = f.readlines()
-        self.name = lines.pop(0).strip("*").strip()
-        for line in lines:
-            if is_comment(line):
-                block = "circuit"
-                continue
-            if is_control_bloc(line):
-                block = "control"
-                continue
-            if other_command(line) is not None:
-                command = other_command(line)
-                block = "other"
-            match block:
-                case "circuit" if is_component(line):
-                    logger.debug(f"Parsing component line: {line.strip()}")
-                    self.circuit.append(Component(*line.split()))
-                case "circuit" if line.startswith(CircuitList):
-                    self.circuit.append(line)
-                case "control":
-                    self.controls.append(line.rstrip())
-                case "other":
-                    self.add_other(command, line.rstrip().lstrip(command).strip())  # ty: ignore[invalid-argument-type]
-        return self
-
     def add_component(self, component: Component):
         """Add a component to the circuit."""
         self.circuit.append(component)
@@ -273,6 +240,40 @@ class Netlist:
         with open(filename, "w") as f:
             f.write(self.spice())
         return Path(filename)
+
+
+def load_netlist(spice_file: Path | str) -> Netlist:
+    """
+    Load a spice netlist from a file.
+
+    :param spice_file: path of the spice file to load.
+    :return: the Netlist instance with the content of the spice file.
+    """
+    block: Literal["control", "other", "circuit"] = "circuit"
+    with open(spice_file, "r") as f:
+        lines = f.readlines()
+    netlist = Netlist(lines.pop(0).strip("*").strip())
+    for line in lines:
+        if is_comment(line):
+            block = "circuit"
+            continue
+        if is_control_bloc(line):
+            block = "control"
+            continue
+        if other_command(line) is not None:
+            command = other_command(line)
+            block = "other"
+        match block:
+            case "circuit" if is_component(line):
+                logger.debug(f"Parsing component line: {line.strip()}")
+                netlist.circuit.append(Component(*line.split()))
+            case "circuit" if line.startswith(CircuitList):
+                netlist.circuit.append(line)
+            case "control":
+                netlist.controls.append(line.rstrip())
+            case "other":
+                netlist.add_other(command, line.rstrip().lstrip(command).strip())  # ty: ignore[invalid-argument-type]
+    return netlist
 
 
 def is_comment(line: str) -> bool:

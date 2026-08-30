@@ -6,7 +6,7 @@ from pathlib import Path
 
 from haadic.core.steps.step import Step, can_skip
 from haadic.core.techno import Available_PDK, get_file, load_pdk
-from haadic.io.handlers.netlist import Netlist
+from haadic.io.handlers.netlist import load_netlist
 from haadic.io.wrappers.ngspice import compute
 
 
@@ -52,7 +52,7 @@ class BenchSim(Step):
             return data_file
         techno = self.config.techno
 
-        spice = Netlist().load(bench)
+        spice = load_netlist(bench)
         section = load_pdk(techno).get("section", "tt")
         spice.add_lib(get_file(techno, "lib_spice"), section)
 
