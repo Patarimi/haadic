@@ -4,6 +4,7 @@ Vdc input 0
 
 
 .control
-dc Vdc 0 1
+dc Vdc 0 1 0.1
+set filetype = ASCII
 write {bench} all
 .endc
