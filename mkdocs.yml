@@ -6,6 +6,8 @@ watch:
 
 nav:
   - Home: README.md
+  - Tutorial:
+    - Getting Started: tutorial/getting_started.md
   - CLI-Command: CLI-ref.md
 
 theme:
