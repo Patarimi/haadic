@@ -1,5 +1,6 @@
 site_name: HAADIC
 site_url: https://patarimi.github.io/haadic
+repo_url: https://github.com/Patarimi/haadic
 watch:
   - haadic
 
@@ -24,8 +25,12 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
+          paths: [haadic]
           options:
             docstring_style: sphinx
+            show_source: false
+            show_root_heading: true
+            show_root_full_path: false
   - api-autonav:
       modules: ['haadic']
       nav_section_title: "Module Documentation"
