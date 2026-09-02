@@ -8,21 +8,12 @@ from cyclopts import App
 from haadic._config import DATA_DIR
 from haadic.core import techno
 from haadic.core.steps.step import cleanup
+from haadic.core.tools import config_logger
 from haadic.design.components.ekv import EKV
 
 CUR_DIR = Path().cwd()
-
-# Skip logging configuration if it is already done (eg during tests)
 log_path = CUR_DIR / "haadic.log"
-if not logging.getLogger().hasHandlers():
-    logging.basicConfig(
-        level=logging.INFO,
-        handlers=[
-            logging.FileHandler(log_path),
-            logging.StreamHandler(),
-        ],
-        format="|%(levelname)-7s| %(filename)s:%(lineno)d | %(message)s",
-    )
+config_logger(log_path, logging.INFO)
 
 logger = logging.getLogger(__name__)
 

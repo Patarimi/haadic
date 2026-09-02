@@ -15,9 +15,11 @@ from haadic.core.steps.layout_generation import ConfigLayout, Layout
 from haadic.core.steps.post_process import ConfigPostProc, PostProcess, PostProcessFunc
 from haadic.core.steps.spice_simulation import BenchSim, ConfigSim
 from haadic.core.techno import Available_PDK
+from haadic.core.tools import config_logger
 from haadic.design.layouts.base_cell import BaseCell
 from haadic.io.wrappers.magic import ExtractLevels
 
+config_logger()
 logger = logging.getLogger(__name__)
 
 
@@ -84,9 +86,11 @@ class Flow:
             )
             output_file = flow.run(start)
             pp = PostProcess(ConfigPostProc(eval))
+            logger.info(f"Post-Processing Completed: {output_file}")
             data = pp.run(output_file, dimensions)
             for key in data.dct:
                 datas[key] = data[key]
+            logger.info(f"Flow completed with dimensions {dimensions.dct}")
         return datas
 
     def run_from_target(

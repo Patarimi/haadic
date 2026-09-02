@@ -65,7 +65,6 @@ def extract_spice(
         toggle="on" if options in ("ROnly", "RC") else "off",
     )
     tcl_file = output_path.with_suffix(".tcl")
-    logger.info(tcl_file)
     stream.dump(str(tcl_file))
     logger.info(f"Command file generated: {tcl_file}")
     cmd = [
