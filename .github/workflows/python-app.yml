@@ -43,7 +43,7 @@ jobs:
           uv sync --only-group doc
       - name: Build Doc
         run: |
-          uv run mkdocs build
+          uv run zensical build
       - name: Upload static files as artifact
         id: deployment
         uses: actions/upload-pages-artifact@v5

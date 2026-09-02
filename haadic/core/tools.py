@@ -8,6 +8,7 @@ from klayout import db as kl
 
 from haadic.io.readers.raw import parse_out
 
+CUR_DIR = Path().cwd()
 logger = logging.getLogger(__name__)
 
 
@@ -150,3 +151,26 @@ def diff_raw(raw1: Path, raw2: Path, abs_tol: float = 1e-12) -> bool:
     data1 = parse_out(raw1)
     data2 = parse_out(raw2)
     return np.allclose(data1, data2, atol=abs_tol)
+
+
+def config_logger(
+    log_path: Path = CUR_DIR / "haadic.log",
+    level: int = logging.INFO,
+) -> None:
+    """
+    Configure the logger for the haadic package.
+
+    :param log_path: Path to the log file.
+    :param level: logging level. Default is logging.INFO.
+    """
+    if not logging.getLogger().hasHandlers():
+        logging.basicConfig(
+            level=level,
+            handlers=[
+                logging.FileHandler(log_path),
+                logging.StreamHandler(),
+            ],
+            format="|%(levelname)-7s| %(filename)s:%(lineno)d | %(message)s",
+        )
+    sub_module_logger = logging.getLogger("nixthon")
+    sub_module_logger.setLevel(logging.ERROR)

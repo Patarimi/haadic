@@ -8,21 +8,12 @@ from cyclopts import App
 from haadic._config import DATA_DIR
 from haadic.core import techno
 from haadic.core.steps.step import cleanup
+from haadic.core.tools import config_logger
 from haadic.design.components.ekv import EKV
 
 CUR_DIR = Path().cwd()
-
-# Skip logging configuration if it is already done (eg during tests)
 log_path = CUR_DIR / "haadic.log"
-if not logging.getLogger().hasHandlers():
-    logging.basicConfig(
-        level=logging.INFO,
-        handlers=[
-            logging.FileHandler(log_path),
-            logging.StreamHandler(),
-        ],
-        format="|%(levelname)-7s| %(filename)s:%(lineno)d | %(message)s",
-    )
+config_logger(log_path, logging.INFO)
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +44,7 @@ def extract_ekv_cli(
     Extract EKV model parameters from a given technology and save them in a json file.
 
     :param techno_name: name of the technology to extract the EKV model from. Must be one of the techno supported by haadic.
-    :param output: path of the json file to save the extracted model. If None, the model is saved in the pdk install directory with the name ekv_model_<techno_name>.json.
+    :param output: path of the json file to save the extracted model. If None, the model is saved in the pdk install directory with the name `ekv_model_<techno_name>.json`.
     :param rf: If true, extract the RF parameters of the EKV model. Else, only extract the DC parameters.
     :param force: If true, overwrite the existing model file. Else, skip extraction if the file already exists.
     :return: The extracted EKV model.
@@ -73,7 +64,11 @@ def extract_ekv_cli(
 
 @app.command(name="new")
 def template(output_dir: Path = CUR_DIR, no_input: bool = False) -> None:
-    """Create a new project using the haadic template."""
+    """
+    Create a new project using the haadic template.
+
+    :param output_dir: target directory to be created.
+    """
     import subprocess
 
     template_dir = DATA_DIR / "template"
