@@ -157,7 +157,7 @@ def compose(*steps: Step, reload: bool = True) -> Step:
             def fun(path: Path, step: Step) -> Path:
                 validate_input(path, step.input_suffixes)
                 excepted_output = step.output_file(path)
-                if self.config["reload"] and can_skip(path, excepted_output):
+                if not self.config["reload"] and can_skip(path, excepted_output):
                     logger.info(
                         f"Skipping step {step.__class__.__name__} as {excepted_output.name} is up to date with {path.name}"
                     )
