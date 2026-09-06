@@ -27,6 +27,10 @@ working_dir
     design.py
 ```
 
+The `design.py` file defines the technology, the input dimensions, the layout function, and the flow entry point.
+
+The `bench.cir` file is an example of bench circuit for evaluating the circuit performance.
+
 # Running the first haadic flow
 The design flow can be run with the following command :
 

@@ -13,7 +13,7 @@ def mosfet(
     width: float = 2,
     length: float = 0.13,
     doping: Literal["N", "P"] = "N",
-):
+) -> BaseCell:
     """
     Create and insert a mosfet in the given cell.
 
