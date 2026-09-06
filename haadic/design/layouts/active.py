@@ -112,7 +112,7 @@ def connect(cell: BaseCell, label_line: str, label_mos: str) -> BaseCell:
 
 
 def pattern_connect(
-    cell: BaseCell, device_name: str, pattern: Sequence[str]
+    cell: BaseCell, device_name: str, pattern: Sequence[str], flip: bool = False
 ) -> BaseCell:
     """
     Connect the ports of a device to lines following the given pattern.
@@ -122,8 +122,12 @@ def pattern_connect(
     :param cell: BaseCell in which the connection is inserted.
     :param device_name: device to be connected.
     :param pattern: labels of the connections lines.
+    :param flip: if True, the pattern is flipped every other repetition.
     :return: _cell_ with_ the added connections.
     """
+    if flip:
+        pattern = list(pattern) + list(pattern[-2:0:-1])
+    print(pattern)
     labels = gen.get_dtext(cell, cell=device_name)
     for lbl in labels:
         i = 2 * int(lbl.name.lstrip("gdr"))

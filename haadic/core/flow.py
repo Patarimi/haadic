@@ -40,6 +40,7 @@ class ConfigFlow:
     extract_level: ExtractLevels = "RC"
     sweep_folder: bool = True
     reload: bool = True
+    debug_layout: bool = False
 
 
 @dataclass
@@ -78,12 +79,21 @@ class Flow:
             start = step.init_step(
                 dimensions, self.config.run_dir, self.config.sweep_folder
             )
-            flow = step.compose(
-                Layout(ConfigLayout(self.layout, self.config.techno)),
-                Extract(ConfigExtract(self.config.techno, self.config.extract_level)),
-                BenchSim(ConfigSim(bench, self.config.techno)),
-                reload=self.config.reload,
-            )
+
+            if self.config.debug_layout:
+                flow = step.compose(
+                    Layout(ConfigLayout(self.layout, self.config.techno)),
+                    reload=self.config.reload,
+                )
+            else:
+                flow = step.compose(
+                    Layout(ConfigLayout(self.layout, self.config.techno)),
+                    Extract(
+                        ConfigExtract(self.config.techno, self.config.extract_level)
+                    ),
+                    BenchSim(ConfigSim(bench, self.config.techno)),
+                    reload=self.config.reload,
+                )
             output_file = flow.run(start)
             pp = PostProcess(ConfigPostProc(eval))
             logger.info(f"Post-Processing Completed: {output_file}")

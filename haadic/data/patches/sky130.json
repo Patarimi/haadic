@@ -55,7 +55,7 @@
       "datatype": 20,
       "name": "li1",
       "width": 0.17,
-      "spacing": 0,
+      "spacing": 0.17,
       "_pin": 16
     },
     {
@@ -63,7 +63,7 @@
       "datatype": 20,
       "name": "met1",
       "width": 0.14,
-      "spacing": 0,
+      "spacing": 0.14,
       "_pin": 20
     },
     {

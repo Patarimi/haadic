@@ -18,3 +18,4 @@
 *.csv
 *.png
 haadic/data/mockup_pdk/mock.json
+*/results/
