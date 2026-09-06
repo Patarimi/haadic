@@ -8,6 +8,7 @@ nav:
   - Home: README.md
   - Tutorial:
     - Getting Started: tutorial/getting_started.md
+    - Creating a Layout: tutorial/layout_generation.md
   - CLI-Command: CLI-ref.md
 
 theme:
@@ -17,6 +18,7 @@ theme:
 markdown_extensions:
   - toc:
       permalink: True
+  - admonition
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
