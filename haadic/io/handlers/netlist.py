@@ -133,9 +133,9 @@ class Netlist:
                     if file_path_is_template
                     else out_joined
                 )
-                self.replace_control(cmd, f"write {to_wsl(raw_file)} {out_joined}")
+                self.replace_control(cmd, f"write '{to_wsl(raw_file)}' {out_joined}")
         else:
-            self.add_control(f"write {to_wsl(raw_file)} {out_joined}")
+            self.add_control(f"write '{to_wsl(raw_file)}' {out_joined}")
 
     def set_filetype(self, filetype: str = "ASCII"):
         """Set the filetype in the control section."""
@@ -201,7 +201,7 @@ class Netlist:
         """
         if self.is_in_other(".include", Path(include_path)):
             return
-        self.add_other(".include", to_wsl(include_path))
+        self.add_other(".include", "'" + to_wsl(include_path) + "'")
 
     def is_in_other(self, key: str, file: Path) -> bool:
         """
