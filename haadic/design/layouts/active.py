@@ -132,7 +132,6 @@ def pattern_connect(
     """
     if flip:
         pattern = list(pattern) + list(pattern[-2:0:-1])
-    print(pattern)
     labels = gen.get_dtext(cell, cell=device_name)
     for lbl in labels:
         i = 2 * int(lbl.name.lstrip("gdr"))
