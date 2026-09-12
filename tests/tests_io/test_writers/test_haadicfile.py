@@ -158,7 +158,7 @@ def test_layer_stack_sw():
         66, 20, "poly", 0.15, 0.27, _pin=16
     )
     assert layer_stack.get_metal_layer(2) == hf.Layer(
-        68, 20, "met1", 0.14, spacing=0.14, _pin=20
+        68, 20, "met1", 0.14, spacing=0.14, _pin=16
     )
     assert layer_stack.get_metal_layer(-1) == hf.Layer(72, 20, "met5", 1.6, _pin=20)
 

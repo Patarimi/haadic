@@ -10,8 +10,8 @@ from haadic.io.handlers.netlist import Component, Netlist, load_netlist
 def test_component():
     c5 = Component("C5", "gnd", "5", "5e-12")
     r_mid = Component("Rmid", "5", "6", "5e3")
-    assert str(c5) == "C5 gnd 5 5.000 pF"
-    assert str(r_mid) == "Rmid 5 6 5.000 kΩ"
+    assert str(c5) == "C5 gnd 5 5.000p"
+    assert str(r_mid) == "Rmid 5 6 5.000k"
 
     with pytest.raises(ValueError):
         Component("Q5", "gnd", "5", "5e-12")
@@ -19,20 +19,20 @@ def test_component():
 
 def test_component_with_subunit():
     c5 = Component("C5", "gnd", "5", "5p")
-    assert str(c5) == "C5 gnd 5 5.000 pF"
+    assert str(c5) == "C5 gnd 5 5.000p"
 
 
 def test_netlist():
     net = Netlist("test")
     net.add_component(Component("C5", "gnd", "5", "5e-12"))
     assert net.name == "test"
-    assert net.spice() == "* test\nC5 gnd 5 5.000 pF\n"
+    assert net.spice() == "* test\nC5 gnd 5 5.000p\n"
     net.add_control("run")
     net.add_lib("test.lib")
     # add a second time to check that it is not duplicated in the spice output
     net.add_lib("test.lib")
     expected_spice = f"""* test
-C5 gnd 5 5.000 pF
+C5 gnd 5 5.000p
 
 .lib '{to_wsl("test.lib")}'
 .end
