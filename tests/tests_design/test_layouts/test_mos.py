@@ -17,8 +17,6 @@ def test_pmos(base_cell, tmp_path):
 
 
 def test_line(base_cell, tmp_path):
-    # change the gate layer to match the reference GDS
-    base_cell._layer_stack._gate.layer = 5
     base_cell._top.name = "top"  # rename top cell to match ref file
     mosfet(base_cell, nf=5, doping="N")
     line(base_cell, "vdd", 2)
@@ -28,8 +26,6 @@ def test_line(base_cell, tmp_path):
 
 
 def test_connect(base_cell, tmp_path):
-    # change the gate layer to match the reference GDS
-    base_cell._layer_stack._gate.layer = 5
     base_cell.read(REF_PATH / "ref_line.gds")
     line(base_cell, "vout", 2)
     connect(base_cell, "vdd", "dr0")
