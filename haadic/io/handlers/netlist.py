@@ -74,10 +74,10 @@ class Component:
 
         For example, a resistor named "R1" with a value of 1000 between nodes "n1" and "n2" will be represented as "R R1 n1 n2 1kΩ".
         """
-        value = self.readable_value()
+        value = self.readable_value(True)
         return f"{self.full_name()} {self.node[0]} {self.node[1]} {value}"
 
-    def readable_value(self) -> str:
+    def readable_value(self, no_unit: bool = False) -> str:
         """
         Get the value of the component in a human readable format, with the appropriate unit.
 
@@ -85,6 +85,8 @@ class Component:
         """
         if isinstance(self.value, str):
             return self.value
+        if no_unit:
+            return f"{float_to_eng(self.value)}".replace(" ", "")
         return f"{float_to_eng(self.value)}{Unit[self.type]}".strip()
 
     def full_name(self):
