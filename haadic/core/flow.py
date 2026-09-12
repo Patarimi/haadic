@@ -2,6 +2,7 @@
 
 import logging
 import os
+import sys
 from collections.abc import Callable, Iterable, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
@@ -85,6 +86,8 @@ class Flow:
                     Layout(ConfigLayout(self.layout, self.config.techno)),
                     reload=self.config.reload,
                 )
+                flow.run(start)
+                sys.exit(0)
             else:
                 flow = step.compose(
                     Layout(ConfigLayout(self.layout, self.config.techno)),
@@ -107,7 +110,7 @@ class Flow:
         self,
         target: step.Dim,
         local_model: Callable[[step.Dim], step.Dim],
-    ) -> step.Dim:
+    ) -> step.Dim | Path:
         """
         Run the flow from a target specification using a local model.
 

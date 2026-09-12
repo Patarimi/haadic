@@ -60,6 +60,11 @@ def via(cell: BaseCell, level: int, size: tuple[float, float]) -> BaseCell:
         return math.floor((length - 2 * via_s - via_w) / (via_w + via_g)) + 1
 
     rep_x, rep_y = repetition(size[0]), repetition(size[1])
+    if rep_x <= 0 or rep_y <= 0:
+        logger.warning(f"Via {level} size too small: {size[0]=:.4f}\t{size[1]=:.4f}.")
+        logger.warning(f"Minimum width: {via_w:.4f}, Minimum enclosure: {via_s:.4f}.")
+        add_rectangle(v, layer, (via_w, via_w))
+        return v
     tmp = cell.create_cell("tmp")
     add_rectangle(tmp, layer, (via_w, via_w))
     shift = [via_w + (r - 1) * (via_w + via_g) for r in (rep_x, rep_y)]
