@@ -163,3 +163,12 @@ class BaseCell:
         """
         lyr_infos = self._layout.layer_infos()[index]
         return self._layer_stack.search_layer(lyr_infos.layer, lyr_infos.datatype)
+
+    def get_layer_level(self, layer: Layer) -> int:
+        """
+        Get the layer level in the stack for a given Layer object.
+
+        :param layer: The Layer object.
+        :return: Corresponding layer level in the technology layer stack.
+        """
+        return self._layer_stack.get_layer_index(layer.layer, layer.datatype)

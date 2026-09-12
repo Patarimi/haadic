@@ -108,6 +108,11 @@ def connect(cell: BaseCell, label_line: str, label_mos: str) -> BaseCell:
     gen.add_rectangle(
         cell, lbl_v.layer, (box_v.width(), top - bottom), (box_v.left, bottom)
     )
+    if lbl_v.layer != lbl_h.layer:
+        level_v = cell.get_layer_level(lbl_v.layer)
+        level_h = cell.get_layer_level(lbl_h.layer)
+        via = gen.via(cell, min(level_v, level_h), (box_v.width(), -box_h.height()))
+        cell.insert_cell(via, origin=(box_v.left, bottom))
     return cell
 
 
