@@ -15,10 +15,8 @@ It can be use for custom passive and active components.
 
 The `active` module is inspired by the grid-based framework (from Berkeley Analog Generator). This is meant for active design.
 
-In this example, a cascode amplifer will be drawn. The layout is drawn for top to bottom, using either components (`mosfet`)
-or horizontal line (`line`).
+In this example, a cascode amplifer will be drawn. The layout is drawn from top to bottom, using either components (`mosfet`) or horizontal line (`line`, which are schematic nodes).
 
-The `pattern_connect` function make vertical connections between a component and horizontal lines.
 
 ```python
 from haadic.design.layouts import general as gen
@@ -39,10 +37,17 @@ def layout(cell: BaseCell, dimensions: Dim) -> BaseCell:
     line(cell, "gate_biais", level=0)
     nmos_connexion = ("gnd", "input", "middle_point", "gate_biais", "output")
     pattern_connect(cell, nmos.name, nmos_connexion, flip=True)
+    for port in ["input", "gnd", "output"]:
+        set_as_port(cell, port)
 
     return cell
 ```
 
+The `pattern_connect` function make vertical connections between a component and horizontal lines.
+
+The line `set_as_port(cell, port)` means that the node will be available as a terminal (or port) in the schematic.
+
+## Editing the dimensions
 The dimensions must be defined before the flow is run. For example:
 
 ```python
