@@ -130,7 +130,7 @@ class LayerStack:
         if self.use_json and get_file(self.techno, "haadic").is_file():
             path_json = get_file(self.techno, "haadic")
             self.load_from_json(path_json)
-            logger.info(f"LayerStack loaded from {path_json}")
+            logger.debug(f"LayerStack loaded from {path_json}")
         else:
             path = get_file(self.techno, "techlef")
             self.load_from_tlef(path)
@@ -243,10 +243,10 @@ class LayerStack:
         """
         patch_file = DATA_DIR / "patches" / f"{self.techno}.json"
         if not Path(patch_file).is_file():
-            logger.info(f"No patch file found at {patch_file}.")
+            logger.warning(f"No patch file found at {patch_file}.")
             return
         self.load_from_json(patch_file)
-        logger.info(f"Patch file {patch_file} applied to LayerStack.")
+        logger.debug(f"Patch file {patch_file} applied to LayerStack.")
 
     def load_from_json(self, path_json: Path | str):
         """Load the layer stack information from a JSON file."""

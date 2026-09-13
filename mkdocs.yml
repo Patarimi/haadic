@@ -1,10 +1,17 @@
 site_name: HAADIC
 site_url: https://patarimi.github.io/haadic
+repo_url: https://github.com/Patarimi/haadic
 watch:
   - haadic
 
 nav:
   - Home: README.md
+  - Tutorial:
+    - Getting Started: tutorial/getting_started.md
+    - Creating a Layout: tutorial/layout_generation.md
+    - Setting up a Simulation: tutorial/bench_and_simulation.md
+    - Post-processing: tutorial/post_simulation.md
+    - Parameter Sweep: tutorial/parameter_sweep.md
   - CLI-Command: CLI-ref.md
 
 theme:
@@ -14,6 +21,7 @@ theme:
 markdown_extensions:
   - toc:
       permalink: True
+  - admonition
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
@@ -24,8 +32,12 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
+          paths: [haadic]
           options:
             docstring_style: sphinx
+            show_source: false
+            show_root_heading: true
+            show_root_full_path: false
   - api-autonav:
       modules: ['haadic']
       nav_section_title: "Module Documentation"

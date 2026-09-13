@@ -13,7 +13,7 @@ def mosfet(
     width: float = 2,
     length: float = 0.13,
     doping: Literal["N", "P"] = "N",
-):
+) -> BaseCell:
     """
     Create and insert a mosfet in the given cell.
 
@@ -108,11 +108,16 @@ def connect(cell: BaseCell, label_line: str, label_mos: str) -> BaseCell:
     gen.add_rectangle(
         cell, lbl_v.layer, (box_v.width(), top - bottom), (box_v.left, bottom)
     )
+    if lbl_v.layer != lbl_h.layer:
+        level_v = cell.get_layer_level(lbl_v.layer)
+        level_h = cell.get_layer_level(lbl_h.layer)
+        via = gen.via(cell, min(level_v, level_h), (box_v.width(), box_h.height()))
+        cell.insert_cell(via, origin=(box_v.left, bottom - box_h.height()))
     return cell
 
 
 def pattern_connect(
-    cell: BaseCell, device_name: str, pattern: Sequence[str]
+    cell: BaseCell, device_name: str, pattern: Sequence[str], flip: bool = False
 ) -> BaseCell:
     """
     Connect the ports of a device to lines following the given pattern.
@@ -122,8 +127,11 @@ def pattern_connect(
     :param cell: BaseCell in which the connection is inserted.
     :param device_name: device to be connected.
     :param pattern: labels of the connections lines.
+    :param flip: if True, the pattern is flipped every other repetition.
     :return: _cell_ with_ the added connections.
     """
+    if flip:
+        pattern = list(pattern) + list(pattern[-2:0:-1])
     labels = gen.get_dtext(cell, cell=device_name)
     for lbl in labels:
         i = 2 * int(lbl.name.lstrip("gdr"))

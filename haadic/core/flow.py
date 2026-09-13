@@ -2,11 +2,13 @@
 
 import logging
 import os
+import sys
 from collections.abc import Callable, Iterable, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import pandas as pd
 from tabulate import tabulate
 
 from haadic.core.steps import step
@@ -15,9 +17,11 @@ from haadic.core.steps.layout_generation import ConfigLayout, Layout
 from haadic.core.steps.post_process import ConfigPostProc, PostProcess, PostProcessFunc
 from haadic.core.steps.spice_simulation import BenchSim, ConfigSim
 from haadic.core.techno import Available_PDK
+from haadic.core.tools import config_logger
 from haadic.design.layouts.base_cell import BaseCell
 from haadic.io.wrappers.magic import ExtractLevels
 
+config_logger()
 logger = logging.getLogger(__name__)
 
 
@@ -38,6 +42,7 @@ class ConfigFlow:
     extract_level: ExtractLevels = "RC"
     sweep_folder: bool = True
     reload: bool = True
+    debug_layout: bool = False
 
 
 @dataclass
@@ -76,24 +81,38 @@ class Flow:
             start = step.init_step(
                 dimensions, self.config.run_dir, self.config.sweep_folder
             )
-            flow = step.compose(
-                Layout(ConfigLayout(self.layout, self.config.techno)),
-                Extract(ConfigExtract(self.config.techno, self.config.extract_level)),
-                BenchSim(ConfigSim(bench, self.config.techno)),
-                reload=self.config.reload,
-            )
+
+            if self.config.debug_layout:
+                flow = step.compose(
+                    Layout(ConfigLayout(self.layout, self.config.techno)),
+                    reload=self.config.reload,
+                )
+                flow.run(start)
+                sys.exit(0)
+            else:
+                flow = step.compose(
+                    Layout(ConfigLayout(self.layout, self.config.techno)),
+                    Extract(
+                        ConfigExtract(self.config.techno, self.config.extract_level)
+                    ),
+                    BenchSim(ConfigSim(bench, self.config.techno)),
+                    reload=self.config.reload,
+                )
             output_file = flow.run(start)
             pp = PostProcess(ConfigPostProc(eval))
+            logger.info(f"Post-Processing Completed: {output_file}")
             data = pp.run(output_file, dimensions)
             for key in data.dct:
                 datas[key] = data[key]
+            logger.info(f"Flow completed with dimensions {dimensions.dct}")
+            logger.info(f"Performance metrics: {data.dct}")
         return datas
 
     def run_from_target(
         self,
         target: step.Dim,
         local_model: Callable[[step.Dim], step.Dim],
-    ) -> step.Dim:
+    ) -> step.Dim | Path:
         """
         Run the flow from a target specification using a local model.
 
@@ -118,15 +137,20 @@ class Flow:
 
     def run_from_sweeps(
         self, sweep_points: Sequence[step.Dim], max_workers: int | None = None
-    ) -> list[step.Dim]:
+    ) -> pd.DataFrame:
         """Run the flow for all the dimensions configuration passed."""
         if not max_workers:
             max_workers = min(len(sweep_points), os.cpu_count() or 1)
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            rows = list(
+            results = list(
                 executor.map(
                     lambda point: self.run_from_dim(point),
                     sweep_points,
                 )
             )
-        return rows
+        rows = [
+            point.dct | performance.dct
+            for point, performance in zip(sweep_points, results)
+        ]
+        table = pd.DataFrame.from_records(rows)
+        return table
