@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Self, get_args
 
 import numpy as np
-import pandas as pd
 
 from haadic.core.flow import ConfigFlow, Flow
 from haadic.core.steps.step import Dim
@@ -260,9 +259,7 @@ def extract_rf_ekv(
         for length in length_values
     ]
 
-    rows = [res.dct for res in flow.run_from_sweeps(sweep_points)]
-
-    data = pd.DataFrame.from_records(rows)
+    data = flow.run_from_sweeps(sweep_points)
     data["rho_d"] = data["gds"] / data["gm"]
     W_f = data["width"]
     L = data["length"]

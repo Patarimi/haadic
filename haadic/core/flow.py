@@ -8,6 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import pandas as pd
 from tabulate import tabulate
 
 from haadic.core.steps import step
@@ -136,15 +137,20 @@ class Flow:
 
     def run_from_sweeps(
         self, sweep_points: Sequence[step.Dim], max_workers: int | None = None
-    ) -> list[step.Dim]:
+    ) -> pd.DataFrame:
         """Run the flow for all the dimensions configuration passed."""
         if not max_workers:
             max_workers = min(len(sweep_points), os.cpu_count() or 1)
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            rows = list(
+            results = list(
                 executor.map(
                     lambda point: self.run_from_dim(point),
                     sweep_points,
                 )
             )
-        return rows
+        rows = [
+            point.dct | performance.dct
+            for point, performance in zip(sweep_points, results)
+        ]
+        table = pd.DataFrame.from_records(rows)
+        return table
