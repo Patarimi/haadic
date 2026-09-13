@@ -5,7 +5,7 @@ Once the `layout` function returns a valid `BaseCell`, the next step is to
 describe how that layout must be driven and measured. In haadic, this is done
 with a SPICE bench file.
 
-The project created by `haadic new` already contains a minimal bench named `bench.cir`, for a more interesting results, edit the bench with the following circuit:
+The project created by `haadic new` already contains a minimal bench named `bench.cir`. For more interesting results, edit the bench with the following circuit:
 
 ```spice
 # Circuit name
@@ -24,15 +24,15 @@ Xdut input gate_biais 0 output top # Device simulated
 .endc
 ```
 
-The important detail is the node name `input`, `output` and `gate_biais`. It must match a port label created by `layout` using `set_as_port` function.
+The important detail is the node names `input`, `output`, and `gate_biais`. They must match port labels created by `layout` using the `set_as_port` function.
 
 Port labels are the interface between the physical layout and the electrical bench. If a source refers to `input`, the layout must expose a port with that exact name. Node names are case-sensitive in a SPICE netlist.
 
 The `{bench}` placeholder is interpreted by the haadic simulation step. Keep it in the `write` command so that the flow can choose the correct output path.
 
-The extracted schematic, the components library for the technology are automatocaly added to the bench.cir file during the run.
+The extracted schematic and the component library for the technology are automatically added to the `bench.cir` file during the run.
 
-More benches can be added to the benches variable. For example DC and AC simulations. They will all be simulated which each flow.
+More benches can be added to the `benches` variable, for example, for DC and AC simulations. They will all be simulated in each flow.
 
 You can run the flow with the same command as before:
 
@@ -44,4 +44,4 @@ Don't forget to switch back `debug_layout` to `False`.
 
 # Results
 
-If everythings run smoolthy, a `bench.raw` file should be available, with all simulations results. A `bench.log` is also generated with information to diagnosis failed simuations.
+If everything runs smoothly, a `bench.raw` file should be available with all simulation results. A `bench.log` is also generated with information to diagnose failed simulations.

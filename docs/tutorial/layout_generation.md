@@ -6,11 +6,11 @@ The coordinates and dimensions used by the layout helpers are expressed in micro
 
 ## A first parametric layout
 
-The default layout uses the general-purpose layout functions. As the name implied, this is meant for low-level, free drawing. It can be use for custom passive and active components.
+The default layout uses the general-purpose layout functions. As the name implies, this is meant for low-level, free-form layout drawing. It can be used for custom passive and active components.
 
-The `active` module is inspired by the grid-based framework (from Berkeley Analog Generator). This is meant for active design.
+The `active` module is inspired by the grid-based framework from the Berkeley Analog Generator. This is intended for active design.
 
-In this example, a cascode amplifer will be drawn. The layout is drawn from top to bottom, using either components (`mosfet`) or horizontal line (`line`, which are schematic nodes).
+In this example, a cascode amplifier will be drawn. The layout is drawn from top to bottom, using either components (`mosfet`) or horizontal lines (`line`, which represent schematic nodes).
 
 
 ```python
@@ -38,7 +38,7 @@ def layout(cell: BaseCell, dimensions: Dim) -> BaseCell:
     return cell
 ```
 
-The `pattern_connect` function make vertical connections between a component and horizontal lines.
+The `pattern_connect` function makes vertical connections between a component and horizontal lines.
 
 The line `set_as_port(cell, port)` means that the node will be available as a terminal (or port) in the schematic.
 
@@ -49,11 +49,11 @@ The dimensions must be defined before the flow is run. For example:
 dimensions = Dim({"width": 10.0, "length": 0.18, "n_f": 4})
 ```
 
-Changing either value changes the generated geometry without changing the
+Changing any value changes the generated geometry without changing the
 layout function itself.
 
 !!! note
-    During layout design and debugging, you can set the `debug_layout` to `True` to run only the layout construction step:
+    During layout design and debugging, you can set `debug_layout` to `True` to run only the layout construction step:
     ```python
     conf.debug_layout = True
     ```

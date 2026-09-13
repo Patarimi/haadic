@@ -1,10 +1,10 @@
 # Installation
 
-This application needs nix, uv and python3. For windows, please install NixOS as shown [here](https://nixos.wiki/wiki/WSL).
+This application needs Nix, uv, and Python 3. On Windows, please install NixOS as shown [here](https://nixos.wiki/wiki/WSL).
 
 Installation using [uvx](https://docs.astral.sh/uv/getting-started/installation/) is recommended.
 
-The following command check if everything is correctly setup :
+The following command checks whether everything is set up correctly:
 
 ```shell
 uvx --with="git+https://github.com/Patarimi/haadic.git" haadic smoke-test
@@ -12,13 +12,13 @@ uvx --with="git+https://github.com/Patarimi/haadic.git" haadic smoke-test
 
 # Creating a new Project
 
-A directory with the required files can be generated using :
+A directory with the required files can be generated using:
 
 ```shell
 haadic new 
 ```
 
-Follow the instructions using default values for this tutorial. This files are created :
+Follow the instructions using the default values for this tutorial. These files are created:
 
 ```mermaid
 treeView-beta
@@ -29,10 +29,10 @@ working_dir
 
 The `design.py` file defines the technology, the input dimensions, the layout function, and the flow entry point.
 
-The `bench.cir` file is an example of bench circuit for evaluating the circuit performance.
+The `bench.cir` file is an example bench circuit for evaluating circuit performance.
 
 # Running the first haadic flow
-The design flow can be run with the following command :
+The design flow can be run with the following command:
 
 ```shell
 uv run --script design.py
