@@ -104,6 +104,7 @@ class Flow:
             for key in data.dct:
                 datas[key] = data[key]
             logger.info(f"Flow completed with dimensions {dimensions.dct}")
+            logger.info(f"Performance metrics: {data.dct}")
         return datas
 
     def run_from_target(

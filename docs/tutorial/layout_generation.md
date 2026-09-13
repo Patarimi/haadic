@@ -1,17 +1,12 @@
 # Creating a Layout
 
-This tutorial explains how to create a parametric layout with haadic by editing
-the `layout` function in `design.py`. The function is called by the flow for
-each set of design dimensions and must return a `BaseCell` containing the
-generated geometry.
+This tutorial explains how to create a parametric layout with haadic by editing the `layout` function in `design.py`. The function is called by the flow for each set of design dimensions and must return a `BaseCell` containing the generated geometry.
 
-The coordinates and dimensions used by the layout helpers are expressed in
-micrometres.
+The coordinates and dimensions used by the layout helpers are expressed in micrometres.
 
 ## A first parametric layout
 
-The default layout uses the general-purpose layout functions. As the name implied, this is meant for low-level, free drawing.
-It can be use for custom passive and active components.
+The default layout uses the general-purpose layout functions. As the name implied, this is meant for low-level, free drawing. It can be use for custom passive and active components.
 
 The `active` module is inspired by the grid-based framework (from Berkeley Analog Generator). This is meant for active design.
 
