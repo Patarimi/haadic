@@ -2,7 +2,7 @@
 
 This tutorial explains how to create a parametric layout with haadic by editing the `layout` function in `design.py`. The function is called by the flow for each set of design dimensions and must return a `BaseCell` containing the generated geometry.
 
-The coordinates and dimensions used by the layout helpers are expressed in micrometres.
+The coordinates and dimensions used by the layout helpers are expressed in micrometers.
 
 ## A first parametric layout
 
@@ -29,8 +29,8 @@ def layout(cell: BaseCell, dimensions: Dim) -> BaseCell:
     line(cell, "gnd", level=1, below=True)
     line(cell, "output", level=2)
     line(cell, "middle_point", level=1)
-    line(cell, "gate_biais", level=0)
-    nmos_connexion = ("gnd", "input", "middle_point", "gate_biais", "output")
+    line(cell, "gate_bias", level=0)
+    nmos_connexion = ("gnd", "input", "middle_point", "gate_bias", "output")
     pattern_connect(cell, nmos.name, nmos_connexion, flip=True)
     for port in ["input", "gnd", "output"]:
         set_as_port(cell, port)

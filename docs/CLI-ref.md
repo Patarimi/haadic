@@ -1,6 +1,6 @@
 # Main commands
 
-Main commands offered by haadic. More informations are available with the `--help` option.
+Main commands offered by haadic. More information are available with the `--help` option.
 
 ## Set-up
 
