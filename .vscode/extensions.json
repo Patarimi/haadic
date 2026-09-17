@@ -3,6 +3,6 @@
         "allegromorphic.gds-preview",
         "mermaidchart.vscode-mermaid-chart",
         "charliermarsh.ruff",
-        "njpwerner.autodocstring"
+        "streetsidesoftware.code-spell-checker"
     ]
 }

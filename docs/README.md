@@ -2,7 +2,7 @@
 
 **Highly-Automated Analog Designer for Integrated Circuits**
 
-This project is a prototype. Its goal is to create a technological and
+This project is under development. Its goal is to create a technological and
 software-agnostic design flow, from device sizing to layout and implementation.
 
 
@@ -11,10 +11,12 @@ Post-simulation computation can be done by editing the `evaluate` function.
 
 ## Design Flow
 
-The following flow is run using the informations given in a _design.py_ python file (see [tutorial](tutorial/getting_started/)). The flow has 2 entry points :
+The following flow is run using the information given in a _design.py_ python file (see [tutorial](tutorial/getting_started/)). The flow has 2 entry points :
 
 - `flow.run_from_dim` : Only requires a `dim` variables which defines the value of each parameters of the layout function.
 - `flow.run_from_target` : Requires both a `target`and an `local_model` function. The `local_model` is an implementation of the design methodology which output the layout parameters value required to obtains the `target`.
+
+For batch execution, the method `run_from_sweep` can be used.
 
 ```mermaid
 flowchart TD
@@ -63,7 +65,7 @@ A techno.json file can be created in the working dir or the haadic root with the
 
 A techno.json file with three open source PDK and a mock PDK are already supplied.
 
-## For developpers
+## For developers
 
 Install haadic with optional group dev :
 

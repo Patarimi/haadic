@@ -37,13 +37,13 @@ def evaluate(bench_data: SimRes, geo: Dim, output_dir: Path) -> Dim:
     plt.show()
     v_in_opt = np.interp(600e-9, j_d, v_in)  # [1]
 
-    return Dim({"v_biais": v_in_opt})
+    return Dim({"v_bias": v_in_opt})
 ```
 [1] This line computes the gate voltage `v_in` at which the drain current density `j_d` is equal to the target value (let's say 600 nA). You must import NumPy for it to work.
 
 The returned `Dim` maps metric names to values. These names become the output of the flow and can later be compared with targets in a model-based flow.
 
-Use `output_dir` for optional artefacts such as a CSV export:
+Use `output_dir` for optional artifacts such as a CSV export:
 
 ```python
 bench_data.to_csv(output_dir / "simulation.csv", index=False)

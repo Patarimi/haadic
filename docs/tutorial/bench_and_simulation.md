@@ -12,10 +12,10 @@ The project created by `haadic new` already contains a minimal bench named `benc
 
 Vin input gnd dc 0.5
 Vdd dd gnd dc 1.8
-Rdrain dd output 1k
-Vbiais bias input dc 1
-Rbias bias gate_biais 1k
-Xdut input gate_biais 0 output top # Device simulated
+R_drain dd output 1k
+V_bias bias input dc 1
+R_bias bias gate_bias 1k
+X_dut input gate_bias 0 output top # Device simulated
 
 .control
 	dc Vin 0 1 0.1
@@ -24,7 +24,7 @@ Xdut input gate_biais 0 output top # Device simulated
 .endc
 ```
 
-The important detail is the node names `input`, `output`, and `gate_biais`. They must match port labels created by `layout` using the `set_as_port` function.
+The important detail is the node names `input`, `output`, and `gate_bias`. They must match port labels created by `layout` using the `set_as_port` function.
 
 Port labels are the interface between the physical layout and the electrical bench. If a source refers to `input`, the layout must expose a port with that exact name. Node names are case-sensitive in a SPICE netlist.
 
