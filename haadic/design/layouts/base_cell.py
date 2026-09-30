@@ -102,7 +102,7 @@ class BaseCell:
         spacing: tuple[float, float] | float = (0, 0),
         instances: tuple[int, int] = (1, 1),
         rotation: float = 0.0,
-        mirrorx: bool = False,
+        mirror_x: bool = False,
     ) -> Self:
         """
         Insert another BaseCell into this cell.
@@ -121,8 +121,8 @@ class BaseCell:
             spacing = (spacing, spacing)
         dest_cell = self._layout.create_cell(cell.name)
         dest_cell.copy_tree(cell._top)
-        if rotation != 0.0 or mirrorx:
-            dest_cell.transform(kdb.DCplxTrans(rot=rotation, mirrx=mirrorx))
+        if rotation != 0.0 or mirror_x:
+            dest_cell.transform(kdb.DCplxTrans(rot=rotation, mirrx=mirror_x))
         self._top.insert(
             kdb.DCellInstArray(
                 dest_cell,
