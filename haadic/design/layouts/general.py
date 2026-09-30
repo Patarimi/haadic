@@ -34,6 +34,47 @@ class Label:
     layer: Layer
 
 
+@dataclass
+class Shape:
+    """
+    Store information about a shape in a layout in absolute coordinates (_ie_ relative to the top cell).
+
+    :param layer: Layer in which the shape is drawn.
+    :param coordinates: tuple of the coordinates (left, bottom, right, top) of the shape.
+    """
+
+    layer: Layer
+    coordinates: tuple[float, float, float, float]  # (left, bottom, right, top)
+
+    @property
+    def left(self) -> float:  # noqa: D102
+        return self.coordinates[0]
+
+    @property
+    def bottom(self) -> float:  # noqa: D102
+        return self.coordinates[1]
+
+    @property
+    def right(self) -> float:  # noqa: D102
+        return self.coordinates[2]
+
+    @property
+    def top(self) -> float:  # noqa: D102
+        return self.coordinates[3]
+
+    @property
+    def width(self) -> float:  # noqa: D102
+        return self.right - self.left
+
+    @property
+    def height(self) -> float:  # noqa: D102
+        return self.top - self.bottom
+
+    @property
+    def center(self) -> Point:  # noqa: D102
+        return ((self.left + self.right) / 2, (self.bottom + self.top) / 2)
+
+
 def via(cell: BaseCell, level: int, size: tuple[float, float]) -> BaseCell:
     """
     Generate a via cell.
@@ -154,7 +195,7 @@ def get_labels(layout: BaseCell, cell: str | None = None) -> list[Label]:
     return labels
 
 
-def get_shape(layout: BaseCell, point: Point, layer: Layer) -> db.DBox | None:
+def get_shape(layout: BaseCell, point: Point, layer: Layer) -> Shape | None:
     """
     Return the shape at the given point and layer.
 
@@ -163,14 +204,23 @@ def get_shape(layout: BaseCell, point: Point, layer: Layer) -> db.DBox | None:
     :param layer: layer to explore.
     :return: the shape at the given point and layer.
     """
-    for cell in layout._layout.each_cell():
+    top_cell = next(layout._layout.each_top_cell())
+    for inst in layout._layout.cell(top_cell).each_inst():
         for lyr in layout._layout.layer_indexes():
-            for shape in cell.shapes(lyr):
+            for shape in inst.cell.shapes(lyr):
                 current_info = layout._layout.layer_infos()[lyr]
                 if layer.layer != current_info.layer:
                     continue
-                if shape.is_box() and shape.dbox.contains(db.DPoint(*point)):
-                    return shape.dbox
+                if shape.is_box() and shape.dbbox().contains(db.DPoint(*point)):
+                    return Shape(
+                        layer,
+                        (
+                            shape.dbbox().left + inst.dtrans.disp.x,
+                            shape.dbbox().bottom + inst.dtrans.disp.y,
+                            shape.dbbox().right + inst.dtrans.disp.x,
+                            shape.dbbox().top + inst.dtrans.disp.y,
+                        ),
+                    )
     return None
 
 
