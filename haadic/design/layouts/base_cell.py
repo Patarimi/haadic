@@ -39,6 +39,18 @@ class BaseCell:
         return self._top
 
     @property
+    def origin(self) -> tuple[float, float]:
+        """Return the origin of the cell."""
+        dbbox = self._top.dbbox()
+        return dbbox.left, dbbox.bottom
+
+    @property
+    def size(self) -> tuple[float, float]:
+        """Return the size of the cell as (width, height)."""
+        dbbox = self._top.dbbox()
+        return dbbox.width(), dbbox.height()
+
+    @property
     def gate(self) -> Layer:
         """Return the gate layer from the technology layer stack."""
         return self._layer_stack.get_gate_layer()
