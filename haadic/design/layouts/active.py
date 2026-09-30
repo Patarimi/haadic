@@ -1,10 +1,94 @@
-"""Functions to generate mos transistor layouts. This fonction are based on a standard grid design."""
+"""Functions to generate mos transistor layouts. This function are based on a standard grid design."""
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
+from dataclasses import dataclass, field
+from functools import partial
 from typing import Literal
 
 import haadic.design.layouts.general as gen
 from haadic.design.layouts.base_cell import BaseCell
+
+
+@dataclass(slots=True)
+class CellDrawer:
+    """Class to define a cell drawing function with its size."""
+
+    _draw: Callable[[], BaseCell] | BaseCell
+    size: tuple[float, float] = (-1, -1)
+
+    @property
+    def cell(self) -> BaseCell:
+        """Draw the cell using the provided drawing function or return the cell."""
+        if isinstance(self._draw, BaseCell):
+            return self._draw
+        else:
+            return self._draw()
+
+    @property
+    def width(self) -> float:
+        """Return the width of the cell."""
+        return self.size[0]
+
+    @property
+    def height(self) -> float:
+        """Return the height of the cell."""
+        return self.size[1]
+
+    @property
+    def origin(self) -> tuple[float, float]:
+        """Return the origin of the cell."""
+        return self.cell.origin
+
+
+@dataclass(slots=True)
+class GridBasedLayout(BaseCell):
+    """Class to generate grid-based layouts for MOS transistors."""
+
+    items: list[CellDrawer] = field(default_factory=list)
+    width: float = 0
+    height: float = 0
+
+    def add_item(self, item: CellDrawer) -> None:
+        """Add a CellDrawer item to the layout and update the total width."""
+        self.items.append(item)
+        self.width = max(self.width, item.width)
+        print(
+            f"Added item with width {item.width:.3f}, updated layout width to {self.width:.3f}"
+        )
+
+    def draw(self) -> BaseCell:
+        """Draw all items in the layout within the given cell."""
+        self.height = 0
+        for item in self.items:
+            item_cell = item.cell
+            self.insert_cell(
+                item_cell, origin=(-item.origin[0], -item.origin[1] + self.height)
+            )
+            print(
+                f"Drew item with height {item.height:.3f}, updated layout height to {self.height:.3f}"
+            )
+            # TODO: Compute spacing based on the layer stack and the items being drawn
+            self.height += item_cell.top.dbbox().height() + self.metal(0).spacing
+        return self
+
+    def add_line(self, name: str, level: int = 0, below=False) -> None:
+        """Add a horizontal line to the layout."""
+        self.add_item(
+            CellDrawer(
+                partial(line, self, name, level=level, below=below), size=(-1, -1)
+            )
+        )
+
+    def add_mosfet(
+        self,
+        nf: int = 5,
+        width: float = 2,
+        length: float = 0.13,
+        doping: Literal["N", "P"] = "N",
+    ) -> None:
+        """Add a MOSFET to the layout."""
+        cell = mosfet(self, nf=nf, width=width, length=length, doping=doping)
+        self.add_item(CellDrawer(cell, cell.size))
 
 
 def mosfet(
@@ -55,11 +139,10 @@ def mosfet(
         gen.add_port(mos, m1_layer, f"dr{i}", (i * pitch + diff_space / 2, width / 2))
     gen.add_port(mos, m1_layer, f"dr{nf}", (nf * pitch + diff_space / 2, width / 2))
     mos.flatten(-1, True)
-    cell.insert_cell(mos)
     return mos
 
 
-def line(cell: BaseCell, name: str, level: int = 0, below=False):
+def line(cell: GridBasedLayout, name: str, level: int = 0, below=False) -> BaseCell:
     """
     Draw a horizontal line above (or below if _below_ = True) the content of the cell.
 
@@ -72,16 +155,14 @@ def line(cell: BaseCell, name: str, level: int = 0, below=False):
     layer = cell.metal(level)
     spacing = layer.spacing
     width = layer.width
-    horz = cell.create_cell(f"h_{name}")
-    bbox = cell.top.dbbox()
+    h_line = cell.create_cell(f"h_{name}")
     if not below:
-        origin_y = bbox.top + spacing
+        origin_y = cell.height + spacing
     else:
-        origin_y = bbox.bottom - spacing - width
-    gen.add_rectangle(horz, layer, (bbox.width(), width), (bbox.left, origin_y))
-    gen.add_port(horz, layer, name, (bbox.left, origin_y + width / 2))
-    cell.insert_cell(horz)
-    return horz
+        origin_y = -spacing - width
+    gen.add_rectangle(h_line, layer, (cell.width, width), (0, origin_y))
+    gen.add_port(h_line, layer, name, (0, origin_y + width / 2))
+    return h_line
 
 
 def connect(cell: BaseCell, label_line: str, label_mos: str) -> BaseCell:
@@ -101,18 +182,18 @@ def connect(cell: BaseCell, label_line: str, label_mos: str) -> BaseCell:
         raise RuntimeError("No Shape found on layer {lyr_vp} at {lbl_v}")
     if box_h is None:
         raise RuntimeError("No Shape found on layer {lyr_vh} at {lbl_h}")
-    if box_h.center().y > box_v.center().y:
+    if box_h.center[1] > box_v.center[1]:
         top, bottom = box_v.top, box_h.top
     else:
         top, bottom = box_v.bottom, box_h.bottom
     gen.add_rectangle(
-        cell, lbl_v.layer, (box_v.width(), top - bottom), (box_v.left, bottom)
+        cell, lbl_v.layer, (box_v.width, top - bottom), (box_v.left, bottom)
     )
     if lbl_v.layer != lbl_h.layer:
         level_v = cell.get_layer_level(lbl_v.layer)
         level_h = cell.get_layer_level(lbl_h.layer)
-        via = gen.via(cell, min(level_v, level_h), (box_v.width(), box_h.height()))
-        cell.insert_cell(via, origin=(box_v.left, bottom - box_h.height()))
+        via = gen.via(cell, min(level_v, level_h), (box_v.width, box_h.height))
+        cell.insert_cell(via, origin=(box_v.left, bottom - box_h.height))
     return cell
 
 
@@ -140,3 +221,18 @@ def pattern_connect(
         i = i % len(pattern)
         connect(cell, pattern[i], lbl.name)
     return cell
+
+
+if __name__ == "__main__":
+    from pathlib import Path
+
+    from haadic.design.layouts.base_cell import BaseCell
+
+    c = GridBasedLayout("test", "sky130")
+    c.add_line("h1", level=0)
+    c.add_mosfet(nf=5, width=2, length=0.13, doping="N")
+    c.add_line("h2", level=1)
+    c.draw()
+    connect(c, "h1", "g0")
+    connect(c, "h2", "dr0")
+    c.write(Path("test.gds"))
