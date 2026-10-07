@@ -7,7 +7,7 @@ Installation using [uvx](https://docs.astral.sh/uv/getting-started/installation/
 The following command checks whether everything is set up correctly:
 
 ```shell
-uvx --with="git+https://github.com/Patarimi/haadic.git" haadic smoke-test
+uvx haadic smoke-test
 ```
 
 # Creating a new Project
