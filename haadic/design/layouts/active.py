@@ -3,10 +3,12 @@
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from functools import partial
+from pathlib import Path
 from typing import Literal
 
 import haadic.design.layouts.general as gen
 from haadic.design.layouts.base_cell import BaseCell
+from haadic.design.layouts.general import Point
 
 
 @dataclass(slots=True)
@@ -85,10 +87,11 @@ class GridBasedLayout(BaseCell):
         width: float = 2,
         length: float = 0.13,
         doping: Literal["N", "P"] = "N",
-    ) -> None:
+    ) -> str:
         """Add a MOSFET to the layout."""
         cell = mosfet(self, nf=nf, width=width, length=length, doping=doping)
         self.add_item(CellDrawer(cell, cell.size))
+        return cell.name
 
 
 def mosfet(
@@ -118,7 +121,7 @@ def mosfet(
 
     mos = cell.create_cell(f"{doping.lower()}mos_{nf}")
     gate = cell.create_cell("gate")
-    gen.add_rectangle(gate, poly_layer, (length, width + 2 * gate_ext), (0, 0))
+    gen.add_rectangle(gate, poly_layer, (length, width + 2 * gate_ext), Point(0, 0))
     pitch = length + diff_space
     mos.insert_cell(gate, (diff_space, -gate_ext), spacing=pitch, instances=(nf, 1))
     dr_con = cell.create_cell("dr_con")
@@ -134,15 +137,22 @@ def mosfet(
         gen.enclose(mos, cell.nwell(), doping_ext, filter=doping_layer)
     for i in range(nf):
         gen.add_port(
-            mos, poly_layer, f"g{i}", (i * pitch + diff_space + length / 2, -gate_ext)
+            mos,
+            poly_layer,
+            f"g{i}",
+            Point(i * pitch + diff_space + length / 2, -gate_ext),
         )
-        gen.add_port(mos, m1_layer, f"dr{i}", (i * pitch + diff_space / 2, width / 2))
-    gen.add_port(mos, m1_layer, f"dr{nf}", (nf * pitch + diff_space / 2, width / 2))
+        gen.add_port(
+            mos, m1_layer, f"dr{i}", Point(i * pitch + diff_space / 2, width / 2)
+        )
+    gen.add_port(
+        mos, m1_layer, f"dr{nf}", Point(nf * pitch + diff_space / 2, width / 2)
+    )
     mos.flatten(-1, True)
     return mos
 
 
-def line(cell: GridBasedLayout, name: str, level: int = 0, below=False) -> BaseCell:
+def line(cell: BaseCell, name: str, level: int = 0, below=False) -> BaseCell:
     """
     Draw a horizontal line above (or below if _below_ = True) the content of the cell.
 
@@ -160,8 +170,8 @@ def line(cell: GridBasedLayout, name: str, level: int = 0, below=False) -> BaseC
         origin_y = cell.height + spacing
     else:
         origin_y = -spacing - width
-    gen.add_rectangle(h_line, layer, (cell.width, width), (0, origin_y))
-    gen.add_port(h_line, layer, name, (0, origin_y + width / 2))
+    gen.add_rectangle(h_line, layer, (cell.width, width), Point(0, origin_y))
+    gen.add_port(h_line, layer, name, Point(0, origin_y + width / 2))
     return h_line
 
 
@@ -179,15 +189,15 @@ def connect(cell: BaseCell, label_line: str, label_mos: str) -> BaseCell:
     box_v = gen.get_shape(cell, lbl_v.position, lbl_v.layer)
     box_h = gen.get_shape(cell, lbl_h.position, lbl_h.layer)
     if box_v is None:
-        raise RuntimeError("No Shape found on layer {lyr_vp} at {lbl_v}")
+        raise RuntimeError(f"No Shape found on layer {lbl_v.layer} at {lbl_v.position}")
     if box_h is None:
-        raise RuntimeError("No Shape found on layer {lyr_vh} at {lbl_h}")
-    if box_h.center[1] > box_v.center[1]:
+        raise RuntimeError(f"No Shape found on layer {lbl_h.layer} at {lbl_h.position}")
+    if box_h.center.y > box_v.center.y:
         top, bottom = box_v.top, box_h.top
     else:
         top, bottom = box_v.bottom, box_h.bottom
     gen.add_rectangle(
-        cell, lbl_v.layer, (box_v.width, top - bottom), (box_v.left, bottom)
+        cell, lbl_v.layer, (box_v.width, top - bottom), Point(box_v.left, bottom)
     )
     if lbl_v.layer != lbl_h.layer:
         level_v = cell.get_layer_level(lbl_v.layer)
@@ -214,6 +224,7 @@ def pattern_connect(
     if flip:
         pattern = list(pattern) + list(pattern[-2:0:-1])
     labels = gen.get_dtext(cell, cell=device_name)
+    print(labels)
     for lbl in labels:
         i = 2 * int(lbl.name.lstrip("gdr"))
         if lbl.name.startswith("g"):
@@ -224,15 +235,20 @@ def pattern_connect(
 
 
 if __name__ == "__main__":
-    from pathlib import Path
+    width = 5
+    length = 0.13
+    n_finger = 4
 
-    from haadic.design.layouts.base_cell import BaseCell
-
-    c = GridBasedLayout("test", "sky130")
-    c.add_line("h1", level=0)
-    c.add_mosfet(nf=5, width=2, length=0.13, doping="N")
-    c.add_line("h2", level=1)
+    c = GridBasedLayout("top", "sky130")
+    c.add_line("gnd", level=1)
+    c.add_line("input", level=0)
+    name = c.add_mosfet(nf=n_finger, width=width, length=length, doping="N")
+    c.add_line("output", level=2)
+    c.add_line("middle_point", level=1)
+    c.add_line("gate_bias", level=0)
     c.draw()
-    connect(c, "h1", "g0")
-    connect(c, "h2", "dr0")
-    c.write(Path("test.gds"))
+    nmos_connexion = ("gnd", "input", "middle_point", "gate_bias", "output")
+    pattern_connect(c, name, nmos_connexion, flip=True)
+    for port in ["input", "gnd", "output"]:
+        gen.set_as_port(c, port)
+    c.write(Path("tests.gds"))

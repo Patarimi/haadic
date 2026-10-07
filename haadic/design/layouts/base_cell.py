@@ -45,6 +45,14 @@ class BaseCell:
         return dbbox.left, dbbox.bottom
 
     @property
+    def height(self) -> float:
+        return self.size[1]
+
+    @property
+    def width(self) -> float:
+        return self.size[0]
+
+    @property
     def size(self) -> tuple[float, float]:
         """Return the size of the cell as (width, height)."""
         dbbox = self._top.dbbox()
