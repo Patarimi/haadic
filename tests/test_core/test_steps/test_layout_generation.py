@@ -11,5 +11,5 @@ def test_layout_step(tmp_path):
     conf = lay_gen.ConfigLayout(layout)
 
     lg = lay_gen.Layout(conf)
-    outputfile = lg.run(Path(geo_file))
-    assert outputfile.is_file()
+    output_file = lg.run(Path(geo_file))
+    assert output_file.is_file()
