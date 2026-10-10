@@ -16,7 +16,23 @@ from haadic.design.layouts.base_cell import BaseCell
 from haadic.io.writers.haadicfile import Layer, LayerStack
 
 logger = logging.getLogger(__name__)
-type Point = tuple[float, float]
+
+
+@dataclass(slots=True)
+class Point:
+    """Just a 2D-point."""
+
+    x: float
+    y: float
+
+    def __add__(self, val) -> "Point":  # noqa: D105
+        return Point(self.x + val.x, self.y + val.y)
+
+    def __sub__(self, val) -> "Point":  # noqa: D105
+        return Point(self.x - val.x, self.y - val.y)
+
+    def to_DPoint(self) -> db.DPoint:  # noqa: D102
+        return db.DPoint(self.x, self.y)
 
 
 @dataclass
@@ -32,6 +48,47 @@ class Label:
     name: str
     position: Point
     layer: Layer
+
+
+@dataclass
+class Shape:
+    """
+    Store information about a shape in a layout in absolute coordinates (_ie_ relative to the top cell).
+
+    :param layer: Layer in which the shape is drawn.
+    :param coordinates: tuple of the coordinates (left, bottom, right, top) of the shape.
+    """
+
+    layer: Layer
+    coordinates: tuple[float, float, float, float]  # (left, bottom, right, top)
+
+    @property
+    def left(self) -> float:  # noqa: D102
+        return self.coordinates[0]
+
+    @property
+    def bottom(self) -> float:  # noqa: D102
+        return self.coordinates[1]
+
+    @property
+    def right(self) -> float:  # noqa: D102
+        return self.coordinates[2]
+
+    @property
+    def top(self) -> float:  # noqa: D102
+        return self.coordinates[3]
+
+    @property
+    def width(self) -> float:  # noqa: D102
+        return self.right - self.left
+
+    @property
+    def height(self) -> float:  # noqa: D102
+        return self.top - self.bottom
+
+    @property
+    def center(self) -> Point:  # noqa: D102
+        return Point((self.left + self.right) / 2, (self.bottom + self.top) / 2)
 
 
 def via(cell: BaseCell, level: int, size: tuple[float, float]) -> BaseCell:
@@ -139,22 +196,24 @@ def get_labels(layout: BaseCell, cell: str | None = None) -> list[Label]:
     :return: list of Label objects.
     """
     labels = []
-    if cell is None:
-        cells = layout._layout.each_cell()
-    else:
-        cells = (layout._layout.cell(cell),)
-    for c in cells:
+    instances = layout._layout.top_cell().each_inst()
+    for inst in instances:
+        if cell is not None and inst.cell.name != cell:
+            continue
         for lyr_nb in layout._layout.layer_indexes():
             layer = layout.get_layer_from_index(lyr_nb)
-            for shape in c.shapes(lyr_nb):
+            for shape in inst.cell.shapes(lyr_nb):
                 if not shape.is_text():
                     continue
-                pos = (shape.dtext.position().x, shape.dtext.position().y)
+                pos = Point(
+                    shape.dtext.position().x + inst.dtrans.disp.x,
+                    shape.dtext.position().y + inst.dtrans.disp.y,
+                )
                 labels.append(Label(shape.dtext.string, pos, layer))
     return labels
 
 
-def get_shape(layout: BaseCell, point: Point, layer: Layer) -> db.DBox | None:
+def get_shape(layout: BaseCell, point: Point, layer: Layer) -> Shape | None:
     """
     Return the shape at the given point and layer.
 
@@ -163,14 +222,24 @@ def get_shape(layout: BaseCell, point: Point, layer: Layer) -> db.DBox | None:
     :param layer: layer to explore.
     :return: the shape at the given point and layer.
     """
-    for cell in layout._layout.each_cell():
+    top_cell = next(layout._layout.each_top_cell())
+    for inst in layout._layout.cell(top_cell).each_inst():
+        offset = Point(inst.dtrans.disp.x, inst.dtrans.disp.y)
+        abs_point = point - offset
         for lyr in layout._layout.layer_indexes():
-            for shape in cell.shapes(lyr):
+            for shape in inst.cell.shapes(lyr):
                 current_info = layout._layout.layer_infos()[lyr]
                 if layer.layer != current_info.layer:
                     continue
-                if shape.is_box() and shape.dbox.contains(db.DPoint(*point)):
-                    return shape.dbox
+                if shape.is_box() and shape.dbbox().contains(abs_point.to_DPoint()):
+                    bottom_left = (
+                        Point(shape.dbbox().left, shape.dbbox().bottom) + offset
+                    )
+                    top_right = Point(shape.dbbox().right, shape.dbbox().top) + offset
+                    return Shape(
+                        layer,
+                        (bottom_left.x, bottom_left.y, top_right.x, top_right.y),
+                    )
     return None
 
 
@@ -187,8 +256,11 @@ def set_as_port(cell: BaseCell, label: str) -> BaseCell:
     return cell
 
 
+ORIGIN = Point(0, 0)
+
+
 def add_rectangle(
-    cell: BaseCell, layer: Layer, size: tuple[float, float], origin: Point = (0, 0)
+    cell: BaseCell, layer: Layer, size: tuple[float, float], origin: Point = ORIGIN
 ) -> BaseCell:
     """
     Add a rectangle to the cell.
@@ -199,7 +271,7 @@ def add_rectangle(
     :param origin: tuple of the origin (x, y) of the rectangle.
     :return: The cell with the added rectangle.
     """
-    rec = db.DBox(origin[0], origin[1], origin[0] + size[0], origin[1] + size[1])
+    rec = db.DBox(origin.x, origin.y, origin.x + size[0], origin.y + size[1])
     cell.top.shapes(layer.drawing).insert(rec)
     return cell
 
@@ -227,7 +299,7 @@ def add_port(
     :param halign: The vertical alignment of the text. Options are "left", "center", "right".
     :return: The cell with the added text.
     """
-    text_obj = db.DText(text, position[0], position[1])
+    text_obj = db.DText(text, position.x, position.y)
     match halign:
         case "left":
             text_obj.halign = db.DText.HAlignLeft
@@ -265,7 +337,7 @@ def add_path(
     """
     if isinstance(extension, (float | int)):
         extension = (extension, extension)
-    db_points = [db.DPoint(p[0], p[1]) for p in points]
+    db_points = [db.DPoint(p.x, p.y) for p in points]
     path = db.DPath(db_points, width, extension[0], extension[1])
     cell.top.shapes(layer.drawing).insert(path)
     return cell
@@ -284,7 +356,7 @@ def ground_plane(
     :return:
     """
     # option vertical/horizontal/both
-    # gestion of density
+    # handling metal density
     # option substrate connection
     gnd = layout.create_cell("ground")
     layer = layout.layer(
@@ -319,6 +391,6 @@ def enclose(
         cell,
         layer,
         (bbox.width() + 2 * extension, bbox.height() + 2 * extension),
-        (bbox.left - extension, bbox.bottom - extension),
+        Point(bbox.left - extension, bbox.bottom - extension),
     )
     return cell
