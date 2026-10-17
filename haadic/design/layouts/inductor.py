@@ -6,6 +6,7 @@ from numpy import pi, tan
 
 import haadic.design.layouts.general as gen
 from haadic.design.layouts.base_cell import BaseCell
+from haadic.design.layouts.general import Point
 
 logger = logging.getLogger(__name__)
 
@@ -77,26 +78,26 @@ def octagonal_inductor(
 
         for j in (-1, 1):
             # Create path for top metal
-            path_pts = [(x, j * y) for x, y in path]
+            path_pts = [Point(x, j * y) for x, y in path]
             gen.add_path(layout, m_top, path_pts, width)
 
             if not start:
                 if j == 1:
                     # Create connecting path
                     connect_pts = [
-                        (path[-1][0], j * path[-1][1]),
-                        (path[-1][0], path[-1][1] - width / 2),
-                        (path[-1][0] - width - gap, -path[-1][1] + width / 2),
-                        (path[-1][0] - width - gap, -path[-1][1]),
+                        Point(path[-1][0], j * path[-1][1]),
+                        Point(path[-1][0], path[-1][1] - width / 2),
+                        Point(path[-1][0] - width - gap, -path[-1][1] + width / 2),
+                        Point(path[-1][0] - width - gap, -path[-1][1]),
                     ]
                     gen.add_path(layout, m_top, connect_pts, width)
                 else:
                     # Create bridge path
                     cross_pts = [
-                        (path[-1][0], -path[-1][1] - width),
-                        (path[-1][0], -path[-1][1] + width / 2),
-                        (path[-1][0] - width - gap, path[-1][1] - width / 2),
-                        (path[-1][0] - width - gap, path[-1][1] + width),
+                        Point(path[-1][0], -path[-1][1] - width),
+                        Point(path[-1][0], -path[-1][1] + width / 2),
+                        Point(path[-1][0] - width - gap, path[-1][1] - width / 2),
+                        Point(path[-1][0] - width - gap, path[-1][1] + width),
                     ]
                     gen.add_path(layout, m_bridge, cross_pts, width)
 
@@ -109,6 +110,6 @@ def octagonal_inductor(
                     )
 
     # Add port labels
-    gen.add_port(layout, m_top, pin_name[0], (-p_ext, p_gap / 2))
-    gen.add_port(layout, m_top, pin_name[1], (-p_ext, -p_gap / 2))
+    gen.add_port(layout, m_top, pin_name[0], Point(-p_ext, p_gap / 2))
+    gen.add_port(layout, m_top, pin_name[1], Point(-p_ext, -p_gap / 2))
     return layout.flatten(-1, True)
