@@ -46,10 +46,12 @@ class BaseCell:
 
     @property
     def height(self) -> float:
+        """Return the height of the cell."""
         return self.size[1]
 
     @property
     def width(self) -> float:
+        """Return the width of the cell."""
         return self.size[0]
 
     @property
