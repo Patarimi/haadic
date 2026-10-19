@@ -60,14 +60,14 @@ class GridBasedLayout(BaseCell):
 
     def draw(self) -> BaseCell:
         """Draw all items in the layout within the given cell."""
-        self.height = 0
+        self.height = self._top.dbbox().top  # Reset height to the top cell's height
         for item in self.items:
             item_cell = item.cell
             self.insert_cell(
                 item_cell, origin=(-item.origin[0], -item.origin[1] + self.height)
             )
             print(
-                f"Drew item with height {item.height:.3f}, updated layout height to {self.height:.3f}"
+                f"Drawn item with height {item.height:.3f}, updated layout height to {self.height:.3f}"
             )
             # TODO: Compute spacing based on the layer stack and the items being drawn
             self.height += item_cell.top.dbbox().height() + self.metal(0).spacing
