@@ -8,6 +8,7 @@ import logging
 import math
 from collections.abc import Sequence
 from dataclasses import dataclass
+from math import isclose
 from typing import Literal
 
 from klayout import db
@@ -89,6 +90,14 @@ class Shape:
     @property
     def center(self) -> Point:  # noqa: D102
         return Point((self.left + self.right) / 2, (self.bottom + self.top) / 2)
+
+    def __eq__(self, other: object) -> bool:
+        """Check if two Shape objects are equal."""
+        if not isinstance(other, Shape):
+            return NotImplemented
+        return self.layer == other.layer and all(
+            isclose(a, b) for a, b in zip(self.coordinates, other.coordinates)
+        )
 
 
 def via(cell: BaseCell, level: int, size: tuple[float, float]) -> BaseCell:
@@ -177,6 +186,7 @@ def get_dtext(
     :return: list
     """
     labels = get_labels(layout, cell)
+    print(f"Found {labels=}")
 
     if label is None:
         return labels
@@ -195,21 +205,35 @@ def get_labels(layout: BaseCell, cell: str | None = None) -> list[Label]:
     :param cell: if cell is not None, only look inside this cell.
     :return: list of Label objects.
     """
-    labels = []
     instances = layout._layout.top_cell().each_inst()
+    labels = _get_labels_in_cell_or_inst(layout._layout.top_cell(), layout)
     for inst in instances:
         if cell is not None and inst.cell.name != cell:
             continue
-        for lyr_nb in layout._layout.layer_indexes():
-            layer = layout.get_layer_from_index(lyr_nb)
-            for shape in inst.cell.shapes(lyr_nb):
-                if not shape.is_text():
-                    continue
-                pos = Point(
-                    shape.dtext.position().x + inst.dtrans.disp.x,
-                    shape.dtext.position().y + inst.dtrans.disp.y,
-                )
-                labels.append(Label(shape.dtext.string, pos, layer))
+        labels.extend(_get_labels_in_cell_or_inst(inst.cell, layout))
+
+    return labels
+
+
+def _get_labels_in_cell_or_inst(
+    cell: db.Cell | db.Instance, layout: BaseCell
+) -> list[Label]:
+    if isinstance(cell, db.Instance):
+        origin = Point(cell.dtrans.disp.x, cell.dtrans.disp.y)
+        cell = cell.cell
+    else:
+        origin = Point(0, 0)
+    labels = []
+    for lyr_nb in layout._layout.layer_indexes():
+        layer = layout.get_layer_from_index(lyr_nb)
+        for shape in cell.shapes(lyr_nb):
+            if not shape.is_text():
+                continue
+            pos = Point(
+                shape.dtext.position().x + origin.x,
+                shape.dtext.position().y + origin.y,
+            )
+            labels.append(Label(shape.dtext.string, pos, layer))
     return labels
 
 
@@ -222,24 +246,38 @@ def get_shape(layout: BaseCell, point: Point, layer: Layer) -> Shape | None:
     :param layer: layer to explore.
     :return: the shape at the given point and layer.
     """
-    top_cell = next(layout._layout.each_top_cell())
-    for inst in layout._layout.cell(top_cell).each_inst():
-        offset = Point(inst.dtrans.disp.x, inst.dtrans.disp.y)
-        abs_point = point - offset
-        for lyr in layout._layout.layer_indexes():
-            for shape in inst.cell.shapes(lyr):
-                current_info = layout._layout.layer_infos()[lyr]
-                if layer.layer != current_info.layer:
-                    continue
-                if shape.is_box() and shape.dbbox().contains(abs_point.to_DPoint()):
-                    bottom_left = (
-                        Point(shape.dbbox().left, shape.dbbox().bottom) + offset
-                    )
-                    top_right = Point(shape.dbbox().right, shape.dbbox().top) + offset
-                    return Shape(
-                        layer,
-                        (bottom_left.x, bottom_left.y, top_right.x, top_right.y),
-                    )
+    top_cell = layout._layout.cell(next(layout._layout.each_top_cell()))
+    shape = _get_shape_in_cell_or_inst(top_cell, point, layout, layer)
+    if shape is not None:
+        return shape
+    for inst in top_cell.each_inst():
+        shape = _get_shape_in_cell_or_inst(inst, point, layout, layer)
+        if shape is not None:
+            return shape
+    return None
+
+
+def _get_shape_in_cell_or_inst(
+    cell: db.Cell | db.Instance, point: Point, layout: BaseCell, layer: Layer
+) -> Shape | None:
+    if isinstance(cell, db.Instance):
+        offset = Point(cell.dtrans.disp.x, cell.dtrans.disp.y)
+        cell = cell.cell
+    else:
+        offset = Point(0, 0)
+    abs_point = point - offset
+    for lyr in layout._layout.layer_indexes():
+        for shape in cell.shapes(lyr):
+            current_info = layout._layout.layer_infos()[lyr]
+            if layer.layer != current_info.layer:
+                continue
+            if shape.is_box() and shape.dbbox().contains(abs_point.to_DPoint()):
+                bottom_left = Point(shape.dbbox().left, shape.dbbox().bottom) + offset
+                top_right = Point(shape.dbbox().right, shape.dbbox().top) + offset
+                return Shape(
+                    layer,
+                    (bottom_left.x, bottom_left.y, top_right.x, top_right.y),
+                )
     return None
 
 
