@@ -115,7 +115,9 @@ class BaseCell:
 
         :param input_gds: Path to the input GDS file to read into the layout.
         """
+        self._layout.delete_cells(self._layout.top_cells())
         self._layout.read(str(input_gds))
+        self._top = self._layout.top_cell()
 
     def insert_cell(
         self,
