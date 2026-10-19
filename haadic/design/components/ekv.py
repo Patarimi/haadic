@@ -12,7 +12,7 @@ import numpy as np
 from haadic.core.flow import ConfigFlow, Flow
 from haadic.core.steps.step import Dim
 from haadic.core.techno import Available_PDK, get_file
-from haadic.design.layouts.commun_source import layout
+from haadic.design.layouts.common_source import layout
 from haadic.design.post_processors.ekv import (
     _IC,
     _gm,

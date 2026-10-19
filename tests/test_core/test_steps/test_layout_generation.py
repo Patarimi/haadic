@@ -3,7 +3,7 @@ from pathlib import Path
 
 import haadic.core.steps.layout_generation as lay_gen
 from haadic._config import REF_PATH
-from haadic.design.layouts.commun_source import layout
+from haadic.design.layouts.common_source import layout
 
 
 def test_layout_step(tmp_path):
