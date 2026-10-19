@@ -10,8 +10,8 @@ stack = LayerStack("mock")  # ty:ignore[invalid-argument-type]
 
 
 def test_via(tmp_path, base_cell):
-    opnng = stack.get_via_layer(-1)
-    assert opnng.name == "opening"
+    opening = stack.get_via_layer(-1)
+    assert opening.name == "opening"
     gen.via(base_cell, 2, (3, 4))
     base_cell.write(tmp_path / "via.gds")
     diff_gds(tmp_path / "via.gds", REF_PATH / "ref_via.gds")
@@ -42,7 +42,7 @@ def test_shape(base_cell):
     base_cell.top.shapes(layer.drawing).insert(kl.DBox(0, -1.1, 3.65, -0.7))
     box = gen.get_shape(base_cell, Point(0, -1), layer)
     assert box is not None
-    assert box == kl.DBox(0, -1.1, 3.65, -0.7)
+    assert box == gen.Shape(layer, (0, -1.1, 3.65, -0.7))
     assert gen.get_shape(base_cell, Point(0, 1), layer) is None
 
 
