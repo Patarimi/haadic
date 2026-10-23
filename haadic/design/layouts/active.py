@@ -1,12 +1,13 @@
 """Functions to generate mos transistor layouts. This function are based on a standard grid design."""
 
 from collections.abc import Callable, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 from typing import Literal
 
 import haadic.design.layouts.general as gen
+from haadic.core.techno import Available_PDK
 from haadic.design.layouts.base_cell import BaseCell
 from haadic.design.layouts.general import Point
 
@@ -42,35 +43,37 @@ class CellDrawer:
         return self.cell.origin
 
 
-@dataclass(slots=True)
 class GridBasedLayout(BaseCell):
     """Class to generate grid-based layouts for MOS transistors."""
 
-    items: list[CellDrawer] = field(default_factory=list)
-    width: float = 0
-    height: float = 0
+    def __init__(self, name: str, techno: Available_PDK) -> None:
+        """Initialize the GridBasedLayout with a name and technology."""
+        super().__init__(name, techno)
+        self.items: list[CellDrawer] = []
+        self._width = 0
+        self._height = 0
 
     def add_item(self, item: CellDrawer) -> None:
         """Add a CellDrawer item to the layout and update the total width."""
         self.items.append(item)
-        self.width = max(self.width, item.width)
+        self._width = max(self._width, item.width)
         print(
-            f"Added item with width {item.width:.3f}, updated layout width to {self.width:.3f}"
+            f"Added item with width {item.width:.3f}, updated layout width to {self._width:.3f}"
         )
 
     def draw(self) -> BaseCell:
         """Draw all items in the layout within the given cell."""
-        self.height = self._top.dbbox().top  # Reset height to the top cell's height
+        self._height = self._top.dbbox().top  # Reset height to the top cell's height
         for item in self.items:
             item_cell = item.cell
             self.insert_cell(
-                item_cell, origin=(-item.origin[0], -item.origin[1] + self.height)
+                item_cell, origin=(-item.origin[0], -item.origin[1] + self._height)
             )
             print(
-                f"Drawn item with height {item.height:.3f}, updated layout height to {self.height:.3f}"
+                f"Drawn item with height {item.height:.3f}, updated layout height to {self._height:.3f}"
             )
             # TODO: Compute spacing based on the layer stack and the items being drawn
-            self.height += item_cell.top.dbbox().height() + self.metal(0).spacing
+            self._height += item_cell.top.dbbox().height() + self.metal(0).spacing
         return self
 
     def add_line(self, name: str, level: int = 0, below=False) -> None:
@@ -152,7 +155,7 @@ def mosfet(
     return mos
 
 
-def line(cell: BaseCell, name: str, level: int = 0, below=False) -> BaseCell:
+def line(cell: GridBasedLayout, name: str, level: int = 0, below=False) -> BaseCell:
     """
     Draw a horizontal line above (or below if _below_ = True) the content of the cell.
 
@@ -170,7 +173,7 @@ def line(cell: BaseCell, name: str, level: int = 0, below=False) -> BaseCell:
         origin_y = cell.height + spacing
     else:
         origin_y = -spacing - width
-    gen.add_rectangle(h_line, layer, (cell.width, width), Point(0, origin_y))
+    gen.add_rectangle(h_line, layer, (cell._width, width), Point(0, origin_y))
     gen.add_port(h_line, layer, name, Point(0, origin_y + width / 2))
     return h_line
 
@@ -224,7 +227,6 @@ def pattern_connect(
     if flip:
         pattern = list(pattern) + list(pattern[-2:0:-1])
     labels = gen.get_dtext(cell, cell=device_name)
-    print(labels)
     for lbl in labels:
         i = 2 * int(lbl.name.lstrip("gdr"))
         if lbl.name.startswith("g"):
