@@ -1,2 +1,2 @@
 paths-ignore:
-    - haadic/data/template/**
+    - 'haadic/data/template/**'
