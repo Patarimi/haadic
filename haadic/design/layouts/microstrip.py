@@ -5,7 +5,7 @@ from collections.abc import Sequence
 from haadic.design.layouts import general as gen
 from haadic.design.layouts.base_cell import BaseCell
 
-from .general import via, via_stack
+from .general import Point, via, via_stack
 from .tools import Port
 
 
@@ -31,14 +31,14 @@ def straight_line(
     m_bott = cell.metal(1)
     le = length * 1e6
     w = width * 1e6
-    gen.add_path(cell, m_top, [(0, 0), (le, 0)], w)
-    gen.add_path(cell, m_bott, [(0, 0), (le, 0)], 3 * w)
+    gen.add_path(cell, m_top, [Point(0, 0), Point(le, 0)], w)
+    gen.add_path(cell, m_bott, [Point(0, 0), Point(le, 0)], 3 * w)
 
     for i in range(2):
         if ports[i].name == "":
             continue
-        gen.add_port(cell, m_top, ports[i].name, (i * le, 0), "center", "center")
-        gen.add_port(cell, m_bott, ports[i].ref, (i * le, 0), "center", "center")
+        gen.add_port(cell, m_top, ports[i].name, Point(i * le, 0), "center", "center")
+        gen.add_port(cell, m_bott, ports[i].ref, Point(i * le, 0), "center", "center")
     return cell
 
 
@@ -121,16 +121,16 @@ def marchand_balun(
     )
     cplbox = cpl.top.dbbox()
     layout.insert_cell(cpl, (s + 4 * (w + g) + w, -le), rotation=90)
-    layout.insert_cell(cpl, (0, -le), rotation=90, mirrorx=True)
+    layout.insert_cell(cpl, (0, -le), rotation=90, mirror_x=True)
     bbox = layout.top.dbbox()
     bot = bbox.bottom + 1.5 * w + g - ws / 2
-    gen.add_rectangle(layout, m_top, (s, ws), (bbox.left + cplbox.height(), bot))
+    gen.add_rectangle(layout, m_top, (s, ws), Point(bbox.left + cplbox.height(), bot))
     gen.enclose(layout, m_bott)
 
     coord = (
-        (bbox.left + 2.5 * w + 2 * g, bbox.top),
-        (bbox.left + 1.5 * w + g, bbox.bottom),
-        (bbox.right - 1.5 * w - g, bbox.bottom),
+        Point(bbox.left + 2.5 * w + 2 * g, bbox.top),
+        Point(bbox.left + 1.5 * w + g, bbox.bottom),
+        Point(bbox.right - 1.5 * w - g, bbox.bottom),
     )
     for i in range(3):
         gen.add_port(layout, m_top, ports[i].name, coord[i])
@@ -172,17 +172,17 @@ def lange_coupler(
     bot_metal = layout.metal(1)
     half_lange = layout.create_cell("half_lange")
     first_met = [
-        (0, 0),
-        (le, 0),
-        (le, 2 * (w + g)),
-        (0, 2 * (w + g)),
-        (0, 2 * (w + g) + ext),
+        Point(0, 0),
+        Point(le, 0),
+        Point(le, 2 * (w + g)),
+        Point(0, 2 * (w + g)),
+        Point(0, 2 * (w + g) + ext),
     ]
     gen.add_path(half_lange, top_metal, first_met, w, w / 2)
     if ext > 0:
-        port = [(le, 2 * (w + g)), (le, 2 * w + 2 * g + ext)]
+        port = [Point(le, 2 * (w + g)), Point(le, 2 * w + 2 * g + ext)]
         half_lange = gen.add_path(half_lange, top_metal, port, w, (0, w / 2))
-    sec_met = [(0, 0), (0, 2 * (w + g))]
+    sec_met = [Point(0, 0), Point(0, 2 * (w + g))]
     half_lange = gen.add_path(half_lange, bridge, sec_met, w, w / 2)
     v1 = via(layout, -2, (w, w))
     half_lange.insert_cell(v1, (-w / 2, -w / 2))
@@ -191,10 +191,10 @@ def lange_coupler(
     layout.insert_cell(half_lange, (le - w - g, w + g), rotation=180)
     for i in range(4):
         coord = (
-            (0, ext + 2.5 * w + 2 * g),
-            (le, ext + 2.5 * w + 2 * g),
-            (-w - g, -ext - 1.5 * w - g),
-            (le - w - g, -ext - 1.5 * w - g),
+            Point(0, ext + 2.5 * w + 2 * g),
+            Point(le, ext + 2.5 * w + 2 * g),
+            Point(-w - g, -ext - 1.5 * w - g),
+            Point(le - w - g, -ext - 1.5 * w - g),
         )
         if ports[i].name == "":
             continue
@@ -205,6 +205,6 @@ def lange_coupler(
         layout,
         bot_metal,
         (dim.width(), dim.height()),
-        (dim.left, dim.bottom),
+        Point(dim.left, dim.bottom),
     )
     return layout.flatten(-1, True)

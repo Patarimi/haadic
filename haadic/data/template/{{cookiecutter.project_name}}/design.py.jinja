@@ -50,7 +50,7 @@ def layout(cell: BaseCell, dimensions: Dim) -> BaseCell:
     #: Example of a simple layout generation code that creates a rectangle on the first metal layer with the dimensions specified in the `dimensions` argument.
     first_metal = cell.metal(0)
     cell = gen.add_rectangle(cell, first_metal, (dimensions["width"], dimensions["length"]))
-    cell = gen.add_port(cell, first_metal, "input", (0, dimensions["length"] / 2))
+    cell = gen.add_port(cell, first_metal, "input", gen.Point(0, dimensions["length"] / 2))
     return cell
 
 
