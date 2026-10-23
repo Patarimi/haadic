@@ -1,7 +1,7 @@
 """Functions to generate common source layouts. These functions can be used to create cells that can be exported as gds files."""
 
 from haadic.core.steps.step import Dim
-from haadic.design.layouts.active import line, mosfet, pattern_connect
+from haadic.design.layouts.active import GridBasedLayout, pattern_connect
 from haadic.design.layouts.base_cell import BaseCell
 from haadic.design.layouts.general import set_as_port
 
@@ -20,11 +20,13 @@ def layout(
     width = shape["width"]
     length = shape["length"]
     n_finger = int(shape["n_finger"])
-    mos = mosfet(cell, width=width, length=length, nf=n_finger)
-    line(cell, "gate", 0)
-    line(cell, "drain", 1)
-    line(cell, "gnd", 1, below=True)
-    pattern_connect(cell, mos.name, ("gnd", "gate", "drain", "gate"))
+    cell = GridBasedLayout(cell.name, cell.techno)
+    cell.add_line("gnd", 1)
+    mos_name = cell.add_mosfet(width=width, length=length, nf=n_finger)
+    cell.add_line("gate", 0)
+    cell.add_line("drain", 1)
+    cell.draw()
+    pattern_connect(cell, mos_name, ("gnd", "gate", "drain", "gate"))
     set_as_port(cell, "gate")
     set_as_port(cell, "drain")
     set_as_port(cell, "gnd")
