@@ -1,0 +1,2 @@
+paths-ignore:
+    - './haadic/data/template/{{cookiecutter.project_name}}/*.py'
