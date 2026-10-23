@@ -186,7 +186,6 @@ def get_dtext(
     :return: list
     """
     labels = get_labels(layout, cell)
-    print(f"Found {labels=}")
 
     if label is None:
         return labels
@@ -262,6 +261,7 @@ def _get_shape_in_cell_or_inst(
 ) -> Shape | None:
     if isinstance(cell, db.Instance):
         offset = Point(cell.dtrans.disp.x, cell.dtrans.disp.y)
+        print(f"Offset: {offset}")
         cell = cell.cell
     else:
         offset = Point(0, 0)
