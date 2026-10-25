@@ -1,4 +1,5 @@
 import klayout.db as kl
+import pytest
 
 from haadic._config import REF_PATH
 from haadic.core.tools import diff_gds
@@ -43,7 +44,8 @@ def test_shape(base_cell):
     box = gen.get_shape(base_cell, Point(0, -1), layer)
     assert box is not None
     assert box == gen.Shape(layer, (0, -1.1, 3.65, -0.7))
-    assert gen.get_shape(base_cell, Point(0, 1), layer) is None
+    with pytest.raises(gen.NoShapeFound):
+        gen.get_shape(base_cell, Point(0, 1), layer)
 
 
 def test_ground_plane(tmp_path):

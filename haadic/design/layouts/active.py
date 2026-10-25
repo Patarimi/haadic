@@ -192,24 +192,42 @@ def connect(cell: BaseCell, label_line: str, label_mos: str) -> BaseCell:
     :param label_mos: label of the mosfet pin to be connected.
     :return: the cell containing the connection.
     """
-    lbl_h = gen.get_dtext(cell, label_line)[0]
-    lbl_v = gen.get_dtext(cell, label_mos)[0]
-    box_v = gen.get_shape(cell, lbl_v.position, lbl_v.layer)
-    box_h = gen.get_shape(cell, lbl_h.position, lbl_h.layer)
+    box_h = find_shape_by_label(cell, label_line)
+
+    box_v = find_shape_by_label(cell, label_mos)
 
     if box_h.center.y > box_v.center.y:
         top, bottom = box_v.top, box_h.top
     else:
         top, bottom = box_v.bottom, box_h.bottom
     gen.add_rectangle(
-        cell, lbl_v.layer, (box_v.width, top - bottom), Point(box_v.left, bottom)
+        cell, box_v.layer, (box_v.width, top - bottom), Point(box_v.left, bottom)
     )
-    if lbl_v.layer != lbl_h.layer:
-        level_v = cell.get_layer_level(lbl_v.layer)
-        level_h = cell.get_layer_level(lbl_h.layer)
+    if box_v.layer != box_h.layer:
+        level_v = cell.get_layer_level(box_v.layer)
+        level_h = cell.get_layer_level(box_h.layer)
         via = gen.via(cell, min(level_v, level_h), (box_v.width, box_h.height))
         cell.insert_cell(via, origin=(box_v.left, bottom - box_h.height))
     return cell
+
+
+def find_shape_by_label(cell: BaseCell, label: str) -> gen.Shape:
+    """
+    Find the shape associated with a given label in the cell.
+
+    :param cell: The cell to search in.
+    :param label: The label to find the associated shape for.
+    :return: The shape associated with the label.
+    :raises NoShapeFound: If no shape is found for the given label.
+    """
+    lbl = gen.get_dtext(cell, label)[0]
+    try:
+        shape = gen.get_shape(cell, lbl.position, lbl.layer)
+    except gen.NoShapeFound:
+        raise gen.NoShapeFound(
+            f"No Shape found for label {label} at {lbl.position} on layer {lbl.layer}."
+        )
+    return shape
 
 
 def pattern_connect(
