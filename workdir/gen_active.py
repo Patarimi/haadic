@@ -6,7 +6,7 @@ from haadic.core.flow import ConfigFlow, Flow
 from haadic.core.steps.post_process import SimRes
 from haadic.core.steps.step import Dim
 from haadic.design.layouts.base_cell import BaseCell
-from haadic.design.layouts.commun_source import layout as cs_layout
+from haadic.design.layouts.common_source import layout as cs_layout
 from haadic.design.post_processors.ekv import extract_big_l, extract_rf, extract_small_l
 
 # configuration of the flow.

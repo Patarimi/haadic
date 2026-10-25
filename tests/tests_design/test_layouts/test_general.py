@@ -1,16 +1,18 @@
 import klayout.db as kl
+import pytest
 
 from haadic._config import REF_PATH
 from haadic.core.tools import diff_gds
 from haadic.design.layouts import general as gen
+from haadic.design.layouts.general import Point
 from haadic.io.writers.haadicfile import LayerStack
 
 stack = LayerStack("mock")  # ty:ignore[invalid-argument-type]
 
 
 def test_via(tmp_path, base_cell):
-    opnng = stack.get_via_layer(-1)
-    assert opnng.name == "opening"
+    opening = stack.get_via_layer(-1)
+    assert opening.name == "opening"
     gen.via(base_cell, 2, (3, 4))
     base_cell.write(tmp_path / "via.gds")
     diff_gds(tmp_path / "via.gds", REF_PATH / "ref_via.gds")
@@ -33,16 +35,17 @@ def test_dtext(base_cell):
     base_cell.top.shapes(layer.drawing).insert(kl.DText("gnd", 0.0, -0.9))
     gnd_label = gen.get_dtext(base_cell, "gnd")[0]
 
-    assert gnd_label == gen.Label("gnd", (0.0, -0.9), layer)
+    assert gnd_label == gen.Label("gnd", Point(0.0, -0.9), layer)
 
 
 def test_shape(base_cell):
     layer = base_cell.metal(2)
     base_cell.top.shapes(layer.drawing).insert(kl.DBox(0, -1.1, 3.65, -0.7))
-    box = gen.get_shape(base_cell, (0, -1), layer)
+    box = gen.get_shape(base_cell, Point(0, -1), layer)
     assert box is not None
-    assert box == kl.DBox(0, -1.1, 3.65, -0.7)
-    assert gen.get_shape(base_cell, (0, 1), layer) is None
+    assert box == gen.Shape(layer, (0, -1.1, 3.65, -0.7))
+    with pytest.raises(gen.NoShapeFound):
+        gen.get_shape(base_cell, Point(0, 1), layer)
 
 
 def test_ground_plane(tmp_path):
@@ -55,7 +58,7 @@ def test_ground_plane(tmp_path):
 def test_add_rectangle(base_cell):
     layer = base_cell.metal(1)
 
-    gen.add_rectangle(base_cell, layer, (2.5, 3.0), origin=(1.0, -2.0))
+    gen.add_rectangle(base_cell, layer, (2.5, 3.0), origin=Point(1.0, -2.0))
 
     shapes = list(base_cell.top.shapes(layer.drawing).each())
     assert len(shapes) == 1
@@ -65,7 +68,9 @@ def test_add_rectangle(base_cell):
 def test_add_port(base_cell):
     layer = base_cell.metal(1)
 
-    gen.add_port(base_cell, layer, "p1", (1.2, 3.4), valign="center", halign="right")
+    gen.add_port(
+        base_cell, layer, "p1", Point(1.2, 3.4), valign="center", halign="right"
+    )
 
     shapes = list(base_cell.top.shapes(layer.pin).each())
     assert len(shapes) == 1
@@ -79,7 +84,9 @@ def test_add_port(base_cell):
 def test_add_path(base_cell):
     layer = base_cell.metal(1)
 
-    gen.add_path(base_cell, layer, [(0, 0), (2, 1), (4, 0)], 0.5, extension=0.2)
+    gen.add_path(
+        base_cell, layer, [Point(0, 0), Point(2, 1), Point(4, 0)], 0.5, extension=0.2
+    )
 
     shapes = list(base_cell.top.shapes(layer.drawing).each())
     assert len(shapes) == 1
@@ -103,7 +110,7 @@ def test_set_as_port(base_cell):
 def test_enclose(base_cell):
     layer = base_cell.metal(1)
 
-    gen.add_rectangle(base_cell, layer, (1.0, 2.0), origin=(0.5, -1.0))
+    gen.add_rectangle(base_cell, layer, (1.0, 2.0), origin=Point(0.5, -1.0))
     gen.enclose(base_cell, layer, extension=0.3)
 
     shapes = list(base_cell.top.shapes(layer.drawing).each())

@@ -39,6 +39,28 @@ class BaseCell:
         return self._top
 
     @property
+    def origin(self) -> tuple[float, float]:
+        """Return the origin of the cell."""
+        dbbox = self._top.dbbox()
+        return dbbox.left, dbbox.bottom
+
+    @property
+    def height(self) -> float:
+        """Return the height of the cell."""
+        return self.size[1]
+
+    @property
+    def width(self) -> float:
+        """Return the width of the cell."""
+        return self.size[0]
+
+    @property
+    def size(self) -> tuple[float, float]:
+        """Return the size of the cell as (width, height)."""
+        dbbox = self._top.dbbox()
+        return dbbox.width(), dbbox.height()
+
+    @property
     def gate(self) -> Layer:
         """Return the gate layer from the technology layer stack."""
         return self._layer_stack.get_gate_layer()
@@ -93,7 +115,9 @@ class BaseCell:
 
         :param input_gds: Path to the input GDS file to read into the layout.
         """
+        self._layout.delete_cells(self._layout.top_cells())
         self._layout.read(str(input_gds))
+        self._top = self._layout.top_cell()
 
     def insert_cell(
         self,
@@ -102,7 +126,7 @@ class BaseCell:
         spacing: tuple[float, float] | float = (0, 0),
         instances: tuple[int, int] = (1, 1),
         rotation: float = 0.0,
-        mirrorx: bool = False,
+        mirror_x: bool = False,
     ) -> Self:
         """
         Insert another BaseCell into this cell.
@@ -121,8 +145,8 @@ class BaseCell:
             spacing = (spacing, spacing)
         dest_cell = self._layout.create_cell(cell.name)
         dest_cell.copy_tree(cell._top)
-        if rotation != 0.0 or mirrorx:
-            dest_cell.transform(kdb.DCplxTrans(rot=rotation, mirrx=mirrorx))
+        if rotation != 0.0 or mirror_x:
+            dest_cell.transform(kdb.DCplxTrans(rot=rotation, mirrx=mirror_x))
         self._top.insert(
             kdb.DCellInstArray(
                 dest_cell,

@@ -42,7 +42,7 @@ class Layout(Step):
 
     def run(self, input_file: Path) -> Path:
         """
-        Generate a layout in the requested techologies with the given parametric layout and the given set of parameters.
+        Generate a layout in the requested technologies with the given parametric layout and the given set of parameters.
 
         :param input_file: set of parameters for the layout.
         """
@@ -53,6 +53,6 @@ class Layout(Step):
         logger.info("layout generation with geometry: " + str(dimensions))
 
         cell = BaseCell(top_cell_name, self.config.techno)
-        self.config.layout(cell, dimensions)
+        cell = self.config.layout(cell, dimensions)
         cell.write(output_file)
         return output_file

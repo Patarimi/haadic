@@ -24,18 +24,20 @@ def layout(cell: BaseCell, dimensions: Dim) -> BaseCell:
     length = dimensions["length"]
     n_finger = dimensions["n_f"]
 
-    nmos = mosfet(cell, width=width, length=length, nf=n_finger)
-    line(cell, "input", level=0, below=True)
-    line(cell, "gnd", level=1, below=True)
-    line(cell, "output", level=2)
-    line(cell, "middle_point", level=1)
-    line(cell, "gate_bias", level=0)
+    c = GridBasedLayout(cell.name, "sky130")
+    c.add_line("gnd", level=1)
+    c.add_line("input", level=0)
+    c.add_mosfet(nf=n_finger, width=width, length=length, doping="N")
+    c.add_line("output", level=2)
+    c.add_line("middle_point", level=1)
+    c.add_line("gate_bias", level=0)
+    c.draw()
     nmos_connexion = ("gnd", "input", "middle_point", "gate_bias", "output")
-    pattern_connect(cell, nmos.name, nmos_connexion, flip=True)
+    pattern_connect(c, nmos.name, nmos_connexion, flip=True)
     for port in ["input", "gnd", "output"]:
-        set_as_port(cell, port)
+        set_as_port(c, port)
 
-    return cell
+    return c
 ```
 
 The `pattern_connect` function makes vertical connections between a component and horizontal lines.
