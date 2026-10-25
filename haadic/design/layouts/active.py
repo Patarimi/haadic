@@ -203,7 +203,7 @@ def connect(cell: BaseCell, label_line: str, label_mos: str) -> BaseCell:
         level_v = cell.get_layer_level(box_v.layer)
         level_h = cell.get_layer_level(box_h.layer)
         via = gen.via(cell, min(level_v, level_h), (box_v.width, box_h.height))
-        cell.insert_cell(via, origin=(box_v.left, bottom - box_h.height))
+        cell.insert_cell(via, origin=(box_v.left, box_h.bottom))
     return cell
 
 
