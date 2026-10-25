@@ -25,6 +25,7 @@
         "mosfet",
         "netlist",
         "netlists",
+        "ngspice",
         "nmos",
         "nplus",
         "nwell",
