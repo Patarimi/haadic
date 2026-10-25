@@ -51,28 +51,24 @@ class GridBasedLayout(BaseCell):
         super().__init__(name, techno)
         self.items: list[CellDrawer] = []
         self._width = 0
-        self._height = 0
+
+    @property
+    def height(self) -> float:
+        """Return the total height of the layout."""
+        return self._top.dbbox().top
 
     def add_item(self, item: CellDrawer) -> None:
         """Add a CellDrawer item to the layout and update the total width."""
         self.items.append(item)
         self._width = max(self._width, item.width)
-        print(
-            f"Added item with width {item.width:.3f}, updated layout width to {self._width:.3f}"
-        )
 
     def draw(self) -> BaseCell:
         """Draw all items in the layout within the given cell."""
-        self._height = self._top.dbbox().top  # Reset height to the top cell's height
         for item in self.items:
             item_cell = item.cell
-            offset_y = -item.origin[1] + self._height + self.metal(0).spacing
-            self.insert_cell(item_cell, origin=(-item.origin[0], offset_y))
-            print(
-                f"Drawn item with height {item.height:.3f}, updated layout height to {self._height:.3f}"
-            )
             # TODO: Compute spacing based on the layer stack and the items being drawn
-            self._height += item_cell.top.dbbox().height()
+            offset_y = -item.origin[1] + self.height + self.metal(0).spacing
+            self.insert_cell(item_cell, origin=(-item.origin[0], offset_y))
         return self
 
     def add_line(self, name: str, level: int = 0, below=False) -> None:

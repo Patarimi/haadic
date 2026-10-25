@@ -36,6 +36,11 @@ class Point:
         return db.DPoint(self.x, self.y)
 
 
+def from_DPoint(dp: db.DPoint) -> Point:
+    """Convert a db.DPoint to a Point."""
+    return Point(dp.x, dp.y)
+
+
 @dataclass
 class Label:
     """
@@ -209,7 +214,7 @@ def get_labels(layout: BaseCell, cell: str | None = None) -> list[Label]:
     for inst in instances:
         if cell is not None and inst.cell.name != cell:
             continue
-        labels.extend(_get_labels_in_cell_or_inst(inst.cell, layout))
+        labels.extend(_get_labels_in_cell_or_inst(inst, layout))
 
     return labels
 
@@ -218,21 +223,18 @@ def _get_labels_in_cell_or_inst(
     cell: db.Cell | db.Instance, layout: BaseCell
 ) -> list[Label]:
     if isinstance(cell, db.Instance):
-        origin = Point(cell.dtrans.disp.x, cell.dtrans.disp.y)
+        transform = cell.dtrans
         cell = cell.cell
     else:
-        origin = Point(0, 0)
+        transform = db.DTrans()
     labels = []
     for lyr_nb in layout._layout.layer_indexes():
         layer = layout.get_layer_from_index(lyr_nb)
         for shape in cell.shapes(lyr_nb):
             if not shape.is_text():
                 continue
-            pos = Point(
-                shape.dtext.position().x + origin.x,
-                shape.dtext.position().y + origin.y,
-            )
-            labels.append(Label(shape.dtext.string, pos, layer))
+            abs_position = from_DPoint(shape.dtext.position() * transform)
+            labels.append(Label(shape.dtext.string, abs_position, layer))
     return labels
 
 
@@ -264,24 +266,21 @@ def _get_shape_in_cell_or_inst(
     cell: db.Cell | db.Instance, point: Point, layout: BaseCell, layer: Layer
 ) -> Shape | None:
     if isinstance(cell, db.Instance):
-        offset = Point(cell.dtrans.disp.x, cell.dtrans.disp.y)
-        print(f"Offset: {offset}")
+        transform = cell.dtrans
         cell = cell.cell
     else:
-        offset = Point(0, 0)
-    abs_point = point - offset
-    for lyr in layout._layout.layer_indexes():
-        for shape in cell.shapes(lyr):
-            current_info = layout._layout.layer_infos()[lyr]
-            if layer.layer != current_info.layer:
-                continue
-            if shape.is_box() and shape.dbbox().contains(abs_point.to_DPoint()):
-                bottom_left = Point(shape.dbbox().left, shape.dbbox().bottom) + offset
-                top_right = Point(shape.dbbox().right, shape.dbbox().top) + offset
-                return Shape(
-                    layer,
-                    (bottom_left.x, bottom_left.y, top_right.x, top_right.y),
-                )
+        transform = db.DTrans()
+
+    layer_index = layout._layout.find_layer(layer.drawing)
+    if layer_index < 0:
+        return None
+
+    local_point = transform.inverted() * point.to_DPoint()
+    for shape in cell.shapes(layer_index):
+        if not shape.is_box() or not shape.dbbox().contains(local_point):
+            continue
+        box = transform * shape.dbbox()
+        return Shape(layer, (box.left, box.bottom, box.right, box.top))
     return None
 
 

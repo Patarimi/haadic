@@ -20,7 +20,7 @@ def test_pmos(base_cell, tmp_path):
 
 def test_line(base_cell, tmp_path):
     base_cell._top.name = "top"  # rename top cell to match ref file
-    base_cell.add_line("gnd", 2, below=True)
+    base_cell.add_line("gnd", 2)
     base_cell.add_mosfet(nf=5, doping="N")
     base_cell.add_line("vdd", 2)
     base_cell.draw()
