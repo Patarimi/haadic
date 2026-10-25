@@ -71,13 +71,9 @@ class GridBasedLayout(BaseCell):
             self.insert_cell(item_cell, origin=(-item.origin[0], offset_y))
         return self
 
-    def add_line(self, name: str, level: int = 0, below=False) -> None:
+    def add_line(self, name: str, level: int = 0) -> None:
         """Add a horizontal line to the layout."""
-        self.add_item(
-            CellDrawer(
-                partial(line, self, name, level=level, below=below), size=(-1, -1)
-            )
-        )
+        self.add_item(CellDrawer(partial(line, self, name, level=level), size=(-1, -1)))
 
     def add_mosfet(
         self,
@@ -156,24 +152,19 @@ def mosfet(
     return mos
 
 
-def line(cell: GridBasedLayout, name: str, level: int = 0, below=False) -> BaseCell:
+def line(cell: GridBasedLayout, name: str, level: int = 0) -> BaseCell:
     """
     Draw a horizontal line above (or below if _below_ = True) the content of the cell.
 
     :param cell: cell to be used.
     :param name: name of the line, a label will be added.
     :param level: metal layer level to be used. Width and Space are use for drawing.
-    :param below: if True, draw below the cell instead of above.
     :return:
     """
     layer = cell.metal(level)
-    spacing = layer.spacing
     width = layer.width
     h_line = cell.create_cell(f"h_{name}")
-    if not below:
-        origin_y = cell.height + spacing
-    else:
-        origin_y = -spacing - width
+    origin_y = cell.height + layer.spacing
     gen.add_rectangle(h_line, layer, (cell._width, width), Point(0, origin_y))
     gen.add_port(h_line, layer, name, Point(0, origin_y + width / 2))
     return h_line
