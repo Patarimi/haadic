@@ -236,7 +236,7 @@ def _get_labels_in_cell_or_inst(
     return labels
 
 
-def get_shape(layout: BaseCell, point: Point, layer: Layer) -> Shape | None:
+def get_shape(layout: BaseCell, point: Point, layer: Layer) -> Shape:
     """
     Return the shape at the given point and layer.
 
@@ -253,7 +253,11 @@ def get_shape(layout: BaseCell, point: Point, layer: Layer) -> Shape | None:
         shape = _get_shape_in_cell_or_inst(inst, point, layout, layer)
         if shape is not None:
             return shape
-    return None
+    raise NoShapeFound(f"No Shape found on layer {layer} at {point}")
+
+
+class NoShapeFound(Exception):
+    """Exception raised when a label is not associated with a shape."""
 
 
 def _get_shape_in_cell_or_inst(

@@ -196,10 +196,7 @@ def connect(cell: BaseCell, label_line: str, label_mos: str) -> BaseCell:
     lbl_v = gen.get_dtext(cell, label_mos)[0]
     box_v = gen.get_shape(cell, lbl_v.position, lbl_v.layer)
     box_h = gen.get_shape(cell, lbl_h.position, lbl_h.layer)
-    if box_v is None:
-        raise RuntimeError(f"No Shape found on layer {lbl_v.layer} at {lbl_v.position}")
-    if box_h is None:
-        raise RuntimeError(f"No Shape found on layer {lbl_h.layer} at {lbl_h.position}")
+
     if box_h.center.y > box_v.center.y:
         top, bottom = box_v.top, box_h.top
     else:
@@ -239,23 +236,3 @@ def pattern_connect(
         i = i % len(pattern)
         connect(cell, pattern[i], lbl.name)
     return cell
-
-
-if __name__ == "__main__":
-    width = 5
-    length = 0.13
-    n_finger = 4
-
-    c = GridBasedLayout("top", "sky130")
-    c.add_line("gnd", level=1)
-    c.add_line("input", level=0)
-    name = c.add_mosfet(nf=n_finger, width=width, length=length, doping="N")
-    c.add_line("output", level=2)
-    c.add_line("middle_point", level=1)
-    c.add_line("gate_bias", level=0)
-    c.draw()
-    nmos_connexion = ("gnd", "input", "middle_point", "gate_bias", "output")
-    pattern_connect(c, name, nmos_connexion, flip=True)
-    for port in ["input", "gnd", "output"]:
-        gen.set_as_port(c, port)
-    c.write(Path("tests.gds"))
