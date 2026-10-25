@@ -66,14 +66,13 @@ class GridBasedLayout(BaseCell):
         self._height = self._top.dbbox().top  # Reset height to the top cell's height
         for item in self.items:
             item_cell = item.cell
-            self.insert_cell(
-                item_cell, origin=(-item.origin[0], -item.origin[1] + self._height)
-            )
+            offset_y = -item.origin[1] + self._height + self.metal(0).spacing
+            self.insert_cell(item_cell, origin=(-item.origin[0], offset_y))
             print(
                 f"Drawn item with height {item.height:.3f}, updated layout height to {self._height:.3f}"
             )
             # TODO: Compute spacing based on the layer stack and the items being drawn
-            self._height += item_cell.top.dbbox().height() + self.metal(0).spacing
+            self._height += item_cell.top.dbbox().height()
         return self
 
     def add_line(self, name: str, level: int = 0, below=False) -> None:
@@ -95,6 +94,12 @@ class GridBasedLayout(BaseCell):
         cell = mosfet(self, nf=nf, width=width, length=length, doping=doping)
         self.add_item(CellDrawer(cell, cell.size))
         return cell.name
+
+    def read(self, input_gds: Path) -> None:
+        """Read a GDS file and insert its content into the layout."""
+        super().read(input_gds)
+        self._width = self._top.dbbox().width()
+        self._height = self._top.dbbox().height()
 
 
 def mosfet(
