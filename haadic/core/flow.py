@@ -3,7 +3,7 @@
 import logging
 import os
 import sys
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Iterable
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -136,9 +136,10 @@ class Flow:
         return perf
 
     def run_from_sweeps(
-        self, sweep_points: Sequence[step.Dim], max_workers: int | None = None
+        self, sweep_points: Iterable[step.Dim], max_workers: int | None = None
     ) -> pd.DataFrame:
         """Run the flow for all the dimensions configuration passed."""
+        sweep_points = unique(sweep_points)
         if not max_workers:
             max_workers = min(len(sweep_points), os.cpu_count() or 1)
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -154,3 +155,14 @@ class Flow:
         ]
         table = pd.DataFrame.from_records(rows)
         return table
+
+
+def unique(
+    iterable: Iterable[step.Dim],
+) -> list[step.Dim]:
+    """Return a list of unique Dim objects from the given iterable."""
+    unique_list: list[step.Dim] = []
+    for item in iterable:
+        if item not in unique_list:
+            unique_list.append(item)
+    return unique_list
